@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors matching boutiquevastra.com exactly */
+  --color-maroonClr: #8D0B41;
+  --color-goldClr: #C9A84C;
+  --color-creamClr: #FFF8F0;
+  --color-bgClr: #FFFDF9;
+
+  /* Legacy aliases for existing components */
+  --color-primary: #8D0B41;
+  --color-secondary: #C9A84C;
+
+  /* Font families */
+  --font-poppins: "Poppins", sans-serif;
+  --font-kalnia: "Kalnia", serif;
+  --font-rubik: "Rubik", sans-serif;
+
+  /* Keep legacy aliases for existing components */
+  --font-serif: "Kalnia", serif;
+  --font-sans: "Poppins", sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bgClr);
+    color: #171717;
+    font-family: var(--font-poppins);
+  }
+}
+
+/* Loader flip animation matching reference */
+@keyframes loader-flip {
+  0% { transform: rotateY(0deg); }
+  50% { transform: rotateY(180deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+.loader-flip {
+  animation: loader-flip 1.2s infinite ease-in-out;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Hide scrollbar utility matching reference */
+.hideScrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hideScrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Admin Light Theme Overrides */
+.admin-light {
+  background-color: #f9fafb !important;
+  color: #111827 !important;
+}
+
+.admin-light main {
+  background-color: #f9fafb !important;
+  color: #111827 !important;
+}
+
+.admin-light aside,
+.admin-light header {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #e5e7eb !important;
+}
+
+.admin-light aside nav a {
+  color: #374151 !important;
+}
+
+.admin-light aside nav a:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+.admin-light aside nav a[class*="bg-maroonClr"] {
+  background-color: #8D0B41 !important;
+  color: #ffffff !important;
+}
+
+.admin-light .bg-neutral-955,
+.admin-light .bg-neutral-950,
+.admin-light .bg-neutral-900 {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  border-color: #e5e7eb !important;
+}
+
+.admin-light .text-white {
+  color: #111827 !important;
+}
+
+.admin-light .text-neutral-205,
+.admin-light .text-neutral-200 {
+  color: #374151 !important;
+}
+
+.admin-light .text-neutral-300 {
+  color: #4b5563 !important;
+}
+
+.admin-light .text-neutral-400 {
+  color: #6b7280 !important;
+}
+
+.admin-light .text-neutral-500 {
+  color: #9ca3af !important;
+}
+
+.admin-light .border-neutral-800,
+.admin-light .border-neutral-850,
+.admin-light .border-neutral-900 {
+  border-color: #e5e7eb !important;
+}
+
+.admin-light .bg-neutral-900\/40,
+.admin-light .bg-neutral-900\/30 {
+  background-color: #f9fafb !important;
+}
+
+.admin-light select,
+.admin-light input,
+.admin-light textarea {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+.admin-light select:focus,
+.admin-light input:focus,
+.admin-light textarea:focus {
+  border-color: #8D0B41 !important;
+  outline: none;
+}
+
+/* Fix specific table headers & borders */
+.admin-light thead {
+  background-color: #f3f4f6 !important;
+  color: #4b5563 !important;
+}
+
+.admin-light tr:hover {
+  background-color: #f9fafb !important;
+}
+
+.admin-light button[class*="bg-neutral-950"],
+.admin-light button[class*="bg-neutral-900"] {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+  border-color: #e5e7eb !important;
+}
+
+.admin-light button[class*="bg-neutral-950"]:hover,
+.admin-light button[class*="bg-neutral-900"]:hover {
+  background-color: #e5e7eb !important;
+  color: #111827 !important;
+}

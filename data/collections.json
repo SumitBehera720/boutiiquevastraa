@@ -1,0 +1,156 @@
+[
+  {
+    "id": "gid://shopify/Collection/639833702764",
+    "title": "Home page",
+    "handle": "frontpage",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639836520812",
+    "title": "Saree",
+    "handle": "saree",
+    "description": "Saree Collection",
+    "image": {
+      "url": "/images/products/col-image_1.png",
+      "altText": null
+    }
+  },
+  {
+    "id": "gid://shopify/Collection/639836619116",
+    "title": "Kurti",
+    "handle": "kurti",
+    "description": "Kurti Collection",
+    "image": {
+      "url": "/images/products/col-kurti2.webp",
+      "altText": null
+    }
+  },
+  {
+    "id": "gid://shopify/Collection/639836750188",
+    "title": "One Peace",
+    "handle": "one-peace",
+    "description": "One peace Collection",
+    "image": {
+      "url": "/images/products/col-1pice3.webp",
+      "altText": null
+    }
+  },
+  {
+    "id": "gid://shopify/Collection/639836782956",
+    "title": "Two Peace",
+    "handle": "two-peace",
+    "description": "Two Peace Collection",
+    "image": {
+      "url": "/images/products/col-2pice3_1a9de0e0-fada-4842-a9bc-82b5719009b1.webp",
+      "altText": null
+    }
+  },
+  {
+    "id": "gid://shopify/Collection/639836881260",
+    "title": "Co-ords",
+    "handle": "co-ords",
+    "description": "Co-ords Collection",
+    "image": {
+      "url": "/images/products/col-cord3.webp",
+      "altText": null
+    }
+  },
+  {
+    "id": "gid://shopify/Collection/639837045100",
+    "title": "Lehenga",
+    "handle": "lehenga",
+    "description": "Lehenga Collection",
+    "image": {
+      "url": "/images/products/col-Lehenga1_0439b151-c000-4932-ab9a-63a70650969b.webp",
+      "altText": null
+    }
+  },
+  {
+    "id": "gid://shopify/Collection/639837372780",
+    "title": "Jewellery",
+    "handle": "jewellery",
+    "description": "Jewellery Collection",
+    "image": {
+      "url": "/images/products/col-Jewellery3_f055e8b1-719a-45ea-812a-9518569e5193.webp",
+      "altText": null
+    }
+  },
+  {
+    "id": "gid://shopify/Collection/639971000684",
+    "title": "Festive Collection",
+    "handle": "festive-collection",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971033452",
+    "title": "Wedding Collection",
+    "handle": "wedding-collection",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971066220",
+    "title": "Best Seller",
+    "handle": "best-seller",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971098988",
+    "title": "Lehenga",
+    "handle": "lehenga-1",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971131756",
+    "title": "Daily Wear",
+    "handle": "daily-wear",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971230060",
+    "title": "Banarasi Sarees",
+    "handle": "banarasi-sarees",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971262828",
+    "title": "Silk Sarees",
+    "handle": "silk-sarees",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971295596",
+    "title": "Cotton Sarees",
+    "handle": "cotton-sarees",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971328364",
+    "title": "Designer Sarees",
+    "handle": "designer-sarees",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971361132",
+    "title": "Wedding Collection",
+    "handle": "wedding-collection-1",
+    "description": "",
+    "image": null
+  },
+  {
+    "id": "gid://shopify/Collection/639971393900",
+    "title": "Party Wear",
+    "handle": "party-wear",
+    "description": "",
+    "image": null
+  }
+]

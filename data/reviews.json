@@ -1,0 +1,20 @@
+[
+  {
+    "id": "review_1",
+    "productHandle": "global",
+    "author": "Anjali Sharma",
+    "rating": 5,
+    "comment": "The Banarasi Saree I bought is gorgeous! Absolute masterpiece of craftsmanship.",
+    "approved": true,
+    "createdAt": "2026-06-25T10:00:00Z"
+  },
+  {
+    "id": "review_2",
+    "productHandle": "global",
+    "author": "Priya Patel",
+    "rating": 5,
+    "comment": "Super fast shipping and top notch quality. Highly recommend Vastraa!",
+    "approved": true,
+    "createdAt": "2026-06-28T14:30:00Z"
+  }
+]

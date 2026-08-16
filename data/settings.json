@@ -1,0 +1,335 @@
+{
+  "seo": {
+    "titleTemplate": "%s | Boutiique Vastraa",
+    "defaultDescription": "Handcrafted sarees sourced from skilled artisans across India, including the rich brocades of Banarasi silks.",
+    "keywords": "sarees, banarasi, ethnic wear, boutique sarees, indian saree shop, handloom sarees"
+  },
+  "banners": [
+    {
+      "id": "slide_1",
+      "imageUrl": "/images/banner-1773659037696-747582281.webp",
+      "title": "Heritage Handlooms",
+      "subtitle": "Discover our new collections of Banarasi Silk & Organza Sarees",
+      "buttonText": "Explore Collection",
+      "link": "/collections/saree",
+      "mobileImageUrl": "/images/uploads/1784030165379.jpeg"
+    },
+    {
+      "id": "slide_2",
+      "imageUrl": "/images/banner-1773659047206-859638957.webp",
+      "title": "Elegance Redefined",
+      "subtitle": "Artisan craftsmanship, curated colors and modern designs",
+      "buttonText": "Shop All Products",
+      "link": "/collections/all",
+      "mobileImageUrl": "/images/uploads/1784030171746.jpeg"
+    },
+    {
+      "id": "slide_3",
+      "imageUrl": "/images/banner-1773659054836-332868013.webp",
+      "title": "Festive Splendor",
+      "subtitle": "Celebrate in style with our handloom cotton and linen sarees",
+      "buttonText": "Discover Festive",
+      "link": "/collections/saree",
+      "mobileImageUrl": "/images/uploads/1784030179797.jpeg"
+    }
+  ],
+  "homepage": {
+    "lovedCollectionsTitle": "Our Most Loved Collections",
+    "lovedCollectionsSubtitle": "Explore handpicked collections directly from regional weavers.",
+    "lovedCollectionsItems": [
+      {
+        "collectionHandle": "saree",
+        "customTitle": "Heritage Silks",
+        "customImage": "/images/banner-1773659037696-747582281.webp"
+      },
+      {
+        "collectionHandle": "kurti",
+        "customTitle": "Elegant Kurtis",
+        "customImage": "/images/banner-1773659047206-859638957.webp"
+      }
+    ],
+    "patternBanner": {
+      "heading": "Spot it. Style it. Own it.",
+      "type": "IMAGE",
+      "mediaUrl": "/images/pattern-bg.jpg",
+      "reels": [
+        {
+          "id": "reel_1784030380721",
+          "videoUrl": "/images/uploads/1784030386315.mp4",
+          "title": "",
+          "price": "",
+          "compareAtPrice": "",
+          "views": "10K",
+          "link": ""
+        },
+        {
+          "id": "reel_1784030389853",
+          "videoUrl": "/images/uploads/1784030394642.mp4",
+          "title": "",
+          "price": "",
+          "compareAtPrice": "",
+          "views": "10K",
+          "link": ""
+        },
+        {
+          "id": "reel_1784030401986",
+          "videoUrl": "/images/uploads/1784030409157.mp4",
+          "title": "",
+          "price": "",
+          "compareAtPrice": "",
+          "views": "10K",
+          "link": ""
+        }
+      ]
+    },
+    "trendingTitle": "Top-Sellings",
+    "trendingSubtitle": "Wrap yourself in timeless beauty with our exquisite saree collection. Each drape is crafted to celebrate grace, tradition, and modern charm.",
+    "topSellingsProductIds": [],
+    "perfectSareeTitle": "Find Your Perfect Saree",
+    "perfectSareeSubtitle": "Discover elegance woven into every drape.",
+    "perfectSareeTabs": [
+      {
+        "collectionHandle": "saree",
+        "label": "Banarasi Silk",
+        "image": "/images/measure.jpg"
+      },
+      {
+        "collectionHandle": "kurti",
+        "label": "Designer Kurtis",
+        "image": "/images/craftmanship.jpeg"
+      }
+    ],
+    "categoriesTitle": "Explore Best Categories",
+    "categoriesSubtitle": "Indulge in our handpicked categories featuring exquisite craftsmanship, premium fabrics, and timeless artistry made to elevate your wardrobe.",
+    "categoriesItems": [
+      {
+        "collectionHandle": "saree",
+        "customTitle": "Banarasi Pure",
+        "customImage": "/images/woman-2.jpg"
+      },
+      {
+        "collectionHandle": "lehenga",
+        "customTitle": "Luxury Lehenga",
+        "customImage": "/images/measure.jpg"
+      }
+    ],
+    "featuresTitle": "What makes shopping sarees with us special?",
+    "featuresSubtitle": "From handpicked fabrics to doorstep delivery, we take care of everything so you can simply enjoy the experience of finding your perfect saree.",
+    "features": [
+      {
+        "title": "Pure Fabrics Only",
+        "description": "We source only 100% genuine mulberry silks, cottons, and fine linens.",
+        "image": "/images/eco.jpg"
+      },
+      {
+        "title": "Artisanal Weaves",
+        "description": "Each item supports legacy weaving families across Varanasi and Bengal.",
+        "image": "/images/craftmanship.jpeg"
+      },
+      {
+        "title": "Perfect Tailoring",
+        "description": "Order matching pre-stitched blouses custom tailored to your measurements.",
+        "image": "/images/measure.jpg"
+      }
+    ],
+    "testimonialsTitle": "What Our Customers Say",
+    "testimonials": [
+      {
+        "id": "t1",
+        "name": "Aaradhya Sen",
+        "rating": 5,
+        "comment": "Absolutely gorgeous saree! The texture is soft, and the gold zari border looks extremely premium.",
+        "image": "/images/woman-2.jpg"
+      },
+      {
+        "id": "t2",
+        "name": "Meera Nair",
+        "rating": 5,
+        "comment": "The packaging was beautiful and shipping was incredibly fast. Will definitely purchase again.",
+        "image": "/images/measure.jpg"
+      },
+      {
+        "id": "t3",
+        "name": "Divya Sharma",
+        "rating": 5,
+        "comment": "Bought a designer Kurti for a family function, and the fitting was absolutely custom-like. The cotton fabric is extremely breathable and comfortable.",
+        "image": "/images/woman-2.jpg"
+      },
+      {
+        "id": "t4",
+        "name": "Priya Patel",
+        "rating": 5,
+        "comment": "The Banarasi Silk saree is of top-notch quality. It feels so luxurious and traditional. Received so many compliments!",
+        "image": "/images/measure.jpg"
+      },
+      {
+        "id": "t5",
+        "name": "Ananya Das",
+        "rating": 5,
+        "comment": "Excellent customer support! They helped me size my custom blouse correctly via WhatsApp and it fits perfectly.",
+        "image": "/images/woman-2.jpg"
+      },
+      {
+        "id": "t6",
+        "name": "Ritu Verma",
+        "rating": 5,
+        "comment": "A wonderful collection of modern and legacy handloom designs. This is my third purchase and the quality is consistently amazing.",
+        "image": "/images/measure.jpg"
+      },
+      {
+        "id": "t7",
+        "name": "Shreya Gupta",
+        "rating": 5,
+        "comment": "Fast delivery and premium packaging. The saree color was exactly as shown in the picture. Highly recommended boutique!",
+        "image": "/images/woman-2.jpg"
+      }
+    ],
+    "faqTitle": "Frequently Asked Questions",
+    "faqSubtitle": "At Boutiique Vastraa, we believe that finding the perfect saree should be a delightful and effortless experience. Here are answers to some of the most common questions our customers ask.",
+    "faqImage": "/images/woman-2.jpg",
+    "faqs": [
+      {
+        "question": "Are your sarees authentic handloom?",
+        "answer": "Yes! Every saree in our handloom collection comes with the official Silk Mark or Handloom Mark certification, sourced directly from regional artisans."
+      },
+      {
+        "question": "Do you customize blouse designs?",
+        "answer": "Absolutely! We offer custom tailoring services for blouses and petticoats. You can select your measurements on the product detail page."
+      },
+      {
+        "question": "What is your return policy?",
+        "answer": "We offer a hassle-free 7-day return policy on all unworn items with tags intact, except for custom tailored products."
+      },
+      {
+        "question": "How do I care for my silk sarees?",
+        "answer": "Dry clean only is recommended for all our pure silk, Banarasi, and delicate handloom sarees to maintain their color, drape, and zari work."
+      },
+      {
+        "question": "What payment methods do you accept?",
+        "answer": "We accept all major credit/debit cards, UPI/UPI QR, net banking, and Cash on Delivery (COD) for pin codes across India."
+      },
+      {
+        "question": "How long does shipping take?",
+        "answer": "Orders are dispatched within 24-48 hours. Standard shipping takes 3-5 business days across India. Custom tailored orders may take an additional 3 days."
+      },
+      {
+        "question": "Do you ship internationally?",
+        "answer": "Yes! We ship worldwide. International delivery rates are calculated at checkout, and orders usually arrive within 7-12 business days."
+      },
+      {
+        "question": "How can I track my order status?",
+        "answer": "Once your order is shipped, you will receive a tracking link via email and SMS/WhatsApp. You can also track it directly on our 'Track Order' page."
+      },
+      {
+        "question": "Are there any shipping charges?",
+        "answer": "No. All prices listed on our boutique store are fully inclusive of taxes. Shipping is completely free for all orders delivered within India."
+      },
+      {
+        "question": "Can I cancel or modify my order after placing it?",
+        "answer": "You can cancel or modify your order within 12 hours of placement by emailing us at boutiiquevastraa@gmail.com or contacting customer support on WhatsApp."
+      }
+    ]
+  },
+  "footer": {
+    "logoUrl": "/images/logo.png",
+    "description": "Timeless Elegance, Handcrafted for Every Occasion. Shop our exclusive range of luxury sarees, designer kurtis, and jewellery.",
+    "contactEmail": "boutiiquevastraa@gmail.com",
+    "contactPhone": "+91 - 9205248666",
+    "copyright": "© 2026 Boutiique Vastraa. All rights reserved.",
+    "facebookUrl": "https://facebook.com",
+    "instagramUrl": "https://instagram.com",
+    "pinterestUrl": "https://pinterest.com",
+    "links": [
+      {
+        "label": "About Us",
+        "url": "/about"
+      },
+      {
+        "label": "Contact Us",
+        "url": "/contact"
+      },
+      {
+        "label": "FAQ",
+        "url": "/#faq"
+      },
+      {
+        "label": "Track Order",
+        "url": "/track-order"
+      }
+    ]
+  },
+  "header": {
+    "logoUrl": "/images/logo.png",
+    "whatsappNumber": "919205238666",
+    "announcements": [
+      "FREE SHIPPING ON ALL DOMESTIC ORDERS | COMPLIMENTARY BLOUSE STITCHING",
+      "EASY RETURNS & EXCHANGE POLICY"
+    ],
+    "marquee": [
+      {
+        "text": "UP TO 49% PRIVILEGE SAVINGS",
+        "icon": "gift"
+      },
+      {
+        "text": "COMPLIMENTARY GIFT ON PURCHASE OF ANY 2 STYLES ₹1,500+",
+        "icon": "gift"
+      },
+      {
+        "text": "LOVED BY 10,000+ ESTEEMED CUSTOMERS",
+        "icon": "star"
+      }
+    ],
+    "menuLinks": [
+      {
+        "label": "Sarees",
+        "url": "/collections/saree"
+      },
+      {
+        "label": "Lehenga",
+        "url": "/collections/lehenga"
+      },
+      {
+        "label": "Kurtis",
+        "url": "/collections/kurti"
+      },
+      {
+        "label": "Jewellery",
+        "url": "/collections/jewellery"
+      }
+    ]
+  },
+  "gifts": [
+    {
+      "id": "gid://shopify/Product/15158668132716",
+      "title": "Woven Kanjivaram Silk Blend Saree (Pink)",
+      "handle": "woven-kanjivaram-silk-blend-saree-pink",
+      "image": "/images/products/saree3.webp",
+      "price": "600.0",
+      "variantId": "gid://shopify/ProductVariant/53864981037420"
+    },
+    {
+      "id": "gid://shopify/Product/15158668525932",
+      "title": "RARE THREAD Women Embroidered Silk Blend A-line Kurta (Orange)",
+      "handle": "rare-thread-women-embroidered-silk-blend-a-line-kurta-orange",
+      "image": "/images/products/kurti3.webp",
+      "price": "699.0",
+      "variantId": "gid://shopify/ProductVariant/53864990376300"
+    },
+    {
+      "id": "gid://shopify/Product/15158668689772",
+      "title": "Women Fit and Flare Maroon Midi/Calf Length Dress(one peace)",
+      "handle": "women-fit-and-flare-maroon-midi-calf-length-dressone-peace",
+      "image": "/images/products/1pice3.webp",
+      "price": "700.0",
+      "variantId": "gid://shopify/ProductVariant/53864990966124"
+    },
+    {
+      "id": "gid://shopify/Product/15158669050220",
+      "title": "Unttre Tunic Pant Co-ords Set",
+      "handle": "unttre-tunic-pant-co-ords-set",
+      "image": "/images/products/cord2.webp",
+      "price": "499.0",
+      "variantId": "gid://shopify/ProductVariant/53864992473452"
+    }
+  ]
+}

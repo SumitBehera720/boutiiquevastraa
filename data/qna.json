@@ -1,0 +1,22 @@
+[
+  {
+    "id": "qna_1",
+    "productHandle": "woven-kanjivaram-silk-blend-saree-pink",
+    "author": "Priya Sharma",
+    "email": "priya@example.com",
+    "question": "Is the blouse material included with this saree?",
+    "answer": "Yes, it comes with a matching 80cm unstitched blouse material that you can customize to your size.",
+    "approved": true,
+    "createdAt": "2026-07-01T10:00:00.000Z"
+  },
+  {
+    "id": "qna_2",
+    "productHandle": "woven-kanjivaram-silk-blend-saree-pink",
+    "author": "Anjali Mehta",
+    "email": "anjali@example.com",
+    "question": "Does it have a shiny finish or a matte look?",
+    "answer": "It has a luxurious, subtle golden zari sheen which looks very elegant under evening lights, rather than an overly shiny texture.",
+    "approved": true,
+    "createdAt": "2026-07-02T12:00:00.000Z"
+  }
+]

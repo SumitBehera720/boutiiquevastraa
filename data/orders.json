@@ -1,0 +1,458 @@
+[
+  {
+    "id": "ORDER_TEST_COD_1784553108081",
+    "orderNumber": 88510,
+    "customer": {
+      "firstName": "Test",
+      "lastName": "Customer",
+      "email": "test@boutiquevastra.com",
+      "phone": "9876543210",
+      "shippingAddress": {
+        "address1": "123 MG Road",
+        "city": "Bengaluru",
+        "province": "Karnataka",
+        "zip": "560001",
+        "country": "India"
+      }
+    },
+    "lines": [
+      {
+        "id": "prod-1",
+        "title": "Silk Kurti",
+        "quantity": 1,
+        "price": 2500
+      }
+    ],
+    "subtotal": "2500.00",
+    "total": "2500.00",
+    "paymentGateway": "COD",
+    "financialStatus": "PENDING",
+    "fulfillmentStatus": "UNFULFILLED",
+    "createdAt": "2026-07-20T13:11:48.081Z"
+  },
+  {
+    "id": "ORDER_TEST_PHONEPE_1784553108087",
+    "orderNumber": 88688,
+    "customer": {
+      "firstName": "Rahul",
+      "lastName": "Sharma",
+      "email": "rahul@example.com",
+      "phone": "9999988888",
+      "shippingAddress": {
+        "address1": "456 Park Street",
+        "city": "Kolkata",
+        "province": "West Bengal",
+        "zip": "700016",
+        "country": "India"
+      }
+    },
+    "lines": [
+      {
+        "id": "prod-2",
+        "title": "Designer Saree",
+        "quantity": 1,
+        "price": 4500
+      }
+    ],
+    "subtotal": "4500.00",
+    "total": "4500.00",
+    "paymentGateway": "PHONEPE",
+    "financialStatus": "PENDING",
+    "paymentStatus": "PENDING",
+    "merchantTransactionId": "TXN_VSTR_88688_1784553108087_30f2d67101",
+    "paymentAmount": 4500,
+    "inventoryReserved": true,
+    "paymentEvents": [
+      {
+        "event": "Pending Order Pre-Created",
+        "timestamp": "2026-07-20T13:11:48.087Z"
+      },
+      {
+        "event": "PhonePe Redirect Initiated (TXN_VSTR_88688_1784553108087_30f2d67101)",
+        "timestamp": "2026-07-20T13:11:48.087Z"
+      },
+      {
+        "event": "Admin Re-verification Query (CHECKED)",
+        "timestamp": "2026-07-20T13:11:48.088Z"
+      }
+    ],
+    "createdAt": "2026-07-20T13:11:48.087Z"
+  },
+  {
+    "id": "ORDER_TEST_COD_1784553124042",
+    "orderNumber": 88822,
+    "customer": {
+      "firstName": "Test",
+      "lastName": "Customer",
+      "email": "test@boutiquevastra.com",
+      "phone": "9876543210",
+      "shippingAddress": {
+        "address1": "123 MG Road",
+        "city": "Bengaluru",
+        "province": "Karnataka",
+        "zip": "560001",
+        "country": "India"
+      }
+    },
+    "lines": [
+      {
+        "id": "prod-1",
+        "title": "Silk Kurti",
+        "quantity": 1,
+        "price": 2500
+      }
+    ],
+    "subtotal": "2500.00",
+    "total": "2500.00",
+    "paymentGateway": "COD",
+    "financialStatus": "PENDING",
+    "fulfillmentStatus": "UNFULFILLED",
+    "createdAt": "2026-07-20T13:12:04.042Z"
+  },
+  {
+    "id": "ORDER_TEST_PHONEPE_1784553126240",
+    "orderNumber": 88704,
+    "customer": {
+      "firstName": "Rahul",
+      "lastName": "Sharma",
+      "email": "rahul@example.com",
+      "phone": "9999988888",
+      "shippingAddress": {
+        "address1": "456 Park Street",
+        "city": "Kolkata",
+        "province": "West Bengal",
+        "zip": "700016",
+        "country": "India"
+      }
+    },
+    "lines": [
+      {
+        "id": "prod-2",
+        "title": "Designer Saree",
+        "quantity": 1,
+        "price": 4500
+      }
+    ],
+    "subtotal": "4500.00",
+    "total": "4500.00",
+    "paymentGateway": "PHONEPE",
+    "financialStatus": "PENDING",
+    "paymentStatus": "PENDING",
+    "merchantTransactionId": "TXN_VSTR_88704_1784553126240_612fa55a1d",
+    "paymentAmount": 4500,
+    "inventoryReserved": true,
+    "paymentEvents": [
+      {
+        "event": "Pending Order Pre-Created",
+        "timestamp": "2026-07-20T13:12:06.240Z"
+      },
+      {
+        "event": "PhonePe Redirect Initiated (TXN_VSTR_88704_1784553126240_612fa55a1d)",
+        "timestamp": "2026-07-20T13:12:06.240Z"
+      },
+      {
+        "event": "Admin Re-verification Query (CHECKED)",
+        "timestamp": "2026-07-20T13:12:06.241Z"
+      }
+    ],
+    "createdAt": "2026-07-20T13:12:06.240Z"
+  },
+  {
+    "id": "ORDER_TEST_COD_1784553140089",
+    "orderNumber": 88646,
+    "customer": {
+      "firstName": "Test",
+      "lastName": "Customer",
+      "email": "test@boutiquevastra.com",
+      "phone": "9876543210",
+      "shippingAddress": {
+        "address1": "123 MG Road",
+        "city": "Bengaluru",
+        "province": "Karnataka",
+        "zip": "560001",
+        "country": "India"
+      }
+    },
+    "lines": [
+      {
+        "id": "prod-1",
+        "title": "Silk Kurti",
+        "quantity": 1,
+        "price": 2500
+      }
+    ],
+    "subtotal": "2500.00",
+    "total": "2500.00",
+    "paymentGateway": "COD",
+    "financialStatus": "PENDING",
+    "fulfillmentStatus": "UNFULFILLED",
+    "createdAt": "2026-07-20T13:12:20.089Z"
+  },
+  {
+    "id": "ORDER_TEST_PHONEPE_1784553142227",
+    "orderNumber": 88532,
+    "customer": {
+      "firstName": "Rahul",
+      "lastName": "Sharma",
+      "email": "rahul@example.com",
+      "phone": "9999988888",
+      "shippingAddress": {
+        "address1": "456 Park Street",
+        "city": "Kolkata",
+        "province": "West Bengal",
+        "zip": "700016",
+        "country": "India"
+      }
+    },
+    "lines": [
+      {
+        "id": "prod-2",
+        "title": "Designer Saree",
+        "quantity": 1,
+        "price": 4500
+      }
+    ],
+    "subtotal": "4500.00",
+    "total": "4500.00",
+    "paymentGateway": "PHONEPE",
+    "financialStatus": "PENDING",
+    "paymentStatus": "PENDING",
+    "merchantTransactionId": "TXN_VSTR_88532_1784553142227_aa552ad826",
+    "paymentAmount": 4500,
+    "inventoryReserved": true,
+    "paymentEvents": [
+      {
+        "event": "Pending Order Pre-Created",
+        "timestamp": "2026-07-20T13:12:22.227Z"
+      },
+      {
+        "event": "PhonePe Redirect Initiated (TXN_VSTR_88532_1784553142227_aa552ad826)",
+        "timestamp": "2026-07-20T13:12:22.227Z"
+      },
+      {
+        "event": "Admin Re-verification Query (CHECKED)",
+        "timestamp": "2026-07-20T13:12:22.228Z"
+      }
+    ],
+    "createdAt": "2026-07-20T13:12:22.228Z"
+  },
+  {
+    "id": "ORDER_TEST_COD_1784553162993",
+    "orderNumber": 88469,
+    "email": "test@boutiquevastra.com",
+    "phone": "9876543210",
+    "customerName": "Test Customer",
+    "customer": {
+      "firstName": "Test",
+      "lastName": "Customer",
+      "email": "test@boutiquevastra.com",
+      "phone": "9876543210"
+    },
+    "shippingAddress": {
+      "address1": "123 MG Road",
+      "address2": "Suite 4B",
+      "city": "Kolkata",
+      "province": "West Bengal",
+      "zip": "700001",
+      "country": "India"
+    },
+    "lines": [
+      {
+        "id": "prod-1",
+        "title": "Silk Kurti",
+        "quantity": 1,
+        "price": 2500,
+        "sku": "KURTI-SILK-M"
+      }
+    ],
+    "subtotal": "2500.00",
+    "total": "2500.00",
+    "paymentGateway": "COD",
+    "financialStatus": "PENDING",
+    "fulfillmentStatus": "UNFULFILLED",
+    "createdAt": "2026-07-20T13:12:42.993Z"
+  },
+  {
+    "id": "ORDER_TEST_PHONEPE_1784553165072",
+    "orderNumber": 88279,
+    "email": "rahul@example.com",
+    "phone": "9999988888",
+    "customerName": "Rahul Sharma",
+    "shippingAddress": {
+      "address1": "456 Park Street",
+      "city": "Kolkata",
+      "province": "West Bengal",
+      "zip": "700016",
+      "country": "India"
+    },
+    "lines": [
+      {
+        "id": "prod-2",
+        "title": "Designer Saree",
+        "quantity": 1,
+        "price": 4500
+      }
+    ],
+    "subtotal": "4500.00",
+    "total": "4500.00",
+    "paymentGateway": "PHONEPE",
+    "financialStatus": "PENDING",
+    "paymentStatus": "PENDING",
+    "merchantTransactionId": "TXN_VSTR_88279_1784553165071_cf66a6a5cd",
+    "paymentAmount": 4500,
+    "inventoryReserved": true,
+    "paymentEvents": [
+      {
+        "event": "Pending Order Pre-Created",
+        "timestamp": "2026-07-20T13:12:45.072Z"
+      },
+      {
+        "event": "PhonePe Redirect Initiated (TXN_VSTR_88279_1784553165071_cf66a6a5cd)",
+        "timestamp": "2026-07-20T13:12:45.072Z"
+      },
+      {
+        "event": "Admin Re-verification Query (CHECKED)",
+        "timestamp": "2026-07-20T13:12:45.072Z"
+      }
+    ],
+    "createdAt": "2026-07-20T13:12:45.072Z"
+  },
+  {
+    "id": "ORDER_TEST_COD_1784553195368",
+    "orderNumber": 88504,
+    "email": "test@boutiquevastra.com",
+    "phone": "9876543210",
+    "customerName": "Test Customer",
+    "customer": {
+      "firstName": "Test",
+      "lastName": "Customer",
+      "email": "test@boutiquevastra.com",
+      "phone": "9876543210"
+    },
+    "shippingAddress": {
+      "address1": "123 MG Road",
+      "address2": "Suite 4B",
+      "city": "Kolkata",
+      "province": "West Bengal",
+      "zip": "700001",
+      "country": "India"
+    },
+    "lines": [
+      {
+        "id": "prod-1",
+        "title": "Silk Kurti",
+        "quantity": 1,
+        "price": 2500,
+        "sku": "KURTI-SILK-M"
+      }
+    ],
+    "subtotal": "2500.00",
+    "total": "2500.00",
+    "paymentGateway": "COD",
+    "financialStatus": "PENDING",
+    "fulfillmentStatus": "UNFULFILLED",
+    "createdAt": "2026-07-20T13:13:15.368Z"
+  },
+  {
+    "id": "ORDER_TEST_PHONEPE_1784553198146",
+    "orderNumber": 88798,
+    "email": "rahul@example.com",
+    "phone": "9999988888",
+    "customerName": "Rahul Sharma",
+    "shippingAddress": {
+      "address1": "456 Park Street",
+      "city": "Kolkata",
+      "province": "West Bengal",
+      "zip": "700016",
+      "country": "India"
+    },
+    "lines": [
+      {
+        "id": "prod-2",
+        "title": "Designer Saree",
+        "quantity": 1,
+        "price": 4500
+      }
+    ],
+    "subtotal": "4500.00",
+    "total": "4500.00",
+    "paymentGateway": "PHONEPE",
+    "financialStatus": "PENDING",
+    "paymentStatus": "PENDING",
+    "merchantTransactionId": "TXN_VSTR_88798_1784553198146_ff00f832e3",
+    "paymentAmount": 4500,
+    "inventoryReserved": true,
+    "paymentEvents": [
+      {
+        "event": "Pending Order Pre-Created",
+        "timestamp": "2026-07-20T13:13:18.146Z"
+      },
+      {
+        "event": "PhonePe Redirect Initiated (TXN_VSTR_88798_1784553198146_ff00f832e3)",
+        "timestamp": "2026-07-20T13:13:18.146Z"
+      },
+      {
+        "event": "Admin Re-verification Query (CHECKED)",
+        "timestamp": "2026-07-20T13:13:18.147Z"
+      }
+    ],
+    "createdAt": "2026-07-20T13:13:18.146Z"
+  },
+  {
+    "id": "ORDER_TEST_FAIL_1784553213442",
+    "orderNumber": 99875,
+    "merchantTransactionId": "TXN_VSTR_99875_1784553213441_43f05bda7c",
+    "paymentGateway": "PHONEPE",
+    "financialStatus": "PENDING",
+    "paymentStatus": "FAILED",
+    "inventoryReserved": false,
+    "paymentEvents": [
+      {
+        "event": "Pending Order Pre-Created",
+        "timestamp": "2026-07-20T13:13:33.442Z"
+      },
+      {
+        "event": "Payment Cancelled by User (FAILED)",
+        "timestamp": "2026-07-20T13:13:33.443Z"
+      }
+    ],
+    "createdAt": "2026-07-20T13:13:33.442Z"
+  },
+  {
+    "id": "ORDER_TEST_PAID_1784553213446",
+    "orderNumber": 99085,
+    "merchantTransactionId": "TXN_VSTR_99085_1784553213446_3190c7b962",
+    "paymentGateway": "PHONEPE",
+    "financialStatus": "PAID",
+    "paymentStatus": "PAID",
+    "shipmentId": "1461336107",
+    "inventoryReserved": true,
+    "paymentEvents": [
+      {
+        "event": "Payment Verified (SUCCESS)",
+        "timestamp": "2026-07-20T13:13:33.446Z"
+      }
+    ],
+    "createdAt": "2026-07-20T13:13:33.446Z"
+  },
+  {
+    "id": "ORDER_TEST_RETRY_1784553213448",
+    "orderNumber": 99859,
+    "merchantTransactionId": "TXN_VSTR_99859_1784553213448_0f20de4841",
+    "paymentGateway": "PHONEPE",
+    "financialStatus": "PENDING",
+    "paymentStatus": "PENDING",
+    "inventoryReserved": true,
+    "paymentEvents": [
+      {
+        "event": "Initial Payment Attempt Initiated",
+        "timestamp": "2026-07-20T13:13:33.448Z"
+      },
+      {
+        "event": "Payment Retry Initiated (TXN_VSTR_99859_1784553213448_0f20de4841)",
+        "timestamp": "2026-07-20T13:13:33.448Z"
+      }
+    ],
+    "createdAt": "2026-07-20T13:13:33.448Z"
+  }
+]

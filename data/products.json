@@ -1,0 +1,866 @@
+[
+  {
+    "id": "gid://shopify/Product/15158668132716",
+    "title": "Woven Kanjivaram Silk Blend Saree (Pink)",
+    "handle": "woven-kanjivaram-silk-blend-saree-pink",
+    "description": "This saree from AAAAGIRI is suitable for all ocassions. It will look trendy as casual party wear, festive wear and also on religious ceremonies. It is perfect for wedding ocassion. It also gives a formal look perfect for office wear. It can be paired with any matching or contrast blouse and can be draped in variety of ways. It gives a great feel as it is made of soft fabric. It comes with matching blouse material which can be customised as per requirement. Women can wear it to look stylish.",
+    "descriptionHtml": "<p><span>This saree from AAAAGIRI is suitable for all ocassions. It will look trendy as casual party wear, festive wear and also on religious ceremonies. It is perfect for wedding ocassion. It also gives a formal look perfect for office wear. It can be paired with any matching or contrast blouse and can be draped in variety of ways. It gives a great feel as it is made of soft fabric. It comes with matching blouse material which can be customised as per requirement. Women can wear it to look stylish.</span></p>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "600.0",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "999.0",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": [
+        {
+          "node": {
+            "url": "/images/products/saree3.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/saree2.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/saree1.webp",
+            "altText": null
+          }
+        }
+      ]
+    },
+    "options": [
+      {
+        "name": "Title",
+        "values": [
+          "Default Title"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/ProductVariant/53864981037420",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "600.0",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": {
+              "amount": "999.0",
+              "currencyCode": "INR"
+            },
+            "selectedOptions": [
+              {
+                "name": "Title",
+                "value": "Default Title"
+              }
+            ],
+            "image": {
+              "url": "/images/products/saree3.webp"
+            }
+          }
+        }
+      ]
+    },
+    "tags": [
+      "saree"
+    ],
+    "collections": {
+      "edges": [
+        {
+          "node": {
+            "handle": "frontpage"
+          }
+        },
+        {
+          "node": {
+            "handle": "saree"
+          }
+        }
+      ]
+    },
+    "collectionHandles": [
+      "frontpage",
+      "saree"
+    ],
+    "inventory": 10
+  },
+  {
+    "id": "gid://shopify/Product/15158668525932",
+    "title": "RARE THREAD Women Embroidered Silk Blend A-line Kurta (Orange)",
+    "handle": "rare-thread-women-embroidered-silk-blend-a-line-kurta-orange",
+    "description": "Light up every festive celebration with this vibrant orange A-line kurta from RARE THREAD. Crafted from premium silk blend fabric, this kurta features a richly embroidered round neckline with intricate mirror work and zari detailing for a regal first impression. Full bishop sleeves with embroidered cuffs add a graceful finishing touch, while the delicate zari scalloped hemline elevates the entire silhouette. The smooth, lustrous fabric drapes beautifully, making it perfect for festive gatherings, family celebrations, and special occasions. Available in sizes XS to 3XL for an inclusive fit. Style with palazzos, churidars, or straight pants to complete the look.",
+    "descriptionHtml": "<p><span>Light up every festive celebration with this vibrant orange A-line kurta from RARE THREAD. Crafted from premium silk blend fabric, this kurta features a richly embroidered round neckline with intricate mirror work and zari detailing for a regal first impression. Full bishop sleeves with embroidered cuffs add a graceful finishing touch, while the delicate zari scalloped hemline elevates the entire silhouette. The smooth, lustrous fabric drapes beautifully, making it perfect for festive gatherings, family celebrations, and special occasions. Available in sizes XS to 3XL for an inclusive fit. Style with palazzos, churidars, or straight pants to complete the look.</span></p>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "699.0",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "1200.0",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": [
+        {
+          "node": {
+            "url": "/images/products/kurti3.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/kurti1.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/kurti2.webp",
+            "altText": null
+          }
+        }
+      ]
+    },
+    "options": [
+      {
+        "name": "Title",
+        "values": [
+          "Default Title"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/ProductVariant/53864990376300",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "699.0",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": {
+              "amount": "1200.0",
+              "currencyCode": "INR"
+            },
+            "selectedOptions": [
+              {
+                "name": "Title",
+                "value": "Default Title"
+              }
+            ],
+            "image": {
+              "url": "/images/products/kurti3.webp"
+            }
+          }
+        }
+      ]
+    },
+    "tags": [],
+    "collections": {
+      "edges": [
+        {
+          "node": {
+            "handle": "kurti"
+          }
+        }
+      ]
+    },
+    "collectionHandles": [
+      "kurti"
+    ],
+    "inventory": 10
+  },
+  {
+    "id": "gid://shopify/Product/15158668689772",
+    "title": "Women Fit and Flare Maroon Midi/Calf Length Dress(one peace)",
+    "handle": "women-fit-and-flare-maroon-midi-calf-length-dressone-peace",
+    "description": "Stylish and elegant, this women’s midi dress features a beautiful floral print on a rich maroon base. Designed with a smart collared neckline, sleeveless pattern, and flattering fit-and-flare silhouette, it gives a graceful and feminine look. The waist tie detail enhances the shape, while the tiered hem adds flow and charm. Perfect for casual outings, brunch, vacation, and daytime wear.",
+    "descriptionHtml": "<p><span>Stylish and elegant, this women’s midi dress features a beautiful floral print on a rich maroon base. Designed with a smart collared neckline, sleeveless pattern, and flattering fit-and-flare silhouette, it gives a graceful and feminine look. The waist tie detail enhances the shape, while the tiered hem adds flow and charm. Perfect for casual outings, brunch, vacation, and daytime wear.</span></p>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "700.0",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "999.0",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": [
+        {
+          "node": {
+            "url": "/images/products/1pice3.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/1pice2.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/1pice.webp",
+            "altText": null
+          }
+        }
+      ]
+    },
+    "options": [
+      {
+        "name": "Title",
+        "values": [
+          "Default Title"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/ProductVariant/53864990966124",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "700.0",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": {
+              "amount": "999.0",
+              "currencyCode": "INR"
+            },
+            "selectedOptions": [
+              {
+                "name": "Title",
+                "value": "Default Title"
+              }
+            ],
+            "image": {
+              "url": "/images/products/1pice3.webp"
+            }
+          }
+        }
+      ]
+    },
+    "tags": [],
+    "collections": {
+      "edges": [
+        {
+          "node": {
+            "handle": "one-peace"
+          }
+        }
+      ]
+    },
+    "collectionHandles": [
+      "one-peace"
+    ],
+    "inventory": 10
+  },
+  {
+    "id": "gid://shopify/Product/15158668919148",
+    "title": "Women Two Piece Dress Maroon Maxi/Full Length Dress",
+    "handle": "women-two-piece-dress-maroon-maxi-full-length-dress",
+    "description": "Upgrade your wardrobe with this stunning women’s wine bodycon maxi dress, designed to give you a sleek, confident, and elegant look. Featuring a stylish V-neckline, long sleeves, and a flattering slim-fit silhouette, this dress highlights your natural shape while keeping you comfortable throughout the day or night.",
+    "descriptionHtml": "<p><span>Upgrade your wardrobe with this stunning women’s wine bodycon maxi dress, designed to give you a sleek, confident, and elegant look. Featuring a stylish V-neckline, long sleeves, and a flattering slim-fit silhouette, this dress highlights your natural shape while keeping you comfortable throughout the day or night.</span></p>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "899.0",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "1500.0",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": [
+        {
+          "node": {
+            "url": "/images/products/2pice3.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/2pice2.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/2pice.webp",
+            "altText": null
+          }
+        }
+      ]
+    },
+    "options": [
+      {
+        "name": "Title",
+        "values": [
+          "Default Title"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/ProductVariant/53864991457644",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "899.0",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": {
+              "amount": "1500.0",
+              "currencyCode": "INR"
+            },
+            "selectedOptions": [
+              {
+                "name": "Title",
+                "value": "Default Title"
+              }
+            ],
+            "image": {
+              "url": "/images/products/2pice3.webp"
+            }
+          }
+        }
+      ]
+    },
+    "tags": [],
+    "collections": {
+      "edges": [
+        {
+          "node": {
+            "handle": "two-peace"
+          }
+        }
+      ]
+    },
+    "collectionHandles": [
+      "two-peace"
+    ],
+    "inventory": 10
+  },
+  {
+    "id": "gid://shopify/Product/15158669050220",
+    "title": "Unttre Tunic Pant Co-ords Set",
+    "handle": "unttre-tunic-pant-co-ords-set",
+    "description": "General Brand Unttre Unttre Style Code UN_Cord UN_Cord Brand Color Brown Brown Size S S Type Co-ords Co-ords Color Maroon Maroon Add Ons NA NA Occasion Casual Casual Net Quantity 2 2 Pack of 1 1 Print Type Floral Print Floral Print Detail Placement Front Panel Front Panel Top Fabric Viscose Rayon Viscose Rayon Bottom Fabric Viscose Rayon Viscose Rayon Top Type Tunic Tunic Bottom Type Pant Pant Ideal For Women Women Top Details Top Pattern Type Printed Printed Top Length Long Long Neck Mandarin Collar Mandarin Collar Sleeve Length Half Sleeve Half Sleeve Sleeve Style Roll-up Sleeve Roll-up Sleeve Top Fit Regular Regular Bottom Details Bottom Pattern Type Printed Printed Bottom Length Cropped/Ankle Length Cropped/Ankle Length Bottom Closure Slipon Slipon",
+    "descriptionHtml": "<div class=\"_1psv1zeb9 _1psv1ze0\">\n<div class=\"css-g5y9jx r-1udh08x\">\n<div>\n<div class=\"css-g5y9jx\">\n<div class=\"grid-formation grid-column-1\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1ze4i _1psv1ze29\">\n<div class=\"v1zwn21l v1zwn24 _1psv1zeb9 _1psv1ze0 _1psv1ze9x\">General</div>\n<div class=\"css-g5y9jx\">\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Brand</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Unttre</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Unttre</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Style Code</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">UN_Cord</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">UN_Cord</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Brand Color</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Brown</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Brown</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Size</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">S</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">S</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Type</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Co-ords</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Co-ords</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Color</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Maroon</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Maroon</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Add Ons</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">NA</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">NA</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Occasion</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Casual</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Casual</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Net Quantity</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">2</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">2</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Pack of</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">1</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">1</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Print Type</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Floral Print</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Floral Print</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Detail Placement</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Front Panel</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Front Panel</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Top Fabric</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Viscose Rayon</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Viscose Rayon</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Bottom Fabric</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Viscose Rayon</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Viscose Rayon</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Top Type</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Tunic</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Tunic</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Bottom Type</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Pant</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Pant</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Ideal For</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Women</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Women</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation grid-column-1\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1ze4i _1psv1ze29\">\n<div class=\"v1zwn21l v1zwn24 _1psv1zeb9 _1psv1ze0 _1psv1ze9x\">Top Details</div>\n<div class=\"css-g5y9jx\">\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Top Pattern Type</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Printed</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Printed</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Top Length</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Long</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Long</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Neck</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Mandarin Collar</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Mandarin Collar</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Sleeve Length</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Half Sleeve</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Half Sleeve</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Sleeve Style</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Roll-up Sleeve</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Roll-up Sleeve</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Top Fit</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Regular</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Regular</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation grid-column-1\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1ze4i _1psv1ze29\">\n<div class=\"v1zwn21l v1zwn24 _1psv1zeb9 _1psv1ze0 _1psv1ze9x\">Bottom Details</div>\n<div class=\"css-g5y9jx\">\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Bottom Pattern Type</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Printed</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Printed</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Bottom Length</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Cropped/Ankle Length</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Cropped/Ankle Length</div>\n</div>\n</div>\n</div>\n<div class=\"grid-formation-dynamic\">\n<div class=\"_1psv1zeb9 _1psv1ze0 _1psv1zei0 _1psv1ze90 _1psv1ze29 _1psv1ze4i _1psv1zegc _1psv1zedi\">\n<div class=\"v1zwn21m v1zwn27 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o\">Bottom Closure</div>\n<div class=\"v1zwn21l v1zwn26 _1psv1zeb9 _1psv1ze0 _1psv1ze9x _1psv1ze7o _1psv1ze53\">Slipon</div>\n<div class=\"_1psv1zeb9 _1psv1ze0 _7dzyg21s _1o6mltl1s _1psv1zefr _1psv1ze4i _1psv1zek9 _1psv1zedi _1psv1zei0 _1psv1ze90 _1psv1ze6r\">\n<div class=\"v1zwn259 v1zwn21 _1psv1zeb9 _1psv1ze0\">Slipon</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>\n</div>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "499.0",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "699.0",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": [
+        {
+          "node": {
+            "url": "/images/products/cord2.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/cord1.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/cord3.webp",
+            "altText": null
+          }
+        }
+      ]
+    },
+    "options": [
+      {
+        "name": "Title",
+        "values": [
+          "Default Title"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/ProductVariant/53864992473452",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "499.0",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": {
+              "amount": "699.0",
+              "currencyCode": "INR"
+            },
+            "selectedOptions": [
+              {
+                "name": "Title",
+                "value": "Default Title"
+              }
+            ],
+            "image": {
+              "url": "/images/products/cord2.webp"
+            }
+          }
+        }
+      ]
+    },
+    "tags": [],
+    "collections": {
+      "edges": [
+        {
+          "node": {
+            "handle": "co-ords"
+          }
+        }
+      ]
+    },
+    "collectionHandles": [
+      "co-ords"
+    ],
+    "inventory": 10
+  },
+  {
+    "id": "gid://shopify/Product/15158669246828",
+    "title": "Bandhani Semi Stitched Lehenga Choli (Green, Red)",
+    "handle": "bandhani-semi-stitched-lehenga-choli-green-red",
+    "description": "Lehenga waist: Customizable upto 40, Lehenga length: 42 Inch, Dupatta Width: 57cm, Flare: 2.50 mtr, Dupatta length: 2.20 mtr, Choli length: 1 mtr Semi-Stitched Lehenga Choli( lehenga stitched and blouse unstitched) Product Content: 1 Choli, 1 Lehenga, 1 Dupatta; Wash Care: Dry clean or hand wash in cold water Our designer designed special collection Lehenga choli for Indian girls to wear in party and this festive season. This is perfect gift to your some one specials for this occasional season. Lehenga Fabric Jacquard Lehenga Self Designed pattern. Choli Fabric Jacquard. with this fabric Lehenga looks so elegant. with Banarasi Dupatta. This Lehenga choli Has different Colors so your favourite and get attraction in every events. Colour is slight different due to your visual setting of monitor and mobile screen. Style Tip: For an elegant look, Long this Lehenga Choli, with statement earrings & high heels. Lovely Embroidered Pattern Crafted with a beautiful and eye-catching embroidered design, the Cute Fellow Women’s Embroidered Semi-stitched Lehenga, Choli, and Dupatta Set adds charm to your festive look. So, you can wear this set for weddings, festivals, and for other",
+    "descriptionHtml": "<p><span>Lehenga waist: Customizable upto 40, Lehenga length: 42 Inch, Dupatta Width: 57cm, Flare: 2.50 mtr, Dupatta length: 2.20 mtr, Choli length: 1 mtr Semi-Stitched Lehenga Choli( lehenga stitched and blouse unstitched) Product Content: 1 Choli, 1 Lehenga, 1 Dupatta; Wash Care: Dry clean or hand wash in cold water Our designer designed special collection Lehenga choli for Indian girls to wear in party and this festive season. This is perfect gift to your some one specials for this occasional season. Lehenga Fabric Jacquard Lehenga Self Designed pattern. Choli Fabric Jacquard. with this fabric Lehenga looks so elegant. with Banarasi Dupatta. This Lehenga choli Has different Colors so your favourite and get attraction in every events. Colour is slight different due to your visual setting of monitor and mobile screen. Style Tip: For an elegant look, Long this Lehenga Choli, with statement earrings &amp; high heels. Lovely Embroidered Pattern Crafted with a beautiful and eye-catching embroidered design, the Cute Fellow Women’s Embroidered Semi-stitched Lehenga, Choli, and Dupatta Set adds charm to your festive look. So, you can wear this set for weddings, festivals, and for other </span></p>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "999.0",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "1699.0",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": [
+        {
+          "node": {
+            "url": "/images/products/Lehenga3.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/Lehenga2.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/Lehenga1.webp",
+            "altText": null
+          }
+        }
+      ]
+    },
+    "options": [
+      {
+        "name": "Title",
+        "values": [
+          "Default Title"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/ProductVariant/53864993063276",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "999.0",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": {
+              "amount": "1699.0",
+              "currencyCode": "INR"
+            },
+            "selectedOptions": [
+              {
+                "name": "Title",
+                "value": "Default Title"
+              }
+            ],
+            "image": {
+              "url": "/images/products/Lehenga3.webp"
+            }
+          }
+        }
+      ]
+    },
+    "tags": [],
+    "collections": {
+      "edges": [
+        {
+          "node": {
+            "handle": "lehenga"
+          }
+        }
+      ]
+    },
+    "collectionHandles": [
+      "lehenga"
+    ],
+    "inventory": 10
+  },
+  {
+    "id": "gid://shopify/Product/15158669771116",
+    "title": "Alloy Multicolor Jewel Set (Pack of 1)",
+    "handle": "alloy-multicolor-jewel-set-pack-of-1",
+    "description": "Elevate your style with the stunning Vivanta Earring Necklace Set. This exquisite set features a beautiful necklace and matching earrings, expertly crafted to add a touch of sophistication to any outfit",
+    "descriptionHtml": "<p><span>Elevate your style with the stunning Vivanta Earring Necklace Set. This exquisite set features a beautiful necklace and matching earrings, expertly crafted to add a touch of sophistication to any outfit</span></p>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "299.0",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "500.0",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": [
+        {
+          "node": {
+            "url": "/images/products/Jewellery2.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/Jewellery3.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/Jewellery1.webp",
+            "altText": null
+          }
+        }
+      ]
+    },
+    "options": [
+      {
+        "name": "Title",
+        "values": [
+          "Default Title"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/ProductVariant/53864994570604",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "299.0",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": {
+              "amount": "500.0",
+              "currencyCode": "INR"
+            },
+            "selectedOptions": [
+              {
+                "name": "Title",
+                "value": "Default Title"
+              }
+            ],
+            "image": {
+              "url": "/images/products/Jewellery2.webp"
+            }
+          }
+        }
+      ]
+    },
+    "tags": [],
+    "collections": {
+      "edges": [
+        {
+          "node": {
+            "handle": "jewellery"
+          }
+        }
+      ]
+    },
+    "collectionHandles": [
+      "jewellery"
+    ],
+    "inventory": 10
+  },
+  {
+    "id": "gid://shopify/Product/15158670033260",
+    "title": "Alloy Multicolor Jewel Set (Pack of 1)",
+    "handle": "alloy-multicolor-jewel-set-pack-of-2",
+    "description": "Base Metal: Brass & Copper Plating: Gold Plated Stone Type: Cubic Zirconia Sizing: Adjustable Type: As Per Image Net Quantity (N): 1 Vivanta design was manufacturer this jewelleryset Best quality ever and Gold-plated Matte bras drop Temple Style Choker set Country of Origin: India This lovely jewellery set from Vivanta has been exclusively designed for you. Any fabulous outfit is incomplete without matching jewellery. A woman is completely dressed with wearing matching jewellery. The best gift for someone special. Its graceful design complements with any ethnic or western outfit. Wear it on parties and special occasions and amaze everyone with your looks and it is easy and adjustable to wear according to the need and size. The Look is Stunning and Preciously Suitable for all Kinds of Dressy Occasions. Jewellery adds Lavishing look to any clothing. Vivanta always have their customer as preferential basis and works for customers No direct perfume, deo, water, and spray on the jewellery. First wear your makeup, perfume - then wear your jewellery. This will keep your jewellery shining for years. Please store in air-tight container. Do not store in velvet boxes",
+    "descriptionHtml": "<p><span>Base Metal: Brass &amp; Copper Plating: Gold Plated Stone Type: Cubic Zirconia Sizing: Adjustable Type: As Per Image Net Quantity (N): 1 Vivanta design was manufacturer this jewelleryset Best quality ever and Gold-plated Matte bras drop Temple Style Choker set Country of Origin: India This lovely jewellery set from Vivanta has been exclusively designed for you. Any fabulous outfit is incomplete without matching jewellery. A woman is completely dressed with wearing matching jewellery. The best gift for someone special. Its graceful design complements with any ethnic or western outfit. Wear it on parties and special occasions and amaze everyone with your looks and it is easy and adjustable to wear according to the need and size. The Look is Stunning and Preciously Suitable for all Kinds of Dressy Occasions. Jewellery adds Lavishing look to any clothing. Vivanta always have their customer as preferential basis and works for customers No direct perfume, deo, water, and spray on the jewellery. First wear your makeup, perfume - then wear your jewellery. This will keep your jewellery shining for years. Please store in air-tight container. Do not store in velvet boxes</span></p>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "399.0",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "699.0",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": [
+        {
+          "node": {
+            "url": "/images/products/Jewellery6.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/Jewellery5.webp",
+            "altText": null
+          }
+        },
+        {
+          "node": {
+            "url": "/images/products/Jewellery4.webp",
+            "altText": null
+          }
+        }
+      ]
+    },
+    "options": [
+      {
+        "name": "Title",
+        "values": [
+          "Default Title"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/ProductVariant/53864995881324",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "399.0",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": {
+              "amount": "699.0",
+              "currencyCode": "INR"
+            },
+            "selectedOptions": [
+              {
+                "name": "Title",
+                "value": "Default Title"
+              }
+            ],
+            "image": {
+              "url": "/images/products/Jewellery6.webp"
+            }
+          }
+        }
+      ]
+    },
+    "tags": [],
+    "collections": {
+      "edges": [
+        {
+          "node": {
+            "handle": "jewellery"
+          }
+        }
+      ]
+    },
+    "collectionHandles": [
+      "jewellery"
+    ],
+    "inventory": 10
+  },
+  {
+    "id": "gid://shopify/Product/1783275892432",
+    "title": "Test API Product",
+    "handle": "test-api-product",
+    "description": "Test description",
+    "descriptionHtml": "<p>Test description</p>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "999.00",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "999.00",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": []
+    },
+    "options": [
+      {
+        "name": "Size",
+        "values": [
+          "S",
+          "M"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/Product/1783275892432-variant-0",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "999.00",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": null,
+            "selectedOptions": [
+              {
+                "name": "Standard",
+                "value": "Default Title"
+              }
+            ],
+            "image": null
+          }
+        }
+      ]
+    },
+    "tags": [
+      "test"
+    ],
+    "collectionHandles": [],
+    "inventory": 10
+  },
+  {
+    "id": "gid://shopify/Product/1783276008924",
+    "title": "Test API Product 1783276006",
+    "handle": "test-api-product-1783276006",
+    "description": "Test description",
+    "descriptionHtml": "<p>Test description</p>",
+    "availableForSale": true,
+    "priceRange": {
+      "minVariantPrice": {
+        "amount": "999.00",
+        "currencyCode": "INR"
+      }
+    },
+    "compareAtPriceRange": {
+      "minVariantPrice": {
+        "amount": "999.00",
+        "currencyCode": "INR"
+      }
+    },
+    "images": {
+      "edges": []
+    },
+    "options": [
+      {
+        "name": "Size",
+        "values": [
+          "S",
+          "M"
+        ]
+      }
+    ],
+    "variants": {
+      "edges": [
+        {
+          "node": {
+            "id": "gid://shopify/Product/1783276008924-variant-0",
+            "title": "Default Title",
+            "availableForSale": true,
+            "price": {
+              "amount": "999.00",
+              "currencyCode": "INR"
+            },
+            "compareAtPrice": null,
+            "selectedOptions": [
+              {
+                "name": "Standard",
+                "value": "Default Title"
+              }
+            ],
+            "image": null
+          }
+        }
+      ]
+    },
+    "tags": [
+      "test"
+    ],
+    "collectionHandles": [],
+    "inventory": 10
+  }
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "id": "coupon_1",
+    "code": "VASTRAA10",
+    "type": "PERCENTAGE",
+    "value": 10,
+    "active": true,
+    "minPurchaseAmount": 0
+  },
+  {
+    "id": "coupon_2",
+    "code": "WELCOME500",
+    "type": "FIXED_AMOUNT",
+    "value": 500,
+    "active": true,
+    "minPurchaseAmount": 4999
+  },
+  {
+    "id": "coupon_1783275897841",
+    "code": "TEST100",
+    "type": "FIXED_AMOUNT",
+    "value": 100,
+    "minPurchaseAmount": 500
+  },
+  {
+    "id": "coupon_1783275965697",
+    "code": "TEST100",
+    "type": "FIXED_AMOUNT",
+    "value": 100,
+    "minPurchaseAmount": 500
+  },
+  {
+    "id": "coupon_1783276010108",
+    "code": "TEST100",
+    "type": "FIXED_AMOUNT",
+    "value": 100,
+    "minPurchaseAmount": 500
+  },
+  {
+    "id": "coupon_1783276114885",
+    "code": "TEST100",
+    "type": "FIXED_AMOUNT",
+    "value": 100,
+    "minPurchaseAmount": 500
+  }
+]

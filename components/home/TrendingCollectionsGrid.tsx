@@ -34,37 +34,7 @@ export default function TrendingCollectionsGrid({ items, title }: { items?: Tren
   }, []);
 
   return (
-    <section className="w-full py-10 sm:py-14 bg-[#FAF4EC] overflow-hidden">
-      
-      {/* 12-Petal Scalloped Flower Frame ClipPath */}
-      <svg width="0" height="0" className="absolute top-0 left-0">
-        <defs>
-          <clipPath id="flower-scallop-card-clip" clipPathUnits="objectBoundingBox">
-            <path d="
-              M 0.5,0.02
-              C 0.57,0.02 0.62,0.06 0.68,0.05
-              C 0.74,0.04 0.79,0.09 0.84,0.11
-              C 0.89,0.13 0.93,0.19 0.96,0.24
-              C 0.99,0.29 0.97,0.36 0.98,0.42
-              C 0.99,0.48 0.99,0.52 0.98,0.58
-              C 0.97,0.64 0.99,0.71 0.96,0.76
-              C 0.93,0.81 0.89,0.87 0.84,0.89
-              C 0.79,0.91 0.74,0.96 0.68,0.95
-              C 0.62,0.94 0.57,0.98 0.5,0.98
-              C 0.43,0.98 0.38,0.94 0.32,0.95
-              C 0.26,0.96 0.21,0.91 0.16,0.89
-              C 0.11,0.87 0.07,0.81 0.04,0.76
-              C 0.01,0.71 0.03,0.64 0.02,0.58
-              C 0.01,0.52 0.01,0.48 0.02,0.42
-              C 0.03,0.36 0.01,0.29 0.04,0.24
-              C 0.07,0.19 0.11,0.13 0.16,0.11
-              C 0.21,0.09 0.26,0.04 0.32,0.05
-              C 0.38,0.06 0.43,0.02 0.5,0.02 Z
-            " />
-          </clipPath>
-        </defs>
-      </svg>
-
+    <section className="w-full py-10 sm:py-14 bg-white overflow-hidden">
       <div ref={ref} className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8">
         
         {/* Header Title */}
@@ -78,7 +48,7 @@ export default function TrendingCollectionsGrid({ items, title }: { items?: Tren
           <div className="w-16 h-0.5 bg-[#C9A84C] mx-auto mt-2.5 rounded-full" />
         </div>
 
-        {/* 5 Scalloped Cards Row (Exact 220px * 275px size, NO outer borders) */}
+        {/* 5 Simple Cards Row (Exact 220px * 275px size, simple rounded, no pattern) */}
         <div className="w-full flex items-center justify-start lg:justify-center gap-4 sm:gap-6 md:gap-7 overflow-x-auto pb-6 pt-1 hideScrollbar snap-x snap-mandatory px-2">
           {displayItems.map((item, idx) => (
             <Link
@@ -91,11 +61,8 @@ export default function TrendingCollectionsGrid({ items, title }: { items?: Tren
                 transitionDelay: `${idx * 70}ms`,
               }}
             >
-              {/* Card Container: Exact 220px * 275px, clean scalloped clip, NO outer border */}
-              <div 
-                className="relative w-[170px] h-[212px] sm:w-[200px] sm:h-[250px] md:w-[220px] md:h-[275px] shadow-sm group-hover:shadow-xl group-hover:scale-105 transition-all duration-500 bg-creamClr"
-                style={{ clipPath: "url(#flower-scallop-card-clip)" }}
-              >
+              {/* Card Container: Clean rounded box (NO shadows, NO border, NO gradient overlay for 100% clean PNG blend) */}
+              <div className="relative w-[170px] h-[212px] sm:w-[200px] sm:h-[250px] md:w-[220px] md:h-[275px] rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-500 bg-white">
                 <Image
                   src={item.image}
                   alt={item.title}
@@ -104,17 +71,12 @@ export default function TrendingCollectionsGrid({ items, title }: { items?: Tren
                   className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
                   sizes="220px"
                 />
-
-                {/* Dark gradient overlay at bottom for text readability */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent z-10" />
-
-                {/* Title Overlay inside bottom of card */}
-                <div className="absolute bottom-4 inset-x-2 text-center z-20">
-                  <h3 className="font-kalnia text-white text-base sm:text-lg md:text-xl font-medium drop-shadow-md group-hover:text-[#FFD700] transition-colors leading-tight">
-                    {item.title}
-                  </h3>
-                </div>
               </div>
+
+              {/* Title Below Image */}
+              <span className="font-sans font-bold text-xs sm:text-sm md:text-base text-gray-900 mt-2.5 sm:mt-3 text-center tracking-tight group-hover:text-[#9E3E28] transition-colors leading-tight">
+                {item.title}
+              </span>
             </Link>
           ))}
         </div>

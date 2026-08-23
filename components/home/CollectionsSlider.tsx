@@ -51,7 +51,7 @@ export default function CollectionsSlider({ collections, items, title }: { colle
       : DEFAULT_SIX_BOXES;
 
   return (
-    <section className="w-full py-8 sm:py-12 bg-[#FAF4EC] border-y border-[#EBE2CD]/60 overflow-hidden">
+    <section className="w-full py-8 sm:py-12 bg-white overflow-hidden">
       <div ref={ref} className="w-full max-w-[1440px] mx-auto px-3 sm:px-6 md:px-8">
         
         {/* Header Title (optional or matching) */}
@@ -79,8 +79,8 @@ export default function CollectionsSlider({ collections, items, title }: { colle
                 transitionDelay: `${idx * 60}ms`,
               }}
             >
-              {/* Box Image Container: Clean rounded card (NO border) */}
-              <div className="relative w-[115px] h-[115px] min-[420px]:w-[130px] min-[420px]:h-[130px] sm:w-[155px] sm:h-[155px] md:w-[170px] md:h-[170px] lg:w-[180px] lg:h-[180px] rounded-[22px] sm:rounded-[28px] overflow-hidden shadow-sm group-hover:shadow-lg group-hover:scale-105 transition-all duration-300 bg-creamClr">
+              {/* Box Image Container: Clean rounded card (NO shadow, NO border, NO gradient overlay for clean PNG blend) */}
+              <div className="relative w-[115px] h-[115px] min-[420px]:w-[130px] min-[420px]:h-[130px] sm:w-[155px] sm:h-[155px] md:w-[170px] md:h-[170px] lg:w-[180px] lg:h-[180px] rounded-[22px] sm:rounded-[28px] overflow-hidden group-hover:scale-105 transition-transform duration-300 bg-white">
                 <Image
                   src={item.image}
                   alt={item.title}
@@ -89,9 +89,6 @@ export default function CollectionsSlider({ collections, items, title }: { colle
                   className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
                   sizes="(max-width: 640px) 130px, 180px"
                 />
-                
-                {/* Subtle vignette/gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />
 
                 {/* Optional Discount Overlay Badge (e.g. Flash Sale "40% FLAT OFF") */}
                 {item.discountBadge && (

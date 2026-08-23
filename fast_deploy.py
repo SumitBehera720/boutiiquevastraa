@@ -32,9 +32,16 @@ DOTNEXT_TAR = os.path.join(CWD, "standalone_dotnext.tar.gz")
 STATIC_TAR = os.path.join(CWD, "next_static.tar.gz")
 PUBLIC_TAR = os.path.join(CWD, "public_assets.tar.gz")
 
+import shutil
+
 def create_archives():
     log("Creating fresh deployment archives...")
     
+    # Ensure standalone .env is updated with local .env.local
+    if os.path.exists(".env.local"):
+        shutil.copyfile(".env.local", os.path.join(CWD, ".next", "standalone", ".env"))
+        shutil.copyfile(".env.local", os.path.join(CWD, ".next", "standalone", ".env.local"))
+
     # 1. Archive .next/standalone/.next
     standalone_dotnext = os.path.join(CWD, ".next", "standalone", ".next")
     log(f"Archiving standalone .next from {standalone_dotnext}...")
@@ -104,9 +111,12 @@ def deploy_vps_root():
     ssh.exec_command(f"cd {REMOTE_DIR} && tar -xzf public.tar.gz && rm public.tar.gz")
     log("Public assets extracted on VPS.")
 
-    log("Uploading server.js & package.json to VPS...")
+    log("Uploading server.js, package.json & env files to VPS...")
     sftp.put(os.path.join(CWD, ".next", "standalone", "server.js"), REMOTE_DIR + "/server.js", confirm=False)
     sftp.put(os.path.join(CWD, ".next", "standalone", "package.json"), REMOTE_DIR + "/package.json", confirm=False)
+    if os.path.exists(os.path.join(CWD, ".env.local")):
+        sftp.put(os.path.join(CWD, ".env.local"), REMOTE_DIR + "/.env.local", confirm=False)
+        sftp.put(os.path.join(CWD, ".env.local"), REMOTE_DIR + "/.env", confirm=False)
 
     log("Restarting boutiquevastra PM2 process on VPS...")
     ssh.exec_command(f"cd {REMOTE_DIR} && pm2 restart boutiquevastra --update-env || pm2 start server.js --name boutiquevastra")
@@ -144,6 +154,9 @@ def deploy_hostinger():
 
         sftp.put(os.path.join(CWD, ".next", "standalone", "server.js"), REMOTE_FRONTEND + "/server.js", confirm=False)
         sftp.put(os.path.join(CWD, ".next", "standalone", "package.json"), REMOTE_FRONTEND + "/package.json", confirm=False)
+        if os.path.exists(os.path.join(CWD, ".env.local")):
+            sftp.put(os.path.join(CWD, ".env.local"), REMOTE_FRONTEND + "/.env.local", confirm=False)
+            sftp.put(os.path.join(CWD, ".env.local"), REMOTE_FRONTEND + "/.env", confirm=False)
 
         ssh.exec_command("ps aux | grep -E 'node.*server\\.js' | grep -v grep | awk '{print $2}' | xargs -r kill -9 2>/dev/null")
         time.sleep(2)

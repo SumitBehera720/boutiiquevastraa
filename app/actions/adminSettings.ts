@@ -80,6 +80,8 @@ export async function saveHeaderSettingsAction(headerData: any) {
     const ds = await getDs();
     const current = (await ds.get()) || {};
     current.header = headerData;
+    if (headerData.megaMenuSarees) current.megaMenuSarees = headerData.megaMenuSarees;
+    if (headerData.megaMenuCollections) current.megaMenuCollections = headerData.megaMenuCollections;
     await ds.save(current);
     revalidatePath("/admin/settings");
     revalidatePath("/");

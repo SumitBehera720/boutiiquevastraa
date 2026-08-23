@@ -51,7 +51,18 @@ const ARTISANS: Artisan[] = [
   },
 ];
 
-export default function ArtisanTimeline() {
+interface ArtisanTimelineProps {
+  title?: string;
+  subtitle?: string;
+  items?: Artisan[];
+}
+
+export default function ArtisanTimeline({
+  title = "Artisans & Weavers",
+  subtitle = "Behind every drape is a master weaver. Meet the artisans preserving centuries of India's textile heritage.",
+  items
+}: ArtisanTimelineProps) {
+  const list = items && items.length > 0 ? items : ARTISANS;
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -74,12 +85,12 @@ export default function ArtisanTimeline() {
   useEffect(() => {
     if (!visible) return;
     const t = setInterval(() => {
-      setActiveIdx((p) => (p + 1) % ARTISANS.length);
+      setActiveIdx((p) => (p + 1) % list.length);
     }, 4500);
     return () => clearInterval(t);
-  }, [visible]);
+  }, [visible, list.length]);
 
-  const active = ARTISANS[activeIdx];
+  const active = list[activeIdx % list.length] || list[0];
 
   return (
     <section
@@ -122,10 +133,10 @@ export default function ArtisanTimeline() {
             ✥ The Hands Behind Every Thread ✥
           </span>
           <h2 className="font-kalnia text-white text-2xl sm:text-4xl md:text-5xl font-medium leading-tight">
-            Artisans & Weavers
+            {title}
           </h2>
-          <p className="text-white/50 text-xs sm:text-sm mt-3 max-w-lg mx-auto leading-relaxed">
-            Meet the master craftspeople whose hands, heritage, and heart breathe life into every Boutiique saree.
+          <p className="text-white/60 text-xs sm:text-sm mt-2.5 max-w-lg mx-auto">
+            {subtitle}
           </p>
         </div>
 

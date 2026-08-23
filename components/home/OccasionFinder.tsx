@@ -164,8 +164,19 @@ const OCCASIONS: OccasionOption[] = [
   }
 ];
 
-export default function OccasionFinder() {
-  const [activeTab, setActiveTab] = useState("bridal");
+interface OccasionFinderProps {
+  title?: string;
+  subtitle?: string;
+  items?: OccasionOption[];
+}
+
+export default function OccasionFinder({
+  title = "SHOP BY OCCASION",
+  subtitle = "DISCOVER HANDLOOM DRAPES FOR EVERY MOMENT",
+  items
+}: OccasionFinderProps) {
+  const occasionList = items && items.length > 0 ? items : OCCASIONS;
+  const [activeTab, setActiveTab] = useState(occasionList[0]?.id || "bridal");
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -178,7 +189,7 @@ export default function OccasionFinder() {
     return () => observer.disconnect();
   }, []);
 
-  const currentOccasion = OCCASIONS.find(o => o.id === activeTab) || OCCASIONS[0];
+  const currentOccasion = occasionList.find(o => o.id === activeTab) || occasionList[0];
 
   return (
     <section 
@@ -203,16 +214,16 @@ export default function OccasionFinder() {
             ✥ Interactive Drape Finder ✥
           </span>
           <h2 className="font-kalnia text-maroonClr text-2xl sm:text-4xl font-medium">
-            Shop By Occasion
+            {title}
           </h2>
           <p className="text-gray-600 text-xs sm:text-sm mt-2 max-w-md mx-auto">
-            Find the exact drape woven for your moment. Select an occasion to view tailored recommendations.
+            {subtitle}
           </p>
         </div>
 
         {/* Occasion Selection Tabs with Lucide Icons */}
         <div className="flex flex-wrap gap-2.5 sm:gap-4 justify-center mb-8 sm:mb-12">
-          {OCCASIONS.map((occ) => {
+          {occasionList.map((occ) => {
             const isActive = occ.id === activeTab;
             return (
               <button

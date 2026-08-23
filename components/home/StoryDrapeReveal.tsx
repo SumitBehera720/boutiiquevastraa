@@ -3,7 +3,19 @@
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 
-export default function StoryDrapeReveal() {
+interface StoryDrapeRevealProps {
+  heading?: string;
+  description?: string;
+  beforeImage?: string;
+  afterImage?: string;
+}
+
+export default function StoryDrapeReveal({
+  heading = "From Thread to Royal Drape",
+  description = "Drag the golden thread slider to witness raw handloom silk transform into a finished golden masterpiece.",
+  beforeImage = "/images/pattern-bg.jpg",
+  afterImage = "/images/craftmanship.jpeg"
+}: StoryDrapeRevealProps) {
   const [sliderPos, setSliderPos] = useState(50); // percentage 0 to 100
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -59,10 +71,10 @@ export default function StoryDrapeReveal() {
             ✦ Interactive Weave Story ✦
           </span>
           <h2 className="font-kalnia text-white text-2xl sm:text-4xl font-medium">
-            From Thread to Royal Drape
+            {heading}
           </h2>
           <p className="text-white/60 text-xs sm:text-sm mt-2 max-w-md mx-auto">
-            Drag the golden thread slider to witness raw handloom silk transform into a finished golden masterpiece.
+            {description}
           </p>
         </div>
 
@@ -81,7 +93,7 @@ export default function StoryDrapeReveal() {
           {/* AFTER IMAGE (Finished Saree - Right side background) */}
           <div className="absolute inset-0">
             <Image
-              src="/images/craftmanship.jpeg"
+              src={afterImage}
               alt="Finished Handloom Saree"
               fill
               unoptimized
@@ -99,7 +111,7 @@ export default function StoryDrapeReveal() {
           >
             <div className="relative w-full max-w-4xl h-full aspect-[16/9] sm:aspect-[21/9]">
               <Image
-                src="/images/pattern-bg.jpg"
+                src={beforeImage}
                 alt="Raw Silk Loom Threads"
                 fill
                 unoptimized

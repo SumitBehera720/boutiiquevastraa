@@ -53,7 +53,18 @@ const FABRICS: FabricItem[] = [
   }
 ];
 
-export default function FabricLibrary() {
+interface FabricLibraryProps {
+  title?: string;
+  subtitle?: string;
+  items?: FabricItem[];
+}
+
+export default function FabricLibrary({
+  title = "Our Fabric Library",
+  subtitle = "Every thread has a lineage. Discover the heritage, origin, and distinct weave details of our signature materials.",
+  items
+}: FabricLibraryProps) {
+  const fabricsList = items && items.length > 0 ? items : FABRICS;
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
@@ -72,26 +83,26 @@ export default function FabricLibrary() {
   }, []);
 
   return (
-    <section ref={ref} className="py-6 sm:py-14 md:py-16 bg-pattern-jaal overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+    <section ref={ref} className="py-16 sm:py-24 bg-[#FAF6F0] overflow-hidden relative">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <div className={`text-center max-w-2xl mx-auto mb-12 sm:mb-16 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <span className="text-goldClr text-[11px] font-bold uppercase tracking-widest block mb-3">
             ✥ The Weaver's Swatch Book ✥
           </span>
           <h2 className="font-kalnia text-maroonClr text-3xl sm:text-4xl md:text-5xl font-medium mb-4">
-            Our Fabric Library
+            {title}
           </h2>
           <p className="text-gray-600 text-sm sm:text-base">
-            Every thread has a lineage. Discover the heritage, origin, and distinct weave details of our signature materials.
+            {subtitle}
           </p>
           <div className="w-16 h-0.5 bg-goldClr/40 mx-auto mt-4" />
         </div>
 
         {/* Swatches Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8">
-          {FABRICS.map((fabric, idx) => (
+          {fabricsList.map((fabric, idx) => (
             <div
               key={fabric.id}
               className={`h-[260px] sm:h-[380px] lg:h-[420px] group perspective-1000 transition-all duration-1000 ease-out ${

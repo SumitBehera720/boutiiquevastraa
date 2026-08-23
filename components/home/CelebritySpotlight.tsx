@@ -86,7 +86,18 @@ function GoldSeal({ className }: { className?: string }) {
   );
 }
 
-export default function CelebritySpotlight() {
+interface CelebritySpotlightProps {
+  title?: string;
+  subtitle?: string;
+  items?: PolaroidItem[];
+}
+
+export default function CelebritySpotlight({
+  title = "Styled by You, Crafted by Us",
+  subtitle = "Real women. Real drapes. Stories that inspire.",
+  items
+}: CelebritySpotlightProps) {
+  const looksList = items && items.length > 0 ? items : LOOKS;
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
@@ -128,8 +139,7 @@ export default function CelebritySpotlight() {
       {/* Gold leaf corner bottom-left */}
       <div className="absolute bottom-6 left-4 pointer-events-none opacity-20">
         <svg viewBox="0 0 60 80" fill="none" className="w-10 h-14 text-goldClr">
-          <path d="M30 75 Q5 50 10 20 Q20 5 30 10 Q40 5 50 20 Q55 50 30 75 Z" fill="currentColor" />
-          <path d="M30 10 L30 75" stroke="white" strokeWidth="1" strokeOpacity="0.5" />
+          <path d="M30 75 Q30 40 5 15 M30 55 Q40 40 55 35 M30 35 Q15 25 10 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </div>
 
@@ -141,10 +151,10 @@ export default function CelebritySpotlight() {
             ✥ Spotlight Stealers ✥
           </span>
           <h2 className="font-kalnia text-maroonClr text-2xl sm:text-4xl font-medium">
-            Styled by You, Crafted by Us
+            {title}
           </h2>
           <p className="text-gray-500 text-xs sm:text-sm mt-2 max-w-sm mx-auto">
-            Real women. Real drapes. Stories that inspire.
+            {subtitle}
           </p>
         </div>
 
@@ -154,7 +164,7 @@ export default function CelebritySpotlight() {
           {/* Polaroid Collage */}
           <div className={`w-full sm:w-3/5 flex justify-center py-2 transition-all duration-1000 ease-out ${visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-12"}`}>
             <div className="grid grid-cols-3 gap-2 sm:gap-5 max-w-[320px] sm:max-w-[460px] relative">
-              {LOOKS.map((look, idx) => (
+              {looksList.map((look, idx) => (
                 <Link
                   key={look.id}
                   href={`/collections/${look.handle}`}

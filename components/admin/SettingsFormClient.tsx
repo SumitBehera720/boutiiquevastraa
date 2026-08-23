@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { saveSeoSettingsAction, saveBannersSettingsAction, saveHomepageSettingsAction, saveFooterSettingsAction, saveHeaderSettingsAction, saveCollectionBannersAction, uploadFileAction } from "@/app/actions/adminSettings";
-import { Sparkles, Save, Plus, Trash2, ArrowUp, ArrowDown, Image as ImageIcon, Globe, AlertCircle, CheckCircle2, Home, HelpCircle, Gift, Info, Star, PlusCircle, Link2, Mail, Phone, Heart, Grid, Video, Play, List, Compass, MessageSquare, Menu, Smile, Laptop, Smartphone } from "lucide-react";
+import { Sparkles, Save, Plus, Trash2, ArrowUp, ArrowDown, Image as ImageIcon, Globe, AlertCircle, CheckCircle2, Home, HelpCircle, Gift, Info, Star, PlusCircle, Link2, Mail, Phone, Heart, Grid, Video, Play, List, Compass, MessageSquare, Menu, Smile, Laptop, Smartphone, BookOpen, Feather, Award } from "lucide-react";
 
 interface SettingsFormClientProps {
   initialSettings: any;
@@ -92,8 +92,240 @@ function ImageOrVideoUploader({
   );
 }
 
+function ItemPickerPopover({
+  label = "Select Store Collection or Product",
+  linkValue = "",
+  textValue = "",
+  onSelect,
+  collections = [],
+  products = []
+}: {
+  label?: string;
+  linkValue: string;
+  textValue?: string;
+  onSelect: (link: string, title: string) => void;
+  collections?: any[];
+  products?: any[];
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [tab, setTab] = useState<"ALL" | "COLLECTIONS" | "PRODUCTS">("ALL");
+
+  const currentHandle = linkValue.replace("/collections/", "").replace("/products/", "");
+  const matchedCol = collections.find((c: any) => c.handle === currentHandle);
+  const matchedProd = products.find((p: any) => p.handle === currentHandle);
+  const displayTitle = textValue || matchedCol?.title || matchedProd?.title || (currentHandle ? currentHandle : "-- Click to Select Collection or Product --");
+
+  const allCollections = collections.map((c: any) => ({
+    id: c.id || c.handle,
+    title: c.title,
+    handle: c.handle,
+    type: "COLLECTION" as const,
+    link: `/collections/${c.handle}`,
+    image: c.image?.url || c.image || null
+  }));
+
+  const allProducts = products.map((p: any) => ({
+    id: p.id || p.handle,
+    title: p.title,
+    handle: p.handle,
+    type: "PRODUCT" as const,
+    link: `/products/${p.handle}`,
+    image: p.featuredImage?.url || p.image || null
+  }));
+
+  const combinedItems = tab === "COLLECTIONS" ? allCollections : tab === "PRODUCTS" ? allProducts : [...allCollections, ...allProducts];
+
+  const filteredItems = combinedItems.filter((item) =>
+    item.title.toLowerCase().includes(search.toLowerCase()) ||
+    item.handle.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="relative space-y-1.5 w-full">
+      {label && <label className="block text-[8px] font-bold text-[#C9A84C] uppercase tracking-wider">{label}</label>}
+      
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 hover:border-[#C9A84C] rounded-lg px-3 py-2 text-left flex items-center justify-between transition-colors shadow-sm"
+      >
+        <div className="flex items-center gap-2 truncate min-w-0">
+          <span className="w-2 h-2 rounded-full bg-[#C9A84C] flex-shrink-0" />
+          <span className="text-xs font-semibold text-white truncate">{displayTitle}</span>
+          {currentHandle && <span className="text-[9px] text-neutral-500 font-mono flex-shrink-0 truncate">({linkValue || `/collections/${currentHandle}`})</span>}
+        </div>
+        <span className="text-[10px] text-[#C9A84C] font-bold uppercase tracking-wider flex-shrink-0 ml-2">Choose ▾</span>
+      </button>
+
+      {/* Popover Dropdown Modal */}
+      {isOpen && (
+        <>
+          {/* Backdrop overlay */}
+          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]" onClick={() => setIsOpen(false)} />
+
+          {/* Modal Container */}
+          <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden p-3 space-y-3 max-h-[380px] flex flex-col">
+            {/* Search Input & Filter Tabs */}
+            <div className="space-y-2">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="🔍 Type to search collections or products..."
+                autoFocus
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-[#C9A84C]"
+              />
+
+              <div className="flex gap-1 bg-neutral-900 p-1 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => setTab("ALL")}
+                  className={`flex-1 py-1 text-[9px] font-bold uppercase rounded transition-colors ${tab === "ALL" ? "bg-maroonClr text-white" : "text-neutral-400 hover:text-white"}`}
+                >
+                  All ({allCollections.length + allProducts.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTab("COLLECTIONS")}
+                  className={`flex-1 py-1 text-[9px] font-bold uppercase rounded transition-colors ${tab === "COLLECTIONS" ? "bg-maroonClr text-white" : "text-neutral-400 hover:text-white"}`}
+                >
+                  Collections ({allCollections.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTab("PRODUCTS")}
+                  className={`flex-1 py-1 text-[9px] font-bold uppercase rounded transition-colors ${tab === "PRODUCTS" ? "bg-maroonClr text-white" : "text-neutral-400 hover:text-white"}`}
+                >
+                  Products ({allProducts.length})
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable Items List */}
+            <div className="flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+              {filteredItems.length === 0 ? (
+                <div className="p-4 text-center text-xs text-neutral-500">No matching collections or products found.</div>
+              ) : (
+                filteredItems.map((item) => (
+                  <button
+                    key={`${item.type}_${item.id}`}
+                    type="button"
+                    onClick={() => {
+                      onSelect(item.link, item.title);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full p-2 rounded-lg text-left flex items-center justify-between transition-all ${
+                      currentHandle === item.handle ? "bg-maroonClr/30 border border-[#C9A84C]/50 text-white" : "bg-neutral-900/50 hover:bg-neutral-900 border border-neutral-850 text-neutral-200"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {item.image ? (
+                        <img src={item.image} alt="" className="w-7 h-7 object-cover rounded border border-neutral-800 flex-shrink-0" />
+                      ) : (
+                        <div className="w-7 h-7 bg-neutral-800 rounded flex items-center justify-center text-[10px] text-neutral-500 font-bold flex-shrink-0">
+                          {item.type === "COLLECTION" ? "📁" : "🛍️"}
+                        </div>
+                      )}
+                      <div className="truncate">
+                        <span className="text-xs font-semibold block truncate">{item.title}</span>
+                        <span className="text-[9px] text-neutral-400 font-mono block truncate">{item.link}</span>
+                      </div>
+                    </div>
+
+                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase flex-shrink-0 ml-2 ${item.type === "COLLECTION" ? "bg-amber-950/60 text-amber-300 border border-amber-800/40" : "bg-purple-950/60 text-purple-300 border border-purple-800/40"}`}>
+                      {item.type}
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function LinkSelector({
+  label = "Target Link Route",
+  value = "",
+  onChange,
+  collections = [],
+  products = []
+}: {
+  label?: string;
+  value: string;
+  onChange: (url: string) => void;
+  collections?: any[];
+  products?: any[];
+}) {
+  return (
+    <ItemPickerPopover
+      label={label}
+      linkValue={value}
+      onSelect={(link) => onChange(link)}
+      collections={collections}
+      products={products}
+    />
+  );
+}
+
+function ChooseExistingLinkAndOverlay({
+  label = "Choose From Existing Collection or Product",
+  linkValue = "",
+  textValue = "",
+  onSelect,
+  collections = [],
+  products = []
+}: {
+  label?: string;
+  linkValue: string;
+  textValue: string;
+  onSelect: (link: string, text: string) => void;
+  collections?: any[];
+  products?: any[];
+}) {
+  return (
+    <div className="space-y-2 bg-neutral-900/80 p-3 rounded-lg border border-neutral-800">
+      <ItemPickerPopover
+        label={label}
+        linkValue={linkValue}
+        textValue={textValue}
+        onSelect={(link, title) => onSelect(link, textValue || title)}
+        collections={collections}
+        products={products}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+        <div>
+          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Card Text Overlay / Title</label>
+          <input
+            type="text"
+            value={textValue}
+            onChange={(e) => onSelect(linkValue, e.target.value)}
+            placeholder="Text Overlay"
+            className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1 text-xs text-white focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Target Link Route</label>
+          <input
+            type="text"
+            value={linkValue}
+            onChange={(e) => onSelect(e.target.value, textValue)}
+            placeholder="/collections/..."
+            className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1 text-xs text-white font-mono focus:outline-none"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsFormClient({ initialSettings, products = [], collections = [] }: SettingsFormClientProps) {
-  const [activeTab, setActiveTab] = useState<"SEO" | "HEADER" | "BANNERS" | "HOMEPAGE" | "FOOTER" | "COLLECTIONS">("SEO");
+  const [activeTab, setActiveTab] = useState<"SEO" | "HEADER" | "MEGAMENU" | "BANNERS" | "HOMEPAGE" | "FOOTER" | "COLLECTIONS">("SEO");
   const [activeSubSection, setActiveSubSection] = useState<string>("lovedCollections");
   
   const [seoSuccess, setSeoSuccess] = useState("");
@@ -177,6 +409,42 @@ export default function SettingsFormClient({ initialSettings, products = [], col
   const [faqSubtitle, setFaqSubtitle] = useState(hp.faqSubtitle || "");
   const [faqImage, setFaqImage] = useState(hp.faqImage || "");
   const [faqs, setFaqs] = useState<any[]>(hp.faqs || []);
+
+  // Section 9: Occasion Finder
+  const [occasionFinderTitle, setOccasionFinderTitle] = useState(hp.occasionFinderTitle || "SHOP BY OCCASION");
+  const [occasionFinderSubtitle, setOccasionFinderSubtitle] = useState(hp.occasionFinderSubtitle || "DISCOVER HANDLOOM DRAPES FOR EVERY MOMENT");
+  const [occasionFinderItems, setOccasionFinderItems] = useState<any[]>(hp.occasionFinderItems || []);
+
+  // Section 10: Celebrity / Styled by You Spotlight
+  const [celebritySpotlightTitle, setCelebritySpotlightTitle] = useState(hp.celebritySpotlightTitle || "Styled by You, Crafted by Us");
+  const [celebritySpotlightSubtitle, setCelebritySpotlightSubtitle] = useState(hp.celebritySpotlightSubtitle || "Real women. Real drapes. Stories that inspire.");
+  const [celebritySpotlightItems, setCelebritySpotlightItems] = useState<any[]>(hp.celebritySpotlightItems || []);
+
+  // Section 11: Fabric Library
+  const [fabricLibraryTitle, setFabricLibraryTitle] = useState(hp.fabricLibraryTitle || "Our Fabric Library");
+  const [fabricLibrarySubtitle, setFabricLibrarySubtitle] = useState(hp.fabricLibrarySubtitle || "Every thread has a lineage. Discover the heritage, origin, and distinct weave details of our signature materials.");
+  const [fabricLibraryItems, setFabricLibraryItems] = useState<any[]>(hp.fabricLibraryItems || []);
+
+  // Section 12: Story Drape Transformer
+  const [storyDrapeHeading, setStoryDrapeHeading] = useState(hp.storyDrapeHeading || "From Thread to Royal Drape");
+  const [storyDrapeDescription, setStoryDrapeDescription] = useState(hp.storyDrapeDescription || "Drag the golden thread slider to witness raw handloom silk transform into a finished golden masterpiece.");
+  const [storyDrapeBeforeImage, setStoryDrapeBeforeImage] = useState(hp.storyDrapeBeforeImage || "/images/pattern-bg.jpg");
+  const [storyDrapeAfterImage, setStoryDrapeAfterImage] = useState(hp.storyDrapeAfterImage || "/images/craftmanship.jpeg");
+
+  // Section 13: As Seen In Press
+  const [asSeenInPressTitle, setAsSeenInPressTitle] = useState(hp.asSeenInPressTitle || "As Featured In");
+  const [asSeenInPressItems, setAsSeenInPressItems] = useState<any[]>(hp.asSeenInPressItems || []);
+
+  // Section 14: Artisan Timeline (Artisans & Weavers)
+  const [artisanTimelineTitle, setArtisanTimelineTitle] = useState(hp.artisanTimelineTitle || "Artisans & Weavers");
+  const [artisanTimelineSubtitle, setArtisanTimelineSubtitle] = useState(hp.artisanTimelineSubtitle || "Behind every drape is a master weaver. Meet the artisans preserving centuries of India's textile heritage.");
+  const [artisanTimelineItems, setArtisanTimelineItems] = useState<any[]>(hp.artisanTimelineItems || []);
+
+  // Section 15: Secondary Campaign Banners
+  const [promoBanners, setPromoBanners] = useState<any[]>(hp.promoBanners || [
+    { imageUrl: "/images/banner-1773659037696-747582281.webp", title: "New Arrivals", subtitle: "Fresh styles just dropped", link: "/products", buttonText: "Shop Now" },
+    { imageUrl: "/images/banner-1773659047206-859638957.webp", title: "Best Sellers", subtitle: "Loved by thousands", link: "/products", buttonText: "Explore" }
+  ]);
 
   // ----------------------------------------------------
   // 5. Footer Settings State
@@ -295,13 +563,30 @@ export default function SettingsFormClient({ initialSettings, products = [], col
   const [lovedColImage, setLovedColImage] = useState("");
   const addLovedCollection = () => {
     if (!lovedColHandle) return;
+    const title = lovedColTitle || collections.find((c: any) => c.handle === lovedColHandle)?.title || lovedColHandle;
     setLovedCollectionsItems([
       ...lovedCollectionsItems,
-      { collectionHandle: lovedColHandle, customTitle: lovedColTitle, customImage: lovedColImage }
+      { collectionHandle: lovedColHandle, customTitle: title, customImage: lovedColImage }
     ]);
     setLovedColHandle("");
     setLovedColTitle("");
     setLovedColImage("");
+  };
+
+  // Trending Collections Helpers
+  const [trendColHandle, setTrendColHandle] = useState("");
+  const [trendColTitle, setTrendColTitle] = useState("");
+  const [trendColImage, setTrendColImage] = useState("");
+  const addTrendingCollection = () => {
+    if (!trendColHandle) return;
+    const title = trendColTitle || collections.find((c: any) => c.handle === trendColHandle)?.title || trendColHandle;
+    setTrendingCollectionsItems([
+      ...trendingCollectionsItems,
+      { title, handle: trendColHandle, image: trendColImage || "/images/client-1.jpg" }
+    ]);
+    setTrendColHandle("");
+    setTrendColTitle("");
+    setTrendColImage("");
   };
 
   // Top Sellings Helpers
@@ -521,7 +806,26 @@ export default function SettingsFormClient({ initialSettings, products = [], col
       faqTitle,
       faqSubtitle,
       faqImage,
-      faqs
+      faqs,
+      occasionFinderTitle,
+      occasionFinderSubtitle,
+      occasionFinderItems,
+      celebritySpotlightTitle,
+      celebritySpotlightSubtitle,
+      celebritySpotlightItems,
+      fabricLibraryTitle,
+      fabricLibrarySubtitle,
+      fabricLibraryItems,
+      storyDrapeHeading,
+      storyDrapeDescription,
+      storyDrapeBeforeImage,
+      storyDrapeAfterImage,
+      asSeenInPressTitle,
+      asSeenInPressItems,
+      artisanTimelineTitle,
+      artisanTimelineSubtitle,
+      artisanTimelineItems,
+      promoBanners
     });
     setLoading(false);
     if (res.success) setHomeSuccess("Homepage Visual Layout saved successfully!");
@@ -573,7 +877,7 @@ export default function SettingsFormClient({ initialSettings, products = [], col
 
         {/* Tab Switcher */}
         <div className="flex border border-neutral-800 rounded-lg bg-neutral-950 p-1 flex-wrap gap-1">
-          {(["SEO", "HEADER", "BANNERS", "HOMEPAGE", "FOOTER", "COLLECTIONS"] as const).map((tab) => (
+          {(["SEO", "HEADER", "MEGAMENU", "BANNERS", "HOMEPAGE", "FOOTER", "COLLECTIONS"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => {
@@ -592,7 +896,19 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                   : "text-neutral-400 hover:text-white"
               }`}
             >
-              {tab === "SEO" ? "SEO & METADATA" : tab === "HEADER" ? "HEADER LAYOUT" : tab === "BANNERS" ? "HERO SLIDES" : tab === "HOMEPAGE" ? "HOMEPAGE SECTIONS" : tab === "FOOTER" ? "STORE FOOTER" : "CATEGORY BANNERS"}
+              {tab === "SEO" 
+                ? "SEO & METADATA" 
+                : tab === "HEADER" 
+                ? "HEADER LAYOUT" 
+                : tab === "MEGAMENU" 
+                ? "MEGA MENUS" 
+                : tab === "BANNERS" 
+                ? "HERO SLIDES" 
+                : tab === "HOMEPAGE" 
+                ? "HOMEPAGE SECTIONS" 
+                : tab === "FOOTER" 
+                ? "STORE FOOTER" 
+                : "CATEGORY BANNERS"}
             </button>
           ))}
         </div>
@@ -907,6 +1223,573 @@ export default function SettingsFormClient({ initialSettings, products = [], col
       )}
 
       {/* ----------------------------------------------------
+          TAB 2.5: MEGA MENUS EDITOR (Sarees & Collections)
+          ---------------------------------------------------- */}
+      {activeTab === "MEGAMENU" && (
+        <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-6 md:p-8 shadow-sm space-y-8">
+          <div className="flex items-center justify-between pb-2 border-b border-neutral-900">
+            <div className="flex items-center gap-2">
+              <Grid className="w-5 h-5 text-[#C9A84C]" />
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Dropdown Mega Menus & Campaign Banners</h3>
+            </div>
+            {headerSuccess && (
+              <span className="text-[10px] text-green-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Saved!
+              </span>
+            )}
+          </div>
+
+          {headerSuccess && (
+            <div className="p-3.5 bg-green-950/40 border border-green-900/50 text-green-400 text-xs rounded-lg flex items-center gap-2">
+              <CheckCircle2 className="w-4.5 h-4.5" />
+              <span>{headerSuccess}</span>
+            </div>
+          )}
+
+          {/* 1. SAREES MEGA MENU SECTION */}
+          <div className="bg-neutral-900/40 border border-neutral-850 p-6 rounded-2xl space-y-6">
+            <h4 className="text-sm font-bold text-[#C9A84C] uppercase tracking-widest pb-2 border-b border-neutral-800 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" /> 1. SAREES MEGA MENU CONFIGURATION
+            </h4>
+
+            {/* Campaign Promos for Sarees */}
+            <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-4">
+              <h5 className="text-xs font-bold text-white uppercase tracking-wider">Sarees Mega Menu — Featured Banners (Right Side)</h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <ImageOrVideoUploader
+                    label="Top Small Banner Image"
+                    value={megaMenuSarees.promoTopImage || "/images/client-1.jpg"}
+                    onChange={(url) => setMegaMenuSarees({ ...megaMenuSarees, promoTopImage: url })}
+                    accept="image/*"
+                  />
+                  <div className="mt-2">
+                    <ChooseExistingLinkAndOverlay
+                      label="Top Banner Target & Overlay"
+                      linkValue={megaMenuSarees.promoTopLink || "/collections/silk"}
+                      textValue={megaMenuSarees.promoTopText || ""}
+                      onSelect={(link, text) => setMegaMenuSarees({ ...megaMenuSarees, promoTopLink: link, promoTopText: text })}
+                      collections={collections}
+                      products={products}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <ImageOrVideoUploader
+                    label="Bottom Featured Card Image"
+                    value={megaMenuSarees.promoBottomImage || "/images/client-4.jpg"}
+                    onChange={(url) => setMegaMenuSarees({ ...megaMenuSarees, promoBottomImage: url })}
+                    accept="image/*"
+                  />
+                  <div className="mt-2">
+                    <ChooseExistingLinkAndOverlay
+                      label="Bottom Featured Card Target & Text Overlay"
+                      linkValue={megaMenuSarees.promoBottomLink || "/collections/festive"}
+                      textValue={megaMenuSarees.promoBottomText || "Festive Sarees - 45% OFF"}
+                      onSelect={(link, text) => setMegaMenuSarees({ ...megaMenuSarees, promoBottomLink: link, promoBottomText: text })}
+                      collections={collections}
+                      products={products}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Fabrics & Occasions Links List Editors */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Col 1: Fabrics List */}
+              <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
+                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 1: Fabrics & Weaves</h5>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = megaMenuSarees.fabrics ? [...megaMenuSarees.fabrics] : [];
+                      list.push({ label: "NEW FABRIC", handle: "silk", img: "/images/client-1.jpg" });
+                      setMegaMenuSarees({ ...megaMenuSarees, fabrics: list });
+                    }}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-2 py-0.5 text-[8px] font-bold uppercase rounded flex items-center gap-0.5"
+                  >
+                    <Plus className="w-2.5 h-2.5" /> Add
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                  {(megaMenuSarees.fabrics || []).map((item: any, idx: number) => (
+                    <div key={idx} className="bg-neutral-900 border border-neutral-850 p-2.5 rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-[#C9A84C]">Item #{idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = megaMenuSarees.fabrics.filter((_: any, i: number) => i !== idx);
+                            setMegaMenuSarees({ ...megaMenuSarees, fabrics: list });
+                          }}
+                          className="text-neutral-500 hover:text-red-400 p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <ImageOrVideoUploader
+                        label="Thumbnail Image"
+                        value={item.img}
+                        onChange={(url) => {
+                          const list = [...megaMenuSarees.fabrics];
+                          list[idx] = { ...list[idx], img: url };
+                          setMegaMenuSarees({ ...megaMenuSarees, fabrics: list });
+                        }}
+                        accept="image/*"
+                      />
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={(e) => {
+                            const list = [...megaMenuSarees.fabrics];
+                            list[idx] = { ...list[idx], label: e.target.value };
+                            setMegaMenuSarees({ ...megaMenuSarees, fabrics: list });
+                          }}
+                          placeholder="Label Name"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white w-full"
+                        />
+                        <input
+                          type="text"
+                          value={item.handle}
+                          onChange={(e) => {
+                            const list = [...megaMenuSarees.fabrics];
+                            list[idx] = { ...list[idx], handle: e.target.value };
+                            setMegaMenuSarees({ ...megaMenuSarees, fabrics: list });
+                          }}
+                          placeholder="Target Handle"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white font-mono w-full"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Col 2: Occasions List */}
+              <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
+                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 2: Sarees by Occasion</h5>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = megaMenuSarees.occasions ? [...megaMenuSarees.occasions] : [];
+                      list.push({ label: "NEW OCCASION", handle: "festive", img: "/images/client-2.jpg" });
+                      setMegaMenuSarees({ ...megaMenuSarees, occasions: list });
+                    }}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-2 py-0.5 text-[8px] font-bold uppercase rounded flex items-center gap-0.5"
+                  >
+                    <Plus className="w-2.5 h-2.5" /> Add
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                  {(megaMenuSarees.occasions || []).map((item: any, idx: number) => (
+                    <div key={idx} className="bg-neutral-900 border border-neutral-850 p-2.5 rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-[#C9A84C]">Item #{idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = megaMenuSarees.occasions.filter((_: any, i: number) => i !== idx);
+                            setMegaMenuSarees({ ...megaMenuSarees, occasions: list });
+                          }}
+                          className="text-neutral-500 hover:text-red-400 p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <ImageOrVideoUploader
+                        label="Thumbnail Image"
+                        value={item.img}
+                        onChange={(url) => {
+                          const list = [...megaMenuSarees.occasions];
+                          list[idx] = { ...list[idx], img: url };
+                          setMegaMenuSarees({ ...megaMenuSarees, occasions: list });
+                        }}
+                        accept="image/*"
+                      />
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={(e) => {
+                            const list = [...megaMenuSarees.occasions];
+                            list[idx] = { ...list[idx], label: e.target.value };
+                            setMegaMenuSarees({ ...megaMenuSarees, occasions: list });
+                          }}
+                          placeholder="Label Name"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white w-full"
+                        />
+                        <input
+                          type="text"
+                          value={item.handle}
+                          onChange={(e) => {
+                            const list = [...megaMenuSarees.occasions];
+                            list[idx] = { ...list[idx], handle: e.target.value };
+                            setMegaMenuSarees({ ...megaMenuSarees, occasions: list });
+                          }}
+                          placeholder="Target Handle"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white font-mono w-full"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Col 3: Colors List */}
+              <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
+                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 3: Colors & Crafts</h5>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = megaMenuSarees.colors ? [...megaMenuSarees.colors] : [];
+                      list.push({ label: "NEW COLOR", handle: "red", img: "/images/client-3.jpg" });
+                      setMegaMenuSarees({ ...megaMenuSarees, colors: list });
+                    }}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-2 py-0.5 text-[8px] font-bold uppercase rounded flex items-center gap-0.5"
+                  >
+                    <Plus className="w-2.5 h-2.5" /> Add
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                  {(megaMenuSarees.colors || []).map((item: any, idx: number) => (
+                    <div key={idx} className="bg-neutral-900 border border-neutral-850 p-2.5 rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-[#C9A84C]">Item #{idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = megaMenuSarees.colors.filter((_: any, i: number) => i !== idx);
+                            setMegaMenuSarees({ ...megaMenuSarees, colors: list });
+                          }}
+                          className="text-neutral-500 hover:text-red-400 p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <ImageOrVideoUploader
+                        label="Thumbnail Image"
+                        value={item.img}
+                        onChange={(url) => {
+                          const list = [...megaMenuSarees.colors];
+                          list[idx] = { ...list[idx], img: url };
+                          setMegaMenuSarees({ ...megaMenuSarees, colors: list });
+                        }}
+                        accept="image/*"
+                      />
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={(e) => {
+                            const list = [...megaMenuSarees.colors];
+                            list[idx] = { ...list[idx], label: e.target.value };
+                            setMegaMenuSarees({ ...megaMenuSarees, colors: list });
+                          }}
+                          placeholder="Label Name"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white w-full"
+                        />
+                        <input
+                          type="text"
+                          value={item.handle}
+                          onChange={(e) => {
+                            const list = [...megaMenuSarees.colors];
+                            list[idx] = { ...list[idx], handle: e.target.value };
+                            setMegaMenuSarees({ ...megaMenuSarees, colors: list });
+                          }}
+                          placeholder="Target Handle"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white font-mono w-full"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          {/* 2. COLLECTIONS MEGA MENU SECTION */}
+          <div className="bg-neutral-900/40 border border-neutral-850 p-6 rounded-2xl space-y-6">
+            <h4 className="text-sm font-bold text-[#C9A84C] uppercase tracking-widest pb-2 border-b border-neutral-800 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" /> 2. COLLECTIONS MEGA MENU CONFIGURATION
+            </h4>
+
+            {/* Campaign Promos for Collections */}
+            <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-4">
+              <h5 className="text-xs font-bold text-white uppercase tracking-wider">Collections Mega Menu — Featured Banners (Right Side)</h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <ImageOrVideoUploader
+                    label="Top Small Banner Image"
+                    value={megaMenuCollections.promoTopImage || "/images/client-2.jpg"}
+                    onChange={(url) => setMegaMenuCollections({ ...megaMenuCollections, promoTopImage: url })}
+                    accept="image/*"
+                  />
+                  <div className="mt-2">
+                    <ChooseExistingLinkAndOverlay
+                      label="Top Banner Target & Overlay"
+                      linkValue={megaMenuCollections.promoTopLink || "/collections"}
+                      textValue={megaMenuCollections.promoTopText || ""}
+                      onSelect={(link, text) => setMegaMenuCollections({ ...megaMenuCollections, promoTopLink: link, promoTopText: text })}
+                      collections={collections}
+                      products={products}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <ImageOrVideoUploader
+                    label="Bottom Featured Card Image"
+                    value={megaMenuCollections.promoBottomImage || "/images/client-5.jpg"}
+                    onChange={(url) => setMegaMenuCollections({ ...megaMenuCollections, promoBottomImage: url })}
+                    accept="image/*"
+                  />
+                  <div className="mt-2">
+                    <ChooseExistingLinkAndOverlay
+                      label="Bottom Featured Card Target & Text Overlay"
+                      linkValue={megaMenuCollections.promoBottomLink || "/collections/sale"}
+                      textValue={megaMenuCollections.promoBottomText || "Explore Collections - 45% OFF"}
+                      onSelect={(link, text) => setMegaMenuCollections({ ...megaMenuCollections, promoBottomLink: link, promoBottomText: text })}
+                      collections={collections}
+                      products={products}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Categories & Occasions Links List Editors */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Col 1: All Categories List */}
+              <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
+                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 1: All Categories</h5>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = megaMenuCollections.categories ? [...megaMenuCollections.categories] : [];
+                      list.push({ label: "NEW CATEGORY", handle: "saree", img: "/images/client-1.jpg" });
+                      setMegaMenuCollections({ ...megaMenuCollections, categories: list });
+                    }}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-2 py-0.5 text-[8px] font-bold uppercase rounded flex items-center gap-0.5"
+                  >
+                    <Plus className="w-2.5 h-2.5" /> Add
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                  {(megaMenuCollections.categories || []).map((item: any, idx: number) => (
+                    <div key={idx} className="bg-neutral-900 border border-neutral-850 p-2.5 rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-[#C9A84C]">Item #{idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = megaMenuCollections.categories.filter((_: any, i: number) => i !== idx);
+                            setMegaMenuCollections({ ...megaMenuCollections, categories: list });
+                          }}
+                          className="text-neutral-500 hover:text-red-400 p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <ImageOrVideoUploader
+                        label="Thumbnail Image"
+                        value={item.img}
+                        onChange={(url) => {
+                          const list = [...megaMenuCollections.categories];
+                          list[idx] = { ...list[idx], img: url };
+                          setMegaMenuCollections({ ...megaMenuCollections, categories: list });
+                        }}
+                        accept="image/*"
+                      />
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={(e) => {
+                            const list = [...megaMenuCollections.categories];
+                            list[idx] = { ...list[idx], label: e.target.value };
+                            setMegaMenuCollections({ ...megaMenuCollections, categories: list });
+                          }}
+                          placeholder="Label Name"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white w-full"
+                        />
+                        <input
+                          type="text"
+                          value={item.handle}
+                          onChange={(e) => {
+                            const list = [...megaMenuCollections.categories];
+                            list[idx] = { ...list[idx], handle: e.target.value };
+                            setMegaMenuCollections({ ...megaMenuCollections, categories: list });
+                          }}
+                          placeholder="Target Handle"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white font-mono w-full"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Col 2: Occasions List */}
+              <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
+                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 2: Shop by Occasion</h5>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = megaMenuCollections.occasions ? [...megaMenuCollections.occasions] : [];
+                      list.push({ label: "NEW OCCASION", handle: "festive", img: "/images/client-2.jpg" });
+                      setMegaMenuCollections({ ...megaMenuCollections, occasions: list });
+                    }}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-2 py-0.5 text-[8px] font-bold uppercase rounded flex items-center gap-0.5"
+                  >
+                    <Plus className="w-2.5 h-2.5" /> Add
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                  {(megaMenuCollections.occasions || []).map((item: any, idx: number) => (
+                    <div key={idx} className="bg-neutral-900 border border-neutral-850 p-2.5 rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-[#C9A84C]">Item #{idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = megaMenuCollections.occasions.filter((_: any, i: number) => i !== idx);
+                            setMegaMenuCollections({ ...megaMenuCollections, occasions: list });
+                          }}
+                          className="text-neutral-500 hover:text-red-400 p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <ImageOrVideoUploader
+                        label="Thumbnail Image"
+                        value={item.img}
+                        onChange={(url) => {
+                          const list = [...megaMenuCollections.occasions];
+                          list[idx] = { ...list[idx], img: url };
+                          setMegaMenuCollections({ ...megaMenuCollections, occasions: list });
+                        }}
+                        accept="image/*"
+                      />
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={(e) => {
+                            const list = [...megaMenuCollections.occasions];
+                            list[idx] = { ...list[idx], label: e.target.value };
+                            setMegaMenuCollections({ ...megaMenuCollections, occasions: list });
+                          }}
+                          placeholder="Label Name"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white w-full"
+                        />
+                        <input
+                          type="text"
+                          value={item.handle}
+                          onChange={(e) => {
+                            const list = [...megaMenuCollections.occasions];
+                            list[idx] = { ...list[idx], handle: e.target.value };
+                            setMegaMenuCollections({ ...megaMenuCollections, occasions: list });
+                          }}
+                          placeholder="Target Handle"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white font-mono w-full"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Col 3: Colors List */}
+              <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
+                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 3: Shop by Color</h5>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const list = megaMenuCollections.colors ? [...megaMenuCollections.colors] : [];
+                      list.push({ label: "NEW COLOR", handle: "red", img: "/images/client-3.jpg" });
+                      setMegaMenuCollections({ ...megaMenuCollections, colors: list });
+                    }}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-2 py-0.5 text-[8px] font-bold uppercase rounded flex items-center gap-0.5"
+                  >
+                    <Plus className="w-2.5 h-2.5" /> Add
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                  {(megaMenuCollections.colors || []).map((item: any, idx: number) => (
+                    <div key={idx} className="bg-neutral-900 border border-neutral-850 p-2.5 rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-[#C9A84C]">Item #{idx + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const list = megaMenuCollections.colors.filter((_: any, i: number) => i !== idx);
+                            setMegaMenuCollections({ ...megaMenuCollections, colors: list });
+                          }}
+                          className="text-neutral-500 hover:text-red-400 p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <ImageOrVideoUploader
+                        label="Thumbnail Image"
+                        value={item.img}
+                        onChange={(url) => {
+                          const list = [...megaMenuCollections.colors];
+                          list[idx] = { ...list[idx], img: url };
+                          setMegaMenuCollections({ ...megaMenuCollections, colors: list });
+                        }}
+                        accept="image/*"
+                      />
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={(e) => {
+                            const list = [...megaMenuCollections.colors];
+                            list[idx] = { ...list[idx], label: e.target.value };
+                            setMegaMenuCollections({ ...megaMenuCollections, colors: list });
+                          }}
+                          placeholder="Label Name"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white w-full"
+                        />
+                        <input
+                          type="text"
+                          value={item.handle}
+                          onChange={(e) => {
+                            const list = [...megaMenuCollections.colors];
+                            list[idx] = { ...list[idx], handle: e.target.value };
+                            setMegaMenuCollections({ ...megaMenuCollections, colors: list });
+                          }}
+                          placeholder="Target Handle"
+                          className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white font-mono w-full"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-neutral-900">
+            <button onClick={triggerSaveHeader} disabled={loading} className="bg-maroonClr hover:bg-[#A30C4D] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shadow-lg shadow-maroonClr/20 disabled:opacity-50">
+              <Save className="w-4 h-4" /> Save Mega Menus Configuration
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ----------------------------------------------------
           TAB 3: BANNERS (Hero slideshow)
           ---------------------------------------------------- */}
       {activeTab === "BANNERS" && (
@@ -976,17 +1859,19 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                   </div>
 
                   {/* CTA & Link row */}
-                  <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-neutral-800/60">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[9px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Button Text</label>
-                        <input type="text" value={slide.buttonText} onChange={(e) => handleBannerChange(index, "buttonText", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-maroonClr" />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Action Link</label>
-                        <input type="text" value={slide.link} onChange={(e) => handleBannerChange(index, "link", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-3 py-1.5 text-xs text-white focus:outline-none focus:border-maroonClr font-mono" />
-                      </div>
-                    </div>
+                  <div className="col-span-1 md:col-span-2 pt-3 border-t border-neutral-800/60">
+                    <ChooseExistingLinkAndOverlay
+                      label="Choose Target Collection / Product (Auto-Fills Slide Title & Action Link)"
+                      linkValue={slide.link || ""}
+                      textValue={slide.title || ""}
+                      onSelect={(link, text) => {
+                        const updated = [...banners];
+                        updated[index] = { ...updated[index], link, title: text };
+                        setBanners(updated);
+                      }}
+                      collections={collections}
+                      products={products}
+                    />
                   </div>
                 </div>
               </div>
@@ -1007,9 +1892,16 @@ export default function SettingsFormClient({ initialSettings, products = [], col
           <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-3 flex flex-col gap-1 lg:sticky lg:top-24">
             <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider px-3 mb-2 pt-2">Homepage Sections</p>
             {[
-              { id: "lovedCollections", label: "Loved Collections (6 Boxes)", icon: Heart },
-              { id: "trendingCollections", label: "Top Trending Cards (5 Scalloped)", icon: Star },
+              { id: "lovedCollections", label: "Our Most Loved Collections", icon: Heart },
+              { id: "trendingCollections", label: "Top Trending Collections", icon: Star },
               { id: "patternBanner", label: "Shoppable Video Reels", icon: Video },
+              { id: "promoBanners", label: "Featured Campaign Banners", icon: ImageIcon },
+              { id: "occasionFinder", label: "Shop By Occasion", icon: Compass },
+              { id: "celebritySpotlight", label: "Styled by You, Crafted by Us", icon: Sparkles },
+              { id: "fabricLibrary", label: "Our Fabric Library", icon: BookOpen },
+              { id: "artisanTimeline", label: "Artisans & Weavers", icon: Sparkles },
+              { id: "storyDrape", label: "From Thread to Royal Drape", icon: Feather },
+              { id: "asSeenInPress", label: "As Featured In (Press)", icon: Award },
               { id: "topSellings", label: "Top-Sellings Products", icon: List },
               { id: "perfectSaree", label: "Perfect Saree Tabs", icon: Compass },
               { id: "bestCategories", label: "Best Categories Grid", icon: Grid },
@@ -1078,8 +1970,19 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1.5">
                     <div>
                       <label className="block text-[8px] font-bold text-neutral-400 uppercase tracking-wider mb-0.5">Select Collection</label>
-                      <select value={lovedColHandle} onChange={(e) => setLovedColHandle(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none">
-                        <option value="">-- Choose --</option>
+                      <select
+                        value={lovedColHandle}
+                        onChange={(e) => {
+                          const handle = e.target.value;
+                          setLovedColHandle(handle);
+                          const matched = collections.find((c: any) => c.handle === handle);
+                          if (matched && !lovedColTitle) {
+                            setLovedColTitle(matched.title);
+                          }
+                        }}
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none"
+                      >
+                        <option value="">-- Choose Store Collection --</option>
                         {collections.map(c => <option key={c.id} value={c.handle}>{c.title}</option>)}
                       </select>
                     </div>
@@ -1116,66 +2019,60 @@ export default function SettingsFormClient({ initialSettings, products = [], col
             {/* Subsection 1.5: Trending Collections Cards */}
             {activeSubSection === "trendingCollections" && (
               <div className="space-y-4">
-                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">Top Trending Collections (5 Scalloped Cards)</h3>
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">Top Trending Collections (5 Simple Cards)</h3>
                 <div>
                   <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Title</label>
                   <input type="text" value={trendingCollectionsTitle} onChange={(e) => setTrendingCollectionsTitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-maroonClr" />
                 </div>
 
-                <div className="flex justify-between items-center bg-neutral-900 p-3 rounded-lg border border-neutral-850">
-                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Trending Cards List</span>
-                  <button
-                    type="button"
-                    onClick={() => setTrendingCollectionsItems([
-                      ...trendingCollectionsItems,
-                      { title: "New Trend", handle: "saree", image: "/images/client-1.jpg" }
-                    ])}
-                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[9px] font-bold uppercase rounded tracking-wider flex items-center gap-1"
-                  >
-                    <Plus className="w-3 h-3" /> Add Trending Card
-                  </button>
+                {/* Add Trending Collection Item Box */}
+                <div className="bg-neutral-900 p-4 rounded-lg border border-neutral-850 space-y-3">
+                  <h4 className="text-[10px] font-bold text-white uppercase tracking-wider">Add Trending Collection Card</h4>
+                  
+                  <ImageOrVideoUploader
+                    label="Custom Cover Image (PNG with transparent bg supported)"
+                    value={trendColImage}
+                    onChange={setTrendColImage}
+                    accept="image/*"
+                  />
+
+                  <div className="space-y-2 pt-1.5">
+                    <ItemPickerPopover
+                      label="Select Store Collection"
+                      linkValue={trendColHandle ? `/collections/${trendColHandle}` : ""}
+                      textValue={trendColTitle}
+                      onSelect={(link, title) => {
+                        const handle = link.replace("/collections/", "").replace("/products/", "");
+                        setTrendColHandle(handle);
+                        if (!trendColTitle) setTrendColTitle(title);
+                      }}
+                      collections={collections}
+                      products={[]}
+                    />
+
+                    <div>
+                      <label className="block text-[8px] font-bold text-neutral-400 uppercase tracking-wider mb-0.5">Custom Title (Optional)</label>
+                      <input type="text" value={trendColTitle} onChange={(e) => setTrendColTitle(e.target.value)} className="w-full bg-neutral-955 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none" />
+                    </div>
+                  </div>
+                  <button type="button" onClick={addTrendingCollection} className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[10px] font-bold uppercase rounded tracking-wider transition-colors flex items-center gap-1.5"><Plus className="w-3.5 h-3.5" /> Add Collection</button>
                 </div>
 
-                <div className="space-y-3">
+                {/* Items List */}
+                <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
                   {trendingCollectionsItems.map((item, idx) => (
-                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-3 rounded-xl space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Card #{idx + 1}</span>
-                        <div className="flex gap-1">
-                          <button onClick={() => moveItem(trendingCollectionsItems, setTrendingCollectionsItems, idx, "UP")} disabled={idx === 0} className="p-1 bg-neutral-950 text-neutral-400 disabled:opacity-20"><ArrowUp className="w-3 h-3" /></button>
-                          <button onClick={() => moveItem(trendingCollectionsItems, setTrendingCollectionsItems, idx, "DOWN")} disabled={idx === trendingCollectionsItems.length - 1} className="p-1 bg-neutral-950 text-neutral-400 disabled:opacity-20"><ArrowDown className="w-3 h-3" /></button>
-                          <button onClick={() => deleteItem(trendingCollectionsItems, setTrendingCollectionsItems, idx)} className="p-1 bg-neutral-950 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                    <div key={idx} className="flex justify-between items-center bg-neutral-900 border border-neutral-850 p-2.5 rounded-lg text-xs">
+                      <div className="flex items-center gap-3">
+                        {item.image && <img src={item.image} alt="" className="w-7 h-7 object-cover rounded border border-neutral-800" />}
+                        <div>
+                          <span className="font-semibold text-white uppercase">{item.title}</span>
+                          <span className="text-[10px] text-neutral-400 ml-2">({item.handle})</span>
                         </div>
                       </div>
-
-                      <ImageOrVideoUploader
-                        label="Scalloped Card Cover Image"
-                        value={item.image}
-                        onChange={(url) => {
-                          const updated = [...trendingCollectionsItems];
-                          updated[idx] = { ...updated[idx], image: url };
-                          setTrendingCollectionsItems(updated);
-                        }}
-                        accept="image/*"
-                      />
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Card Title Name</label>
-                          <input type="text" value={item.title} onChange={(e) => {
-                            const updated = [...trendingCollectionsItems];
-                            updated[idx] = { ...updated[idx], title: e.target.value };
-                            setTrendingCollectionsItems(updated);
-                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1 text-xs text-white" />
-                        </div>
-                        <div>
-                          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Target Collection Handle</label>
-                          <input type="text" value={item.handle} onChange={(e) => {
-                            const updated = [...trendingCollectionsItems];
-                            updated[idx] = { ...updated[idx], handle: e.target.value };
-                            setTrendingCollectionsItems(updated);
-                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1 text-xs text-white font-mono" />
-                        </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => moveItem(trendingCollectionsItems, setTrendingCollectionsItems, idx, "UP")} disabled={idx === 0} className="p-1 bg-neutral-955 text-neutral-450 disabled:opacity-20"><ArrowUp className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => moveItem(trendingCollectionsItems, setTrendingCollectionsItems, idx, "DOWN")} disabled={idx === trendingCollectionsItems.length - 1} className="p-1 bg-neutral-955 text-neutral-450 disabled:opacity-20"><ArrowDown className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => deleteItem(trendingCollectionsItems, setTrendingCollectionsItems, idx)} className="p-1 bg-neutral-955 hover:text-red-400 text-neutral-500"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                     </div>
                   ))}
@@ -1242,12 +2139,38 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                               <label className="block text-[8px] font-bold text-neutral-500 uppercase">Views Badge (e.g. 12K)</label>
                               <input type="text" value={reel.views || ""} onChange={(e) => handleReelChange(index, "views", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1 text-xs text-white focus:outline-none" />
                             </div>
-                          </div>
-                          <div className="space-y-2">
+                                          <div className="space-y-2">
+                            <ItemPickerPopover
+                              label="Choose Store Product (Auto-Fills Details)"
+                              linkValue={reel.productHandle ? `/products/${reel.productHandle}` : ""}
+                              textValue={reel.title || ""}
+                              onSelect={(link, title) => {
+                                const selectedHandle = link.replace("/products/", "").replace("/collections/", "");
+                                const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                                const updated = [...reels];
+                                if (matchedProd) {
+                                  const rawPrice = matchedProd.price?.amount || matchedProd.price;
+                                  const rawCompare = matchedProd.compareAtPrice?.amount || matchedProd.compareAtPrice;
+                                  updated[index] = {
+                                    ...updated[index],
+                                    productHandle: matchedProd.handle,
+                                    title: matchedProd.title,
+                                    price: typeof rawPrice === 'number' ? `₹${rawPrice}` : (rawPrice || ""),
+                                    compareAtPrice: typeof rawCompare === 'number' ? `₹${rawCompare}` : (rawCompare || ""),
+                                    link: `/products/${matchedProd.handle}`
+                                  };
+                                } else {
+                                  updated[index] = { ...updated[index], productHandle: selectedHandle, title: title || selectedHandle, link: `/products/${selectedHandle}` };
+                                }
+                                setReels(updated);
+                              }}
+                              collections={[]}
+                              products={products}
+                            />
                             <div>
                               <label className="block text-[8px] font-bold text-neutral-500 uppercase">Product Title</label>
                               <input type="text" value={reel.title || ""} onChange={(e) => handleReelChange(index, "title", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none" />
-                            </div>
+                            </div>               </div>
                             <div className="grid grid-cols-2 gap-2">
                               <div>
                                 <label className="block text-[8px] font-bold text-neutral-500 uppercase">Price (INR)</label>
@@ -1259,13 +2182,452 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                               </div>
                             </div>
                           </div>
-                            <label className="block text-[8px] font-bold text-neutral-500 uppercase mb-1">Product Action / Instagram Video Link</label>
-                            <input type="text" value={reel.link || ""} onChange={(e) => handleReelChange(index, "link", e.target.value)} placeholder="https://instagram.com/reel/... or /products/handle" className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none" />
-                            <span className="text-[8px] text-neutral-500 block mt-1">E.g., /products/gold-ring or https://instagram.com/reel/xyz</span>
+                          <div>
+                            <label className="block text-[8px] font-bold text-neutral-500 uppercase mb-1">Product Action / Target Link</label>
+                            <input type="text" value={reel.link || ""} onChange={(e) => handleReelChange(index, "link", e.target.value)} placeholder="/products/handle" className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none" />
+                            <span className="text-[8px] text-neutral-500 block mt-1">E.g., /products/woven-kanjivaram-silk-blend-saree-pink</span>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Subsection: Occasion Finder */}
+            {activeSubSection === "occasionFinder" && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">Shop By Occasion Customizer</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Title</label>
+                    <input type="text" value={occasionFinderTitle} onChange={(e) => setOccasionFinderTitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Subtitle</label>
+                    <input type="text" value={occasionFinderSubtitle} onChange={(e) => setOccasionFinderSubtitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center bg-neutral-900 p-3 rounded-lg border border-neutral-850">
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Occasion Tabs List</span>
+                  <button
+                    type="button"
+                    onClick={() => setOccasionFinderItems([
+                      ...occasionFinderItems,
+                      { id: `occ_${Date.now()}`, name: "Partywear", subtitle: "Georgette & Chiffon Drapes", products: [] }
+                    ])}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[9px] font-bold uppercase rounded flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Occasion Tab
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {occasionFinderItems.map((item, idx) => (
+                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-3 rounded-xl space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Occasion #{idx + 1}</span>
+                        <button type="button" onClick={() => deleteItem(occasionFinderItems, setOccasionFinderItems, idx)} className="p-1 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Occasion Name</label>
+                          <input type="text" value={item.name} onChange={(e) => {
+                            const updated = [...occasionFinderItems];
+                            updated[idx] = { ...updated[idx], name: e.target.value };
+                            setOccasionFinderItems(updated);
+                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        </div>
+                        <div>
+                          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Subtitle Description</label>
+                          <input type="text" value={item.subtitle} onChange={(e) => {
+                            const updated = [...occasionFinderItems];
+                            updated[idx] = { ...updated[idx], subtitle: e.target.value };
+                            setOccasionFinderItems(updated);
+                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Subsection: Celebrity Spotlight */}
+            {activeSubSection === "celebritySpotlight" && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">Styled by You, Crafted by Us Customizer</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Title</label>
+                    <input type="text" value={celebritySpotlightTitle} onChange={(e) => setCelebritySpotlightTitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Subtitle</label>
+                    <input type="text" value={celebritySpotlightSubtitle} onChange={(e) => setCelebritySpotlightSubtitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center bg-neutral-900 p-3 rounded-lg border border-neutral-850">
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Polaroid Cards List</span>
+                  <button
+                    type="button"
+                    onClick={() => setCelebritySpotlightItems([
+                      ...celebritySpotlightItems,
+                      { id: `c_${Date.now()}`, title: "Festive Silk", location: "Styled in Jaipur", image: "/images/client-1.jpg", price: "₹1,899", handle: "saree" }
+                    ])}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[9px] font-bold uppercase rounded flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Polaroid Card
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {celebritySpotlightItems.map((item, idx) => (
+                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-3 rounded-xl space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Card #{idx + 1}</span>
+                        <button type="button" onClick={() => deleteItem(celebritySpotlightItems, setCelebritySpotlightItems, idx)} className="p-1 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                      <ImageOrVideoUploader
+                        label="Customer Outfit Photo"
+                        value={item.image}
+                        onChange={(url) => {
+                          const updated = [...celebritySpotlightItems];
+                          updated[idx] = { ...updated[idx], image: url };
+                          setCelebritySpotlightItems(updated);
+                        }}
+                        accept="image/*"
+                      />
+                      <div className="grid grid-cols-3 gap-2">
+                        <input type="text" placeholder="Title" value={item.title} onChange={(e) => {
+                          const updated = [...celebritySpotlightItems];
+                          updated[idx] = { ...updated[idx], title: e.target.value };
+                          setCelebritySpotlightItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        <input type="text" placeholder="Location tag" value={item.location} onChange={(e) => {
+                          const updated = [...celebritySpotlightItems];
+                          updated[idx] = { ...updated[idx], location: e.target.value };
+                          setCelebritySpotlightItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        <input type="text" placeholder="Handle" value={item.handle} onChange={(e) => {
+                          const updated = [...celebritySpotlightItems];
+                          updated[idx] = { ...updated[idx], handle: e.target.value };
+                          setCelebritySpotlightItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white font-mono" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Subsection: Fabric Library */}
+            {activeSubSection === "fabricLibrary" && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">Our Fabric Library Customizer</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Title</label>
+                    <input type="text" value={fabricLibraryTitle} onChange={(e) => setFabricLibraryTitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Subtitle</label>
+                    <input type="text" value={fabricLibrarySubtitle} onChange={(e) => setFabricLibrarySubtitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center bg-neutral-900 p-3 rounded-lg border border-neutral-850">
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Fabric Swatches List</span>
+                  <button
+                    type="button"
+                    onClick={() => setFabricLibraryItems([
+                      ...fabricLibraryItems,
+                      { id: `f_${Date.now()}`, name: "Pure Tussar Silk", origin: "Bhagalpur", description: "Rich textured wild silk weave", image: "/images/client-3.jpg", handle: "silk" }
+                    ])}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[9px] font-bold uppercase rounded flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Fabric Swatch
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {fabricLibraryItems.map((item, idx) => (
+                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-3 rounded-xl space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Fabric Swatch #{idx + 1}</span>
+                        <button type="button" onClick={() => deleteItem(fabricLibraryItems, setFabricLibraryItems, idx)} className="p-1 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                      <ImageOrVideoUploader
+                        label="Fabric Swatch Cover Image"
+                        value={item.image}
+                        onChange={(url) => {
+                          const updated = [...fabricLibraryItems];
+                          updated[idx] = { ...updated[idx], image: url };
+                          setFabricLibraryItems(updated);
+                        }}
+                        accept="image/*"
+                      />
+                      <div className="grid grid-cols-3 gap-2">
+                        <input type="text" placeholder="Fabric Name" value={item.name} onChange={(e) => {
+                          const updated = [...fabricLibraryItems];
+                          updated[idx] = { ...updated[idx], name: e.target.value };
+                          setFabricLibraryItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        <input type="text" placeholder="Origin Place" value={item.origin} onChange={(e) => {
+                          const updated = [...fabricLibraryItems];
+                          updated[idx] = { ...updated[idx], origin: e.target.value };
+                          setFabricLibraryItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        <input type="text" placeholder="Target Handle" value={item.handle} onChange={(e) => {
+                          const updated = [...fabricLibraryItems];
+                          updated[idx] = { ...updated[idx], handle: e.target.value };
+                          setFabricLibraryItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white font-mono" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Subsection: Story Drape Transformer */}
+            {activeSubSection === "storyDrape" && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">From Thread to Royal Drape (Interactive Slider)</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Headline Text</label>
+                    <input type="text" value={storyDrapeHeading} onChange={(e) => setStoryDrapeHeading(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Description Paragraph</label>
+                    <input type="text" value={storyDrapeDescription} onChange={(e) => setStoryDrapeDescription(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <ImageOrVideoUploader
+                    label="Before Image (Raw Loom Threads)"
+                    value={storyDrapeBeforeImage}
+                    onChange={setStoryDrapeBeforeImage}
+                    accept="image/*"
+                  />
+                  <ImageOrVideoUploader
+                    label="After Image (Finished Royal Silk Drape)"
+                    value={storyDrapeAfterImage}
+                    onChange={setStoryDrapeAfterImage}
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Subsection: As Seen In Press */}
+            {activeSubSection === "asSeenInPress" && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">As Featured In (Press Authority Bar)</h3>
+                <div>
+                  <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Title</label>
+                  <input type="text" value={asSeenInPressTitle} onChange={(e) => setAsSeenInPressTitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                </div>
+
+                <div className="flex justify-between items-center bg-neutral-900 p-3 rounded-lg border border-neutral-850">
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Press Quotes List</span>
+                  <button
+                    type="button"
+                    onClick={() => setAsSeenInPressItems([
+                      ...asSeenInPressItems,
+                      { publication: "VOGUE INDIA", quote: "Redefining luxury in handloom sarees.", tag: "Fashion Feature" }
+                    ])}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[9px] font-bold uppercase rounded flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Press Quote
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {asSeenInPressItems.map((item, idx) => (
+                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-3 rounded-xl space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Press Quote #{idx + 1}</span>
+                        <button type="button" onClick={() => deleteItem(asSeenInPressItems, setAsSeenInPressItems, idx)} className="p-1 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <input type="text" placeholder="Publication Name" value={item.publication} onChange={(e) => {
+                          const updated = [...asSeenInPressItems];
+                          updated[idx] = { ...updated[idx], publication: e.target.value };
+                          setAsSeenInPressItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        <input type="text" placeholder="Press Quote" value={item.quote} onChange={(e) => {
+                          const updated = [...asSeenInPressItems];
+                          updated[idx] = { ...updated[idx], quote: e.target.value };
+                          setAsSeenInPressItems(updated);
+                        }} className="col-span-2 bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Subsection: Featured Campaign Banners */}
+            {activeSubSection === "promoBanners" && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">Featured Campaign Banners (2 Cards)</h3>
+                
+                <div className="flex justify-between items-center bg-neutral-900 p-3 rounded-lg border border-neutral-850">
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Campaign Cards List</span>
+                  <button
+                    type="button"
+                    onClick={() => setPromoBanners([
+                      ...promoBanners,
+                      { imageUrl: "/images/banner-1773659037696-747582281.webp", title: "New Campaign", subtitle: "Exclusive Edit", link: "/products", buttonText: "Shop Now" }
+                    ])}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[9px] font-bold uppercase rounded flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Banner Card
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {promoBanners.map((banner, idx) => (
+                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-4 rounded-xl space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Campaign Card #{idx + 1}</span>
+                        <button type="button" onClick={() => deleteItem(promoBanners, setPromoBanners, idx)} className="p-1 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+
+                      <ImageOrVideoUploader
+                        label="Campaign Banner Image"
+                        value={banner.imageUrl}
+                        onChange={(url) => {
+                          const updated = [...promoBanners];
+                          updated[idx] = { ...updated[idx], imageUrl: url };
+                          setPromoBanners(updated);
+                        }}
+                        accept="image/*"
+                      />
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Card Title</label>
+                          <input type="text" value={banner.title || ""} onChange={(e) => {
+                            const updated = [...promoBanners];
+                            updated[idx] = { ...updated[idx], title: e.target.value };
+                            setPromoBanners(updated);
+                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        </div>
+                        <div>
+                          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Subtitle</label>
+                          <input type="text" value={banner.subtitle || ""} onChange={(e) => {
+                            const updated = [...promoBanners];
+                            updated[idx] = { ...updated[idx], subtitle: e.target.value };
+                            setPromoBanners(updated);
+                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        </div>
+                        <div>
+                          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Button Text</label>
+                          <input type="text" value={banner.buttonText || ""} onChange={(e) => {
+                            const updated = [...promoBanners];
+                            updated[idx] = { ...updated[idx], buttonText: e.target.value };
+                            setPromoBanners(updated);
+                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        </div>
+                      </div>
+
+                      <LinkSelector
+                        label="Banner Redirect Target"
+                        value={banner.link || ""}
+                        onChange={(url) => {
+                          const updated = [...promoBanners];
+                          updated[idx] = { ...updated[idx], link: url };
+                          setPromoBanners(updated);
+                        }}
+                        collections={collections}
+                        products={products}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Subsection: Artisans & Weavers */}
+            {activeSubSection === "artisanTimeline" && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">Artisans & Master Weavers Customizer</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Title</label>
+                    <input type="text" value={artisanTimelineTitle} onChange={(e) => setArtisanTimelineTitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Subtitle</label>
+                    <input type="text" value={artisanTimelineSubtitle} onChange={(e) => setArtisanTimelineSubtitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none" />
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center bg-neutral-900 p-3 rounded-lg border border-neutral-850">
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Artisan Profiles List</span>
+                  <button
+                    type="button"
+                    onClick={() => setArtisanTimelineItems([
+                      ...artisanTimelineItems,
+                      { id: `art_${Date.now()}`, name: "Ramkali Devi", craft: "Spinner of Heritage Threads", region: "Varanasi", story: "Hand-spun silk yarn master", image: "/images/client-4.jpg", years: "35 yrs", specialty: "Mulberry Silk" }
+                    ])}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[9px] font-bold uppercase rounded flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Artisan Profile
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  {artisanTimelineItems.map((item, idx) => (
+                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-4 rounded-xl space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Artisan #{idx + 1}</span>
+                        <button type="button" onClick={() => deleteItem(artisanTimelineItems, setArtisanTimelineItems, idx)} className="p-1 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+
+                      <ImageOrVideoUploader
+                        label="Artisan Portrait Photo"
+                        value={item.image}
+                        onChange={(url) => {
+                          const updated = [...artisanTimelineItems];
+                          updated[idx] = { ...updated[idx], image: url };
+                          setArtisanTimelineItems(updated);
+                        }}
+                        accept="image/*"
+                      />
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <input type="text" placeholder="Name" value={item.name} onChange={(e) => {
+                          const updated = [...artisanTimelineItems];
+                          updated[idx] = { ...updated[idx], name: e.target.value };
+                          setArtisanTimelineItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        <input type="text" placeholder="Craft Role" value={item.craft} onChange={(e) => {
+                          const updated = [...artisanTimelineItems];
+                          updated[idx] = { ...updated[idx], craft: e.target.value };
+                          setArtisanTimelineItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        <input type="text" placeholder="Region" value={item.region} onChange={(e) => {
+                          const updated = [...artisanTimelineItems];
+                          updated[idx] = { ...updated[idx], region: e.target.value };
+                          setArtisanTimelineItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                      </div>
+
+                      <textarea placeholder="Artisan Story" rows={2} value={item.story} onChange={(e) => {
+                        const updated = [...artisanTimelineItems];
+                        updated[idx] = { ...updated[idx], story: e.target.value };
+                        setArtisanTimelineItems(updated);
+                      }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white" />
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

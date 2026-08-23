@@ -174,7 +174,11 @@ export default async function Home() {
       <ReelsSlider reels={homeSettings.videoReels} />
 
       {/* 4.6. Interactive Occasion Drape Quiz (Unique Competitive Feature) */}
-      <OccasionFinder />
+      <OccasionFinder 
+        title={homeSettings.occasionFinderTitle}
+        subtitle={homeSettings.occasionFinderSubtitle}
+        items={homeSettings.occasionFinderItems}
+      />
 
       {/* 5. Editorial / Brand Story Block */}
       <EditorialBlock
@@ -194,22 +198,42 @@ export default async function Home() {
       />
 
       {/* 7. Polaroid Lookbook Collage */}
-      <CelebritySpotlight />
+      <CelebritySpotlight 
+        title={homeSettings.celebritySpotlightTitle}
+        subtitle={homeSettings.celebritySpotlightSubtitle}
+        items={homeSettings.celebritySpotlightItems}
+      />
 
       {/* 8. Secondary Campaign Banners (Lower down to keep top clean) */}
       <PromoBannerGrid banners={homeSettings.promoBanners} />
 
       {/* 9. Upgraded Swatch Fabric Library Flip Grid */}
-      <FabricLibrary />
+      <FabricLibrary 
+        title={homeSettings.fabricLibraryTitle}
+        subtitle={homeSettings.fabricLibrarySubtitle}
+        items={homeSettings.fabricLibraryItems}
+      />
 
       {/* 10. Upgraded Interactive Artisan Loom Stages Timeline */}
-      <ArtisanTimeline />
+      <ArtisanTimeline 
+        title={homeSettings.artisanTimelineTitle}
+        subtitle={homeSettings.artisanTimelineSubtitle}
+        items={homeSettings.artisanTimelineItems}
+      />
 
       {/* 10.2. Interactive Story Weave Transformer */}
-      <StoryDrapeReveal />
+      <StoryDrapeReveal 
+        heading={homeSettings.storyDrapeHeading}
+        description={homeSettings.storyDrapeDescription}
+        beforeImage={homeSettings.storyDrapeBeforeImage}
+        afterImage={homeSettings.storyDrapeAfterImage}
+      />
 
       {/* 10.5. As Seen In Media & Press Authority Bar */}
-      <AsSeenInPress />
+      <AsSeenInPress 
+        title={homeSettings.asSeenInPressTitle}
+        items={homeSettings.asSeenInPressItems}
+      />
 
       {/* 11. Stats Strip — Big Numbers */}
       <StatsStrip />

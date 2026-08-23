@@ -25,7 +25,22 @@ const PRESS_ITEMS = [
   }
 ];
 
-export default function AsSeenInPress() {
+interface PressItem {
+  publication: string;
+  quote: string;
+  tag: string;
+}
+
+interface AsSeenInPressProps {
+  title?: string;
+  items?: PressItem[];
+}
+
+export default function AsSeenInPress({
+  title = "As Featured In",
+  items
+}: AsSeenInPressProps) {
+  const pressList = items && items.length > 0 ? items : PRESS_ITEMS;
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -43,12 +58,12 @@ export default function AsSeenInPress() {
   useEffect(() => {
     if (!visible) return;
     const t = setInterval(() => {
-      setActiveIdx(prev => (prev + 1) % PRESS_ITEMS.length);
+      setActiveIdx(prev => (prev + 1) % pressList.length);
     }, 4000);
     return () => clearInterval(t);
-  }, [visible]);
+  }, [visible, pressList.length]);
 
-  const active = PRESS_ITEMS[activeIdx];
+  const active = pressList[activeIdx % pressList.length] || pressList[0];
 
   return (
     <section 

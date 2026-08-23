@@ -171,7 +171,7 @@ export default async function Home() {
       <TrendingCollectionsGrid items={homeSettings.trendingCollectionsItems} title={homeSettings.trendingCollectionsTitle} />
 
       {/* 4.5. Upgraded Video Reels Slider Section */}
-      <ReelsSlider reels={homeSettings.videoReels} />
+      <ReelsSlider reels={homeSettings.videoReels} products={allProducts} />
 
       {/* 4.6. Interactive Occasion Drape Quiz (Unique Competitive Feature) */}
       <OccasionFinder 

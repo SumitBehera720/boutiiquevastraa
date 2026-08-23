@@ -2205,14 +2205,26 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                                 const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
                                 const updated = [...reels];
                                 if (matchedProd) {
-                                  const rawPrice = matchedProd.price?.amount || matchedProd.price;
-                                  const rawCompare = matchedProd.compareAtPrice?.amount || matchedProd.compareAtPrice;
+                                  const rawPrice = matchedProd.price?.amount || matchedProd.price || matchedProd.priceRange?.minVariantPrice?.amount;
+                                  const rawCompare = matchedProd.compareAtPrice?.amount || matchedProd.compareAtPrice || matchedProd.compareAtPriceRange?.minVariantPrice?.amount;
+                                  
+                                  const pNum = typeof rawPrice === 'number' ? rawPrice : parseFloat(String(rawPrice || "").replace(/[^0-9.]/g, ""));
+                                  const cNum = typeof rawCompare === 'number' ? rawCompare : parseFloat(String(rawCompare || "").replace(/[^0-9.]/g, ""));
+                                  let badge = "";
+                                  if (cNum > pNum && pNum > 0) {
+                                    badge = `${Math.round(((cNum - pNum) / cNum) * 100)}% OFF`;
+                                  }
+
+                                  const formattedP = typeof rawPrice === 'number' ? `₹ ${rawPrice.toLocaleString("en-IN")}` : (rawPrice ? (String(rawPrice).startsWith("₹") ? String(rawPrice) : `₹ ${rawPrice}`) : "");
+                                  const formattedC = typeof rawCompare === 'number' ? `₹ ${rawCompare.toLocaleString("en-IN")}` : (rawCompare ? (String(rawCompare).startsWith("₹") ? String(rawCompare) : `₹ ${rawCompare}`) : "");
+
                                   updated[index] = {
                                     ...updated[index],
                                     productHandle: matchedProd.handle,
                                     title: matchedProd.title,
-                                    price: typeof rawPrice === 'number' ? `₹${rawPrice}` : (rawPrice || ""),
-                                    compareAtPrice: typeof rawCompare === 'number' ? `₹${rawCompare}` : (rawCompare || ""),
+                                    price: formattedP,
+                                    compareAtPrice: formattedC,
+                                    discountBadge: badge,
                                     link: `/products/${matchedProd.handle}`
                                   };
                                 } else {

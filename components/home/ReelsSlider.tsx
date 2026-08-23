@@ -157,7 +157,36 @@ const REELS: Reel[] = [
   }
 ];
 
-export default function ReelsSlider({ reels }: { reels?: any[] }) {
+function getFormattedPrice(val: any): string {
+  if (!val) return "";
+  if (typeof val === "number") return `₹ ${val.toLocaleString("en-IN")}`;
+  if (typeof val === "string") {
+    if (val.trim().startsWith("₹")) return val;
+    const parsed = parseFloat(val.replace(/[^0-9.]/g, ""));
+    return isNaN(parsed) || parsed === 0 ? val : `₹ ${parsed.toLocaleString("en-IN")}`;
+  }
+  if (val.amount) {
+    const parsed = parseFloat(String(val.amount).replace(/[^0-9.]/g, ""));
+    return isNaN(parsed) || parsed === 0 ? String(val.amount) : `₹ ${parsed.toLocaleString("en-IN")}`;
+  }
+  return "";
+}
+
+function getNumericPrice(val: any): number {
+  if (!val) return 0;
+  if (typeof val === "number") return val;
+  if (typeof val === "string") {
+    const parsed = parseFloat(val.replace(/[^0-9.]/g, ""));
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  if (val.amount) {
+    const parsed = parseFloat(String(val.amount).replace(/[^0-9.]/g, ""));
+    return isNaN(parsed) ? 0 : parsed;
+  }
+  return 0;
+}
+
+export default function ReelsSlider({ reels, products = [] }: { reels?: any[]; products?: any[] }) {
   const [activeReelIdx, setActiveReelIdx] = useState<number | null>(null);
   const [showShopDrawer, setShowShopDrawer] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -171,6 +200,55 @@ export default function ReelsSlider({ reels }: { reels?: any[] }) {
     ? reels.map((r, i) => {
         const videoUrl = r.videoUrl || r.video || r.mediaUrl || "";
         const thumbnail = r.thumbnail || r.image || (videoUrl ? "" : "/images/client-1.jpg");
+
+        // Look up matched store product by handle or id
+        const handleToFind = r.productHandle || r.productId || "";
+        const matchedProd = products.find((p: any) =>
+          p.handle === handleToFind || p.id === handleToFind || p.id?.replace("gid://shopify/Product/", "") === handleToFind
+        );
+
+        // Extract actual product images from matched store product
+        let prodImages: string[] = [];
+        if (matchedProd) {
+          if (Array.isArray(matchedProd.images) && matchedProd.images.length > 0) {
+            prodImages = matchedProd.images.map((img: any) => typeof img === "string" ? img : img?.url).filter(Boolean);
+          }
+          if (prodImages.length === 0 && matchedProd.featuredImage) {
+            const feat = typeof matchedProd.featuredImage === "string" ? matchedProd.featuredImage : matchedProd.featuredImage?.url;
+            if (feat) prodImages.push(feat);
+          }
+          if (prodImages.length === 0 && matchedProd.image) {
+            const imgStr = typeof matchedProd.image === "string" ? matchedProd.image : matchedProd.image?.url;
+            if (imgStr) prodImages.push(imgStr);
+          }
+        }
+
+        const mainProdImage = prodImages[0] || r.productImage || thumbnail || "/images/client-1.jpg";
+
+        // Build 3 actual gallery thumbnails for the "SHOP NOW" drawer
+        const prodThumbnails = prodImages.length >= 3
+          ? prodImages.slice(0, 3)
+          : prodImages.length > 0
+            ? [prodImages[0], prodImages[1] || prodImages[0], prodImages[2] || prodImages[0]]
+            : [mainProdImage, thumbnail || mainProdImage, "/images/client-1.jpg"];
+
+        // Automatically fetch title, price, and compareAtPrice from matched store product
+        const rawPrice = matchedProd ? (matchedProd.price?.amount || matchedProd.price || matchedProd.priceRange?.minVariantPrice?.amount) : r.price;
+        const rawCompare = matchedProd ? (matchedProd.compareAtPrice?.amount || matchedProd.compareAtPrice || matchedProd.compareAtPriceRange?.minVariantPrice?.amount) : r.compareAtPrice;
+
+        const formattedPrice = getFormattedPrice(rawPrice) || getFormattedPrice(r.price) || "₹ 1,999";
+        const formattedCompare = getFormattedPrice(rawCompare) || getFormattedPrice(r.compareAtPrice) || "";
+
+        const pNum = getNumericPrice(rawPrice || r.price);
+        const cNum = getNumericPrice(rawCompare || r.compareAtPrice);
+        let calculatedBadge = r.discountBadge || "";
+        if (cNum > pNum && pNum > 0) {
+          const pct = Math.round(((cNum - pNum) / cNum) * 100);
+          if (pct > 0) calculatedBadge = `${pct}% OFF`;
+        }
+
+        const autoTitle = matchedProd?.title || r.title || "Festive Handloom Drape";
+
         return {
           id: r.id || `reel_${i}`,
           videoUrl,
@@ -178,16 +256,16 @@ export default function ReelsSlider({ reels }: { reels?: any[] }) {
           views: r.views || "50K",
           likes: r.likes || "120",
           shares: r.shares || "85",
-          title: r.title || "Festive Handloom Drape",
+          title: autoTitle,
           product: {
-            id: r.productId || "gid://shopify/Product/15158668132716",
-            title: r.title || "Festive Handloom Drape",
-            price: r.price || "₹ 1,999",
-            compareAtPrice: r.compareAtPrice || "₹ 3,899",
-            discountBadge: r.discountBadge || "49% off",
-            image: thumbnail || "/images/client-1.jpg",
-            thumbnails: [thumbnail || "/images/client-1.jpg", "/images/client-2.jpg", "/images/client-3.jpg"],
-            handle: r.productHandle || "woven-kanjivaram-silk-blend-saree-pink",
+            id: matchedProd?.id || r.productId || "gid://shopify/Product/15158668132716",
+            title: autoTitle,
+            price: formattedPrice,
+            compareAtPrice: formattedCompare,
+            discountBadge: calculatedBadge,
+            image: mainProdImage,
+            thumbnails: prodThumbnails,
+            handle: matchedProd?.handle || r.productHandle || "woven-kanjivaram-silk-blend-saree-pink",
           }
         };
       })

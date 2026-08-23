@@ -121,10 +121,42 @@ function ItemPickerPopover({
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<"ALL" | "COLLECTIONS" | "PRODUCTS">("ALL");
 
+  const getProductImage = (p: any) => {
+    if (typeof p.featuredImage === "string") return p.featuredImage;
+    if (p.featuredImage?.url) return p.featuredImage.url;
+    if (Array.isArray(p.images) && p.images.length > 0) {
+      const first = p.images[0];
+      if (typeof first === "string") return first;
+      if (first?.url) return first.url;
+    }
+    if (p.image?.url) return p.image.url;
+    if (typeof p.image === "string") return p.image;
+    if (p.thumbnail) return p.thumbnail;
+    return null;
+  };
+
+  const getCollectionImage = (c: any) => {
+    if (typeof c.image === "string") return c.image;
+    if (c.image?.url) return c.image.url;
+    if (c.coverImage) return c.coverImage;
+    if (c.imageUrl) return c.imageUrl;
+    return null;
+  };
+
+  const getProductPrice = (p: any) => {
+    const priceVal = p.price?.amount || p.price || p.priceRange?.minVariantPrice?.amount;
+    if (!priceVal) return "";
+    if (typeof priceVal === "number") return `₹${priceVal.toLocaleString("en-IN")}`;
+    if (typeof priceVal === "string") return priceVal.startsWith("₹") ? priceVal : `₹${priceVal}`;
+    return "";
+  };
+
   const currentHandle = linkValue.replace("/collections/", "").replace("/products/", "");
   const matchedCol = collections.find((c: any) => c.handle === currentHandle);
   const matchedProd = products.find((p: any) => p.handle === currentHandle);
+  const matchedImage = matchedProd ? getProductImage(matchedProd) : matchedCol ? getCollectionImage(matchedCol) : null;
   const displayTitle = textValue || matchedCol?.title || matchedProd?.title || (currentHandle ? currentHandle : "-- Click to Select Collection or Product --");
+  const matchedPrice = matchedProd ? getProductPrice(matchedProd) : "";
 
   const allCollections = collections.map((c: any) => ({
     id: c.id || c.handle,
@@ -132,7 +164,8 @@ function ItemPickerPopover({
     handle: c.handle,
     type: "COLLECTION" as const,
     link: `/collections/${c.handle}`,
-    image: c.image?.url || c.image || null
+    image: getCollectionImage(c),
+    price: ""
   }));
 
   const allProducts = products.map((p: any) => ({
@@ -141,7 +174,8 @@ function ItemPickerPopover({
     handle: p.handle,
     type: "PRODUCT" as const,
     link: `/products/${p.handle}`,
-    image: p.featuredImage?.url || p.image || null
+    image: getProductImage(p),
+    price: getProductPrice(p)
   }));
 
   const combinedItems = tab === "COLLECTIONS" ? allCollections : tab === "PRODUCTS" ? allProducts : [...allCollections, ...allProducts];
@@ -155,18 +189,27 @@ function ItemPickerPopover({
     <div className="relative space-y-1.5 w-full">
       {label && <label className="block text-[8px] font-bold text-[#C9A84C] uppercase tracking-wider">{label}</label>}
       
-      {/* Trigger Button */}
+      {/* Trigger Button with Product Image Preview */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 hover:border-[#C9A84C] rounded-lg px-3 py-2 text-left flex items-center justify-between transition-colors shadow-sm"
+        className="w-full bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 hover:border-[#C9A84C] rounded-lg px-2.5 py-1.5 text-left flex items-center justify-between transition-colors shadow-sm gap-2"
       >
-        <div className="flex items-center gap-2 truncate min-w-0">
-          <span className="w-2 h-2 rounded-full bg-[#C9A84C] flex-shrink-0" />
-          <span className="text-xs font-semibold text-white truncate">{displayTitle}</span>
-          {currentHandle && <span className="text-[9px] text-neutral-500 font-mono flex-shrink-0 truncate">({linkValue || `/collections/${currentHandle}`})</span>}
+        <div className="flex items-center gap-2.5 truncate min-w-0">
+          {matchedImage ? (
+            <img src={matchedImage} alt="" className="w-7 h-8 object-cover object-top rounded border border-neutral-700 flex-shrink-0" />
+          ) : (
+            <span className="w-2 h-2 rounded-full bg-[#C9A84C] flex-shrink-0" />
+          )}
+          <div className="truncate min-w-0">
+            <div className="flex items-center gap-1.5 truncate">
+              <span className="text-xs font-semibold text-white truncate">{displayTitle}</span>
+              {matchedPrice && <span className="text-[10px] font-bold text-[#C9A84C] flex-shrink-0">{matchedPrice}</span>}
+            </div>
+            {currentHandle && <span className="text-[9px] text-neutral-500 font-mono block truncate">{linkValue || `/collections/${currentHandle}`}</span>}
+          </div>
         </div>
-        <span className="text-[10px] text-[#C9A84C] font-bold uppercase tracking-wider flex-shrink-0 ml-2">Choose ▾</span>
+        <span className="text-[10px] text-[#C9A84C] font-bold uppercase tracking-wider flex-shrink-0 ml-1">Choose ▾</span>
       </button>
 
       {/* Popover Dropdown Modal */}
@@ -176,7 +219,7 @@ function ItemPickerPopover({
           <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]" onClick={() => setIsOpen(false)} />
 
           {/* Modal Container */}
-          <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden p-3 space-y-3 max-h-[380px] flex flex-col">
+          <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden p-3 space-y-3 max-h-[420px] flex flex-col">
             {/* Search Input & Filter Tabs */}
             <div className="space-y-2">
               <input
@@ -185,7 +228,7 @@ function ItemPickerPopover({
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="🔍 Type to search collections or products..."
                 autoFocus
-                className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-[#C9A84C]"
+                className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-[#C9A84C]"
               />
 
               <div className="flex gap-1 bg-neutral-900 p-1 rounded-lg">
@@ -213,8 +256,8 @@ function ItemPickerPopover({
               </div>
             </div>
 
-            {/* Scrollable Items List */}
-            <div className="flex-1 overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+            {/* Scrollable Items List with Product Thumbnail Previews */}
+            <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
               {filteredItems.length === 0 ? (
                 <div className="p-4 text-center text-xs text-neutral-500">No matching collections or products found.</div>
               ) : (
@@ -226,25 +269,28 @@ function ItemPickerPopover({
                       onSelect(item.link, item.title);
                       setIsOpen(false);
                     }}
-                    className={`w-full p-2 rounded-lg text-left flex items-center justify-between transition-all ${
-                      currentHandle === item.handle ? "bg-maroonClr/30 border border-[#C9A84C]/50 text-white" : "bg-neutral-900/50 hover:bg-neutral-900 border border-neutral-850 text-neutral-200"
+                    className={`w-full p-2 rounded-xl text-left flex items-center justify-between transition-all ${
+                      currentHandle === item.handle ? "bg-maroonClr/30 border border-[#C9A84C] text-white shadow-md" : "bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-850 text-neutral-200"
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
                       {item.image ? (
-                        <img src={item.image} alt="" className="w-7 h-7 object-cover rounded border border-neutral-800 flex-shrink-0" />
+                        <img src={item.image} alt="" className="w-10 h-12 object-cover object-top rounded-md border border-neutral-700/80 bg-neutral-950 flex-shrink-0 shadow-sm" />
                       ) : (
-                        <div className="w-7 h-7 bg-neutral-800 rounded flex items-center justify-center text-[10px] text-neutral-500 font-bold flex-shrink-0">
+                        <div className="w-10 h-12 bg-neutral-800 rounded-md flex items-center justify-center text-xs text-neutral-400 font-bold flex-shrink-0 border border-neutral-700">
                           {item.type === "COLLECTION" ? "📁" : "🛍️"}
                         </div>
                       )}
-                      <div className="truncate">
-                        <span className="text-xs font-semibold block truncate">{item.title}</span>
-                        <span className="text-[9px] text-neutral-400 font-mono block truncate">{item.link}</span>
+                      <div className="truncate space-y-0.5 min-w-0">
+                        <span className="text-xs font-bold text-white block truncate">{item.title}</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          {item.price && <span className="text-[10px] font-extrabold text-[#C9A84C] flex-shrink-0">{item.price}</span>}
+                          <span className="text-[9px] text-neutral-400 font-mono block truncate">{item.link}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase flex-shrink-0 ml-2 ${item.type === "COLLECTION" ? "bg-amber-950/60 text-amber-300 border border-amber-800/40" : "bg-purple-950/60 text-purple-300 border border-purple-800/40"}`}>
+                    <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase flex-shrink-0 ml-2 ${item.type === "COLLECTION" ? "bg-amber-950/70 text-amber-300 border border-amber-700/50" : "bg-purple-950/70 text-purple-300 border border-purple-700/50"}`}>
                       {item.type}
                     </span>
                   </button>

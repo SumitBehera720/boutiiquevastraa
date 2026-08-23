@@ -25,31 +25,95 @@ function ImageOrVideoUploader({
   accept?: string;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [localError, setLocalError] = useState("");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Set max file limit to 200MB (200 * 1024 * 1024 bytes)
+    const MAX_SIZE = 200 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setLocalError(`File size (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds 200 MB limit.`);
+      return;
+    }
+
     setUploading(true);
+    setProgress(0);
     setLocalError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB per chunk to prevent HTTP 413 Entity Too Large errors
 
     try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        throw new Error(`Upload server error: ${res.statusText}`);
-      }
-      const data = await res.json();
-      if (data.success && data.url) {
-        onChange(data.url);
+      if (file.size > CHUNK_SIZE) {
+        // Chunked upload stream for files larger than 5MB
+        const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+        const fileId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+        let finalUrl = "";
+
+        for (let i = 0; i < totalChunks; i++) {
+          const start = i * CHUNK_SIZE;
+          const end = Math.min(file.size, start + CHUNK_SIZE);
+          const chunk = file.slice(start, end);
+
+          const formData = new FormData();
+          formData.append("file", chunk, file.name);
+
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            headers: {
+              "x-chunk-index": String(i),
+              "x-total-chunks": String(totalChunks),
+              "x-file-id": fileId,
+              "x-file-name": file.name,
+            },
+            body: formData,
+          });
+
+          if (!res.ok) {
+            throw new Error(`Upload error (${res.status}): ${res.statusText}`);
+          }
+
+          const data = await res.json();
+          if (!data.success) {
+            throw new Error(data.error || "Chunk upload failed.");
+          }
+
+          if (data.url) {
+            finalUrl = data.url;
+          }
+
+          const pct = Math.round(((i + 1) / totalChunks) * 100);
+          setProgress(pct);
+        }
+
+        if (finalUrl) {
+          onChange(finalUrl);
+        } else {
+          throw new Error("Upload completed but no file URL was returned.");
+        }
       } else {
-        setLocalError(data.error || "Failed to upload.");
+        // Single POST request for small files (<5MB)
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          throw new Error(`Upload error (${res.status}): ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        if (data.success && data.url) {
+          onChange(data.url);
+          setProgress(100);
+        } else {
+          setLocalError(data.error || "Failed to upload.");
+        }
       }
     } catch (err: any) {
       setLocalError(err.message || "Failed to upload file.");
@@ -94,7 +158,17 @@ function ImageOrVideoUploader({
           ) : (
             <span className="text-[9px] text-neutral-550 block font-sans">No file uploaded</span>
           )}
-          {uploading && <span className="text-[9px] text-[#C9A84C] block animate-pulse">Uploading file...</span>}
+          {uploading && (
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-[9px] text-[#C9A84C] font-bold">
+                <span className="animate-pulse">Uploading video stream...</span>
+                <span>{progress}%</span>
+              </div>
+              <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
+                <div className="h-full bg-[#C9A84C] transition-all duration-200" style={{ width: `${progress}%` }} />
+              </div>
+            </div>
+          )}
           {localError && <span className="text-[9px] text-red-500 block">{localError}</span>}
         </div>
       </div>

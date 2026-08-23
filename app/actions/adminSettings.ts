@@ -103,6 +103,21 @@ export async function saveGiftsSettingsAction(giftsData: any[]) {
     return { success: false, error: error.message || "Failed to save gifts settings." };
   }
 }
+export async function saveCollectionBannersAction(collectionBannersData: any) {
+  try {
+    await requireAuth();
+    const ds = await getDs();
+    const current = (await ds.get()) || {};
+    current.collectionBanners = collectionBannersData;
+    await ds.save(current);
+    revalidatePath("/admin/settings");
+    revalidatePath("/collections/[handle]", "page");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to save collection banners." };
+  }
+}
 
 export async function uploadFileAction(formData: FormData) {
   try {

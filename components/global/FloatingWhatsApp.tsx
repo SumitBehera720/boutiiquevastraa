@@ -21,8 +21,8 @@ export default function FloatingWhatsApp({ whatsappNumber }: FloatingWhatsAppPro
   // On desktop (sm and above): bottom-6
   const mobileBottomClass = isCheckout ? "bottom-6" : "bottom-20";
 
-  const rawWaNumber = whatsappNumber || "919205248666";
-  const cleanWaNumber = rawWaNumber.includes("38666") ? "919205248666" : rawWaNumber;
+  const rawWaNumber = whatsappNumber || "919205238666";
+  const cleanWaNumber = rawWaNumber;
   const waUrl = `https://wa.me/${cleanWaNumber.replace(/[^0-9]/g, "")}`;
 
   return (

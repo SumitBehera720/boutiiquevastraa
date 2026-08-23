@@ -393,28 +393,90 @@ async function handleProducts(path: string[], req: NextRequest) {
     const productId = path[1];
     const all = await products.all();
     const currentProduct = all.find((p: any) => p.id === productId);
+    if (!currentProduct) return error("Not found", 404);
     let others = all.filter((p: any) => p.id !== productId);
     
-    if (currentProduct) {
-      const currentProductCollections = Array.isArray(currentProduct.collectionHandles)
-        ? currentProduct.collectionHandles
-        : Array.isArray(currentProduct.collections)
-        ? currentProduct.collections
-        : [];
-      
-      const filteredOthers = others.filter((p: any) => {
-        const pCols = Array.isArray(p.collectionHandles)
+    const getProductCoreCategory = (p: any) => {
+      const title = (p.title || "").toLowerCase();
+      const tags = (Array.isArray(p.tags) ? p.tags : []).map((t: any) => String(t).toLowerCase());
+      const colHandles: string[] = (
+        Array.isArray(p.collectionHandles)
           ? p.collectionHandles
           : Array.isArray(p.collections)
           ? p.collections
-          : [];
-        return pCols.some((col: string) => currentProductCollections.includes(col));
-      });
+          : []
+      ).map((c: any) => typeof c === "string" ? c.toLowerCase() : c.handle?.toLowerCase() || "");
+
+      const hasWord = (word: string) => {
+        return title.includes(word) || tags.includes(word) || colHandles.includes(word);
+      };
+
+      if (hasWord("saree") || hasWord("sarees") || title.includes("saree") || colHandles.some((c: string) => c.includes("saree"))) return "saree";
+      if (hasWord("kurti") || hasWord("kurtis") || title.includes("kurti") || colHandles.some((c: string) => c.includes("kurti"))) return "kurti";
+      if (hasWord("one-peace") || hasWord("one peace") || hasWord("onepiece") || title.includes("one peace")) return "one-peace";
+      if (hasWord("two-peace") || hasWord("two peace") || hasWord("twopiece") || title.includes("two peace")) return "two-peace";
+      if (hasWord("co-ords") || hasWord("coord") || hasWord("co-ord") || title.includes("coord")) return "co-ords";
+      if (hasWord("lehenga") || hasWord("lehengas") || title.includes("lehenga") || colHandles.some((c: string) => c.includes("lehenga"))) return "lehenga";
+      if (hasWord("jewellery") || hasWord("jewelry") || hasWord("jewel") || title.includes("jewel") || colHandles.some((c: string) => c.includes("jewel"))) return "jewellery";
+
+      return null;
+    };
+
+    const openedCategory = getProductCoreCategory(currentProduct);
+    if (openedCategory) {
+      // Step 1: Must be in same core category
+      others = others.filter((p: any) => getProductCoreCategory(p) === openedCategory);
+
+      // Step 2: Strong matching on fabrics and style keywords
+      const currentText = `${currentProduct.title || ""} ${currentProduct.description || ""} ${(Array.isArray(currentProduct.tags) ? currentProduct.tags : []).join(" ")}`.toLowerCase();
       
-      if (filteredOthers.length > 0) {
-        others = filteredOthers;
+      const fabrics = ["silk", "organza", "cotton", "linen", "georgette", "chiffon", "rayon", "tissue", "net", "velvet"];
+      const styles = ["banarasi", "kanjivaram", "chanderi", "bandhani", "chikankari", "patola", "kalamkari", "ajrakh", "jamdani", "leheriya", "embroidered", "printed", "handloom", "woven"];
+      const jewelleryItems = ["necklace", "earring", "bangle", "ring", "choker", "pendant"];
+
+      const activeFabrics = fabrics.filter(f => currentText.includes(f));
+      const activeStyles = styles.filter(s => currentText.includes(s));
+      const activeJewellery = jewelleryItems.filter(j => currentText.includes(j));
+
+      // Score and Filter
+      let scoredOthers = others.map((p: any) => {
+        const pText = `${p.title || ""} ${p.description || ""} ${(Array.isArray(p.tags) ? p.tags : []).join(" ")}`.toLowerCase();
+        let score = 0;
+
+        // Fabric constraint
+        if (activeFabrics.length > 0) {
+          const hasMatchingFabric = activeFabrics.some(f => pText.includes(f));
+          if (!hasMatchingFabric) return { product: p, score: -1 };
+        }
+
+        // Jewel constraint
+        if (openedCategory === "jewellery" && activeJewellery.length > 0) {
+          const hasMatchingJewel = activeJewellery.some(j => pText.includes(j));
+          if (!hasMatchingJewel) return { product: p, score: -1 };
+        }
+
+        // Style bonus
+        activeStyles.forEach(s => {
+          if (pText.includes(s)) score += 2;
+        });
+
+        // Fabric overlap bonus
+        activeFabrics.forEach(f => {
+          if (pText.includes(f)) score += 1;
+        });
+
+        return { product: p, score };
+      });
+
+      let finalCandidates = scoredOthers.filter(o => o.score >= 0);
+      if (finalCandidates.length === 0) {
+        finalCandidates = others.map((p: any) => ({ product: p, score: 0 }));
       }
+
+      finalCandidates.sort((a, b) => b.score - a.score);
+      others = finalCandidates.map(c => c.product);
     }
+    
     return json(others.slice(0, 8));
   }
 
@@ -1189,6 +1251,38 @@ async function handleNotifyMe(path: string[], req: NextRequest) {
   return error("Not found", 404);
 }
 
+// ─── Newsletter Subscription routes ──────────────────────────────────────────
+
+async function handleNewsletterSubscribe(path: string[], req: NextRequest) {
+  if (path[0] !== "newsletter" || path[1] !== "subscribe") return null;
+
+  if (req.method === "POST") {
+    const body = await parseBody(req);
+    const { email } = body || {};
+    if (!email || !email.includes("@")) {
+      return error("A valid email address is required");
+    }
+
+    const { newsletterSubscribers } = await import("@/lib/data-store");
+    const result = await newsletterSubscribers.create(email);
+    if (!result.success) {
+      return error(result.message || "Failed to subscribe", 400);
+    }
+
+    try {
+      const { sendNewsletterWelcomeEmail } = await import("@/lib/services/email");
+      await sendNewsletterWelcomeEmail(email);
+    } catch (e: any) {
+      console.error("Failed to send newsletter welcome email:", e.message);
+    }
+
+    return json({ success: true, message: "Thank you for subscribing to our newsletter!" });
+  }
+
+  return error("Not found", 404);
+}
+
+
 // ─── Settings route ────────────────────────────────────────────────────────────
 
 async function handleSettings(path: string[], req: NextRequest) {
@@ -1765,6 +1859,7 @@ async function routePOST(req: NextRequest, { params }: any) {
     || (await handleReviews(path, req))
     || (await handleQna(path, req))
     || (await handleNotifyMe(path, req))
+    || (await handleNewsletterSubscribe(path, req))
     || (await handleAdmin(path, req))
     || error("Not found", 404);
 }

@@ -1,49 +1,38 @@
 "use client";
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown, ChevronUp, X, Filter } from "lucide-react";
 
-export default function FilterSidebar({ filters }: { filters: any[] }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+interface FilterSidebarProps {
+  filters: any[];
+  activeFilters?: string[];
+  onFilterToggle: (filterInput: any) => void;
+  onClearAll: () => void;
+}
+
+export default function FilterSidebar({ 
+  filters, 
+  activeFilters = [], 
+  onFilterToggle, 
+  onClearAll 
+}: FilterSidebarProps) {
   const [isOpenMobile, setIsOpenMobile] = useState(false);
 
   if (!filters || filters.length === 0) return null;
 
   const handleFilterToggle = (filterInput: any) => {
-    const params = new URLSearchParams(searchParams.toString());
-    const filterJson = JSON.stringify(filterInput);
-    
-    // Check if filter already exists
-    const existingFilters = params.getAll("filter");
-    if (existingFilters.includes(filterJson)) {
-      // Remove it
-      const newFilters = existingFilters.filter(f => f !== filterJson);
-      params.delete("filter");
-      newFilters.forEach(f => params.append("filter", f));
-    } else {
-      // Add it
-      params.append("filter", filterJson);
-    }
-
-    params.delete("after"); // Reset pagination
-    router.push(`${pathname}?${params.toString()}`);
+    onFilterToggle(filterInput);
   };
 
   const isFilterActive = (filterInput: any) => {
     const filterJson = JSON.stringify(filterInput);
-    return searchParams.getAll("filter").includes(filterJson);
+    return activeFilters.includes(filterJson);
   };
 
-  const hasActiveFilters = searchParams.getAll("filter").length > 0;
+  const hasActiveFilters = activeFilters.length > 0;
 
   const clearAllFilters = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("filter");
-    params.delete("after");
-    router.push(`${pathname}?${params.toString()}`);
+    onClearAll();
   };
 
   return (
@@ -52,35 +41,50 @@ export default function FilterSidebar({ filters }: { filters: any[] }) {
       <div className="md:hidden mb-4">
         <button 
           onClick={() => setIsOpenMobile(true)}
-          className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded font-medium text-gray-700 w-full justify-center"
+          className="flex items-center gap-2 border border-maroonClr/40 bg-white px-4 py-2.5 rounded-lg font-semibold text-maroonClr w-full justify-center shadow-sm"
         >
-          <Filter className="w-4 h-4" /> Filter Options
+          <Filter className="w-4 h-4 text-maroonClr" /> Filter Products
+          {hasActiveFilters && (
+            <span className="ml-1 bg-maroonClr text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+              {activeFilters.length}
+            </span>
+          )}
         </button>
       </div>
 
-      {/* Sidebar Content */}
+      {/* Dark Backdrop Overlay on Mobile */}
+      {isOpenMobile && (
+        <div 
+          onClick={() => setIsOpenMobile(false)}
+          className="md:hidden fixed inset-0 z-[110] bg-black/60 backdrop-blur-xs transition-opacity duration-300"
+        />
+      )}
+
+      {/* Sidebar Content Sheet */}
       <div className={`
-        fixed inset-0 z-50 bg-white md:bg-transparent md:static md:block md:w-64 flex-shrink-0 transition-transform duration-300 transform
+        fixed inset-y-0 left-0 z-[120] bg-white w-full max-w-xs md:max-w-none md:bg-transparent md:sticky md:top-[160px] md:z-30 md:block md:w-64 flex-shrink-0 transition-transform duration-300 transform
         ${isOpenMobile ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-        overflow-y-auto h-full md:h-auto pb-20 md:pb-0
+        overflow-y-auto h-full md:h-fit md:max-h-[75vh] pb-28 md:pb-4 custom-scrollbar
       `}>
         <div className="p-4 md:p-0 border-b md:border-none border-gray-200 flex justify-between items-center md:mb-6">
-          <h2 className="text-xl font-serif font-bold text-gray-800">Filters</h2>
-          <button className="md:hidden p-2" onClick={() => setIsOpenMobile(false)}>
+          <h2 className="text-xl font-serif font-bold text-gray-800">Filter Products</h2>
+          <button className="md:hidden p-2 rounded-full hover:bg-gray-100" onClick={() => setIsOpenMobile(false)}>
             <X className="w-6 h-6 text-gray-500" />
           </button>
         </div>
 
         {hasActiveFilters && (
-          <button 
-            onClick={clearAllFilters}
-            className="text-sm text-primary underline mb-4 block hover:text-[#6A102A]"
-          >
-            Clear all
-          </button>
+          <div className="px-4 md:px-0 pt-3">
+            <button 
+              onClick={clearAllFilters}
+              className="text-xs font-bold text-maroonClr underline mb-4 block hover:text-[#6A102A]"
+            >
+              Clear all filters ({activeFilters.length})
+            </button>
+          </div>
         )}
 
-        <div className="px-4 md:px-0 space-y-6">
+        <div className="px-4 md:px-0 space-y-6 pt-2">
           {filters.map((filter) => (
             <FilterSection 
               key={filter.id} 
@@ -91,11 +95,19 @@ export default function FilterSidebar({ filters }: { filters: any[] }) {
           ))}
         </div>
 
-        {/* Mobile Apply Button */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
+        {/* Mobile Apply Floating Bar — High z-130 so it sits ABOVE MobileBottomNav (z-40) */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-[130] p-4 pb-6 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] flex gap-2">
+          {hasActiveFilters && (
+            <button
+              onClick={clearAllFilters}
+              className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg text-xs font-bold uppercase tracking-wider"
+            >
+              Clear
+            </button>
+          )}
           <button 
             onClick={() => setIsOpenMobile(false)}
-            className="w-full bg-primary text-white py-3 rounded font-bold tracking-widest uppercase"
+            className="flex-1 bg-maroonClr text-white py-3 rounded-lg text-xs font-bold tracking-widest uppercase shadow-md active:scale-98 transition-transform"
           >
             Show Results
           </button>
@@ -131,13 +143,13 @@ function FilterSection({ filter, isFilterActive, handleFilterToggle }: any) {
                   type="checkbox" 
                   checked={isFilterActive(JSON.parse(val.input))}
                   onChange={() => handleFilterToggle(JSON.parse(val.input))}
-                  className="peer appearance-none w-4 h-4 border border-gray-300 rounded checked:bg-primary checked:border-primary transition-colors cursor-pointer"
+                  className="peer appearance-none w-4 h-4 border border-gray-300 rounded checked:bg-maroonClr checked:border-maroonClr transition-colors cursor-pointer"
                 />
                 <svg className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M1 5L4.5 8.5L13 1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <span className="text-sm text-gray-600 group-hover:text-primary transition-colors flex-1">
+              <span className="text-sm text-gray-600 group-hover:text-maroonClr transition-colors flex-1">
                 {val.label}
               </span>
               <span className="text-xs text-gray-400">({val.count})</span>

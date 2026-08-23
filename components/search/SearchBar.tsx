@@ -53,10 +53,10 @@ export default function SearchBar() {
     <>
       <button 
         onClick={() => setIsOpen(true)}
-        className="text-gray-700 hover:text-primary transition"
+        className="inline-flex items-center justify-center bg-[#d4af37] hover:opacity-80 text-white relative h-8 w-8 cursor-pointer rounded-full transition-all shadow-sm"
         aria-label="Open search"
       >
-        <Search className="w-5 h-5" />
+        <Search className="h-4 w-4 text-white" aria-hidden="true" />
       </button>
 
       {isOpen && (

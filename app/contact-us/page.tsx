@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/contact/ContactForm";
+import { serverGetSettings } from "@/lib/server-data";
 
 export const metadata: Metadata = {
   title: "Contact Us",
   description: "Get in touch with Boutiique Vastraa. We'd love to hear from you!",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await serverGetSettings();
+  const footerSettings = settings?.footer || {};
+  const headerSettings = settings?.header || {};
+
+  const email = footerSettings.contactEmail || "boutiiquevastraa@gmail.com";
+  const contactPhone = footerSettings.contactPhone || "+91 - 9205238666";
+  const whatsappNumber = headerSettings.whatsappNumber || "919205238666";
   return (
     <div className="bg-white min-h-screen">
       <div className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
@@ -28,8 +36,8 @@ export default function ContactPage() {
                 </svg>
                 <div>
                   <h3 className="font-medium text-gray-800">Email</h3>
-                  <a href="mailto:info@boutiiquevastraa.com" className="text-gray-600 hover:text-maroonClr">
-                    info@boutiiquevastraa.com
+                  <a href={`mailto:${email}`} className="text-gray-600 hover:text-maroonClr">
+                    {email}
                   </a>
                 </div>
               </div>
@@ -40,9 +48,14 @@ export default function ContactPage() {
                 </svg>
                 <div>
                   <h3 className="font-medium text-gray-800">Phone / WhatsApp</h3>
-                  <a href="tel:+919205238666" className="text-gray-600 hover:text-maroonClr">
-                    +91 92052 38666
-                  </a>
+                  <div className="flex flex-col gap-1 mt-0.5">
+                    <a href={`tel:${contactPhone.replace(/[^0-9+]/g, "")}`} className="text-gray-600 hover:text-maroonClr text-sm">
+                      Call: {contactPhone}
+                    </a>
+                    <a href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-maroonClr text-sm flex items-center gap-1">
+                      WhatsApp: +91 - {whatsappNumber.replace(/^91/, "").replace(/(\d{5})(\d{5})/, "$1 $2")}
+                    </a>
+                  </div>
                 </div>
               </div>
 
@@ -53,9 +66,10 @@ export default function ContactPage() {
                 </svg>
                 <div>
                   <h3 className="font-medium text-gray-800">Address</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-sm leading-relaxed mt-0.5">
                     Boutiique Vastraa<br />
-                    Mumbai, Maharashtra<br />
+                    2 No Gouranga Colony, Koler Danga Road<br />
+                    Nabadwip, West Bengal, Nadia, 741302<br />
                     India
                   </p>
                 </div>

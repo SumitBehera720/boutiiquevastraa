@@ -60,7 +60,7 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
   };
 
   return (
-    <div className="bg-white min-h-screen pb-16">
+    <div className="bg-white min-h-screen pb-4">
       <ScrollToTop />
       <script
         type="application/ld+json"
@@ -94,7 +94,7 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
       />
 
       {/* Explore Similar Styles at bottom */}
-      <div className="mt-20 border-t border-gray-200">
+      <div className="mt-10 border-t border-gray-200">
         <RelatedProducts productId={product.id} />
       </div>
     </div>

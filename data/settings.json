@@ -38,14 +38,165 @@
     "lovedCollectionsSubtitle": "Explore handpicked collections directly from regional weavers.",
     "lovedCollectionsItems": [
       {
-        "collectionHandle": "saree",
-        "customTitle": "Heritage Silks",
-        "customImage": "/images/banner-1773659037696-747582281.webp"
+        "id": "loved_1",
+        "title": "New Arrivals",
+        "handle": "new-arrivals",
+        "image": "/images/client-1.jpg",
+        "discountBadge": ""
       },
       {
-        "collectionHandle": "kurti",
-        "customTitle": "Elegant Kurtis",
-        "customImage": "/images/banner-1773659047206-859638957.webp"
+        "id": "loved_2",
+        "title": "Festive Edit",
+        "handle": "festive",
+        "image": "/images/client-2.jpg",
+        "discountBadge": ""
+      },
+      {
+        "id": "loved_3",
+        "title": "Flash Sale",
+        "handle": "sale",
+        "image": "/images/client-3.jpg",
+        "discountBadge": "40% FLAT OFF"
+      },
+      {
+        "id": "loved_4",
+        "title": "Loom Aura",
+        "handle": "loom-aura",
+        "image": "/images/client-4.jpg",
+        "discountBadge": ""
+      },
+      {
+        "id": "loved_5",
+        "title": "Shipped with Love",
+        "handle": "best-sellers",
+        "image": "/images/care.jpg",
+        "discountBadge": ""
+      },
+      {
+        "id": "loved_6",
+        "title": "Best Sellers",
+        "handle": "best-sellers",
+        "image": "/images/client-5.jpg",
+        "discountBadge": ""
+      }
+    ],
+    "trendingCollectionsTitle": "TOP TRENDING COLLECTIONS",
+    "trendingCollectionsItems": [
+      {
+        "id": "tr_1",
+        "title": "Mul Diaries",
+        "handle": "mul-diaries",
+        "image": "/images/client-1.jpg"
+      },
+      {
+        "id": "tr_2",
+        "title": "Linen Luxe",
+        "handle": "linen",
+        "image": "/images/client-2.jpg"
+      },
+      {
+        "id": "tr_3",
+        "title": "Tissue Tales",
+        "handle": "tissuetales",
+        "image": "/images/client-3.jpg"
+      },
+      {
+        "id": "tr_4",
+        "title": "Weave Heritage",
+        "handle": "loom-aura",
+        "image": "/images/client-4.jpg"
+      },
+      {
+        "id": "tr_5",
+        "title": "Cloud Cotton",
+        "handle": "cotton",
+        "image": "/images/client-5.jpg"
+      }
+    ],
+    "videoReels": [
+      {
+        "id": "reel1",
+        "thumbnail": "/images/client-1.jpg",
+        "views": "59K",
+        "likes": "124",
+        "shares": "211",
+        "title": "Color Block Linen Cotton Saree - Festive Special",
+        "price": "₹ 1,999",
+        "compareAtPrice": "₹ 3,899",
+        "discountBadge": "49% off",
+        "productHandle": "woven-kanjivaram-silk-blend-saree-pink"
+      },
+      {
+        "id": "reel2",
+        "thumbnail": "/images/client-2.jpg",
+        "views": "90K",
+        "likes": "342",
+        "shares": "189",
+        "title": "The Luxe Gleam Tissue Cotton Saree",
+        "price": "₹ 1,920",
+        "compareAtPrice": "₹ 3,819",
+        "discountBadge": "50% off",
+        "productHandle": "woven-kanjivaram-silk-blend-saree-pink"
+      },
+      {
+        "id": "reel3",
+        "thumbnail": "/images/client-3.jpg",
+        "views": "35K",
+        "likes": "408",
+        "shares": "276",
+        "title": "Premium Tissue Saree Accented With Sequin",
+        "price": "₹ 1,790",
+        "compareAtPrice": "₹ 2,690",
+        "discountBadge": "33% off",
+        "productHandle": "woven-kanjivaram-silk-blend-saree-pink"
+      },
+      {
+        "id": "reel4",
+        "thumbnail": "/images/client-4.jpg",
+        "views": "68K",
+        "likes": "89",
+        "shares": "52",
+        "title": "Blush Breeze Mul Cotton Saree",
+        "price": "₹ 1,889",
+        "compareAtPrice": "₹ 2,989",
+        "discountBadge": "37% off",
+        "productHandle": "woven-kanjivaram-silk-blend-saree-pink"
+      },
+      {
+        "id": "reel5",
+        "thumbnail": "/images/client-5.jpg",
+        "views": "1L",
+        "likes": "215",
+        "shares": "143",
+        "title": "Mul Tones – Vibrant Checks Edition Saree",
+        "price": "₹ 1,685",
+        "compareAtPrice": "₹ 2,885",
+        "discountBadge": "42% off",
+        "productHandle": "woven-kanjivaram-silk-blend-saree-pink"
+      },
+      {
+        "id": "reel6",
+        "thumbnail": "/images/client-1.jpg",
+        "views": "34K",
+        "likes": "178",
+        "shares": "95",
+        "title": "Threads Of Joy - Multicolor Mul Cotton Magic",
+        "price": "₹ 1,798",
+        "compareAtPrice": "₹ 2,898",
+        "discountBadge": "38% off",
+        "productHandle": "woven-kanjivaram-silk-blend-saree-pink"
+      },
+      {
+        "id": "reel7",
+        "thumbnail": "/images/client-2.jpg",
+        "views": "49K",
+        "likes": "230",
+        "shares": "112",
+        "title": "Lustrous Golden Border Festive Drape",
+        "price": "₹ 1,999",
+        "compareAtPrice": "₹ 3,899",
+        "discountBadge": "49% off",
+        "productHandle": "woven-kanjivaram-silk-blend-saree-pink"
       }
     ],
     "patternBanner": {
@@ -234,7 +385,7 @@
     "logoUrl": "/images/logo.png",
     "description": "Timeless Elegance, Handcrafted for Every Occasion. Shop our exclusive range of luxury sarees, designer kurtis, and jewellery.",
     "contactEmail": "boutiiquevastraa@gmail.com",
-    "contactPhone": "+91 - 9205248666",
+    "contactPhone": "+91 - 9205238666",
     "copyright": "© 2026 Boutiique Vastraa. All rights reserved.",
     "facebookUrl": "https://facebook.com",
     "instagramUrl": "https://instagram.com",
@@ -242,11 +393,11 @@
     "links": [
       {
         "label": "About Us",
-        "url": "/about"
+        "url": "/about-us"
       },
       {
         "label": "Contact Us",
-        "url": "/contact"
+        "url": "/contact-us"
       },
       {
         "label": "FAQ",
@@ -296,7 +447,74 @@
         "label": "Jewellery",
         "url": "/collections/jewellery"
       }
-    ]
+    ],
+    "megaMenuSarees": {
+      "fabricsTitle": "SAREE FABRICS & WEAVES",
+      "fabrics": [
+        { "label": "TISSUE SAREES", "handle": "tissuetales", "img": "/images/client-3.jpg" },
+        { "label": "LINEN SAREES", "handle": "linen", "img": "/images/client-2.jpg" },
+        { "label": "MUL COTTON", "handle": "mul-diaries", "img": "/images/client-5.jpg" },
+        { "label": "SILK SAREES", "handle": "silk", "img": "/images/client-1.jpg" },
+        { "label": "ORGANZA SAREES", "handle": "loom-aura", "img": "/images/client-4.jpg" },
+        { "label": "CHIFFON & GEORGETTE", "handle": "saree", "img": "/images/client-2.jpg" }
+      ],
+      "occasionsTitle": "SAREES BY OCCASION",
+      "occasions": [
+        { "label": "FESTIVE DRAPES", "handle": "festive", "img": "/images/client-2.jpg" },
+        { "label": "WEDDING SAREES", "handle": "wedding", "img": "/images/client-3.jpg" },
+        { "label": "PARTYWEAR SAREES", "handle": "party-wear", "img": "/images/client-4.jpg" },
+        { "label": "CASUAL DRAPES", "handle": "casual", "img": "/images/client-1.jpg" },
+        { "label": "WORKWEAR SAREES", "handle": "office-wear", "img": "/images/client-5.jpg" },
+        { "label": "BESTSELLING SAREES", "handle": "best-sellers", "img": "/images/client-3.jpg" }
+      ],
+      "colorsTitle": "SHOP BY COLOR & CRAFT",
+      "colors": [
+        { "label": "CRIMSON RED", "handle": "red", "img": "/images/client-3.jpg" },
+        { "label": "LUXE GOLD", "handle": "luxe-gold", "img": "/images/client-1.jpg" },
+        { "label": "PASTEL PEACH", "handle": "peach", "img": "/images/client-2.jpg" },
+        { "label": "LAVENDER TONES", "handle": "lavender", "img": "/images/client-5.jpg" },
+        { "label": "ROYAL BLUE", "handle": "royal-blue", "img": "/images/client-4.jpg" },
+        { "label": "MUSTARD YELLOW", "handle": "yellow", "img": "/images/client-3.jpg" }
+      ],
+      "promoTopImage": "/images/client-1.jpg",
+      "promoTopLink": "/collections/silk",
+      "promoBottomImage": "/images/client-4.jpg",
+      "promoBottomText": "Festive Sarees - 45% OFF",
+      "promoBottomLink": "/collections/festive"
+    },
+    "megaMenuCollections": {
+      "categoriesTitle": "ALL CATEGORIES",
+      "categories": [
+        { "label": "SAREES", "handle": "saree", "img": "/images/client-1.jpg" },
+        { "label": "KURTIS & TUNICS", "handle": "kurti", "img": "/images/client-2.jpg" },
+        { "label": "LEHENGAS", "handle": "lehenga", "img": "/images/client-4.jpg" },
+        { "label": "JEWELLERY", "handle": "jewellery", "img": "/images/client-3.jpg" },
+        { "label": "FABRIC LIBRARY", "handle": "fabric", "img": "/images/client-5.jpg" },
+        { "label": "SALE & OFFERS", "handle": "sale", "img": "/images/client-3.jpg" }
+      ],
+      "occasionsTitle": "SHOP BY OCCASION",
+      "occasions": [
+        { "label": "FESTIVE SPECIALS", "handle": "festive", "img": "/images/client-2.jpg" },
+        { "label": "CASUAL WEAR", "handle": "casual", "img": "/images/client-1.jpg" },
+        { "label": "WEDDING EDIT", "handle": "wedding", "img": "/images/client-3.jpg" },
+        { "label": "PARTY & EVENING", "handle": "party-wear", "img": "/images/client-4.jpg" },
+        { "label": "NEW ARRIVALS", "handle": "new-arrivals", "img": "/images/client-5.jpg" }
+      ],
+      "colorsTitle": "SHOP BY COLOR",
+      "colors": [
+        { "label": "RED", "handle": "red", "img": "/images/client-3.jpg" },
+        { "label": "GOLD", "handle": "luxe-gold", "img": "/images/client-1.jpg" },
+        { "label": "PEACH", "handle": "peach", "img": "/images/client-2.jpg" },
+        { "label": "LAVENDER", "handle": "lavender", "img": "/images/client-5.jpg" },
+        { "label": "ROYAL BLUE", "handle": "royal-blue", "img": "/images/client-4.jpg" },
+        { "label": "BURGUNDY", "handle": "burgundy", "img": "/images/client-3.jpg" }
+      ],
+      "promoTopImage": "/images/client-2.jpg",
+      "promoTopLink": "/collections",
+      "promoBottomImage": "/images/client-5.jpg",
+      "promoBottomText": "Explore Collections - 45% OFF",
+      "promoBottomLink": "/collections/sale"
+    }
   },
   "gifts": [
     {

@@ -2,14 +2,26 @@ import { Metadata } from 'next';
 import { getProducts, getCollections } from "@/lib/shopify/queries";
 export const dynamic = 'force-dynamic';
 import CollectionsSlider from "@/components/home/CollectionsSlider";
-import PatternBanner from "@/components/home/PatternBanner";
 import TopSellings from "@/components/home/TopSellings";
 import PerfectSareeTabs from "@/components/home/PerfectSareeTabs";
-import BestCategories from "@/components/home/BestCategories";
 import FeaturesGrid from "@/components/home/FeaturesGrid";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import FaqAccordion from "@/components/home/FaqAccordion";
 import HeroBanner from "@/components/home/HeroBanner";
+import TrustBadgeStrip from "@/components/home/TrustBadgeStrip";
+import PromoBannerGrid from "@/components/home/PromoBannerGrid";
+import EditorialBlock from "@/components/home/EditorialBlock";
+import StatsStrip from "@/components/home/StatsStrip";
+import ArtisanStorySection from "@/components/home/ArtisanStorySection";
+import TrustIconsRow from "@/components/home/TrustIconsRow";
+import FabricLibrary from "@/components/home/FabricLibrary";
+import CelebritySpotlight from "@/components/home/CelebritySpotlight";
+import ArtisanTimeline from "@/components/home/ArtisanTimeline";
+import ReelsSlider from "@/components/home/ReelsSlider";
+import TrendingCollectionsGrid from "@/components/home/TrendingCollectionsGrid";
+import OccasionFinder from "@/components/home/OccasionFinder";
+import AsSeenInPress from "@/components/home/AsSeenInPress";
+import StoryDrapeReveal from "@/components/home/StoryDrapeReveal";
 import { serverGetSettings, serverGetReviews } from "@/lib/server-data";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -139,56 +151,84 @@ export default async function Home() {
 
   return (
     <>
-      {/* Hero Banner - user provided banner images */}
+      {/* 1. Hero Slideshow */}
       <HeroBanner slides={bannerSlides} />
 
-      {/* Section 1: Our Most Loved Collections */}
-      <CollectionsSlider collections={lovedCollections} title={homeSettings.lovedCollectionsTitle} />
+      {/* 2. Circular Quick Category Links */}
+      <CollectionsSlider collections={lovedCollections} items={homeSettings.lovedCollectionsItems} title={homeSettings.lovedCollectionsTitle} />
 
-      {/* Section 2: Pattern Banner */}
-      <PatternBanner 
-        heading={homeSettings.patternBanner?.heading} 
-        mediaUrl={homeSettings.patternBanner?.mediaUrl} 
-        type={homeSettings.patternBanner?.type} 
-        reels={homeSettings.patternBanner?.reels}
-      />
+      {/* 3. Thin Trust Badge Strip */}
+      <TrustBadgeStrip />
 
-      {/* Section 3: Top-Sellings */}
+      {/* 4. Top Trending Products (Seen immediately!) */}
       <TopSellings 
         products={trendingProducts} 
         title={homeSettings.trendingTitle} 
         subtitle={homeSettings.trendingSubtitle} 
       />
 
-      {/* Section 4: Find Your Perfect Saree (Tabs) */}
+      {/* 4.4. Top Trending Collections (Scalloped Petal Cards) */}
+      <TrendingCollectionsGrid items={homeSettings.trendingCollectionsItems} title={homeSettings.trendingCollectionsTitle} />
+
+      {/* 4.5. Upgraded Video Reels Slider Section */}
+      <ReelsSlider reels={homeSettings.videoReels} />
+
+      {/* 4.6. Interactive Occasion Drape Quiz (Unique Competitive Feature) */}
+      <OccasionFinder />
+
+      {/* 5. Editorial / Brand Story Block */}
+      <EditorialBlock
+        imageUrl={homeSettings.editorialBlock?.imageUrl}
+        heading={homeSettings.editorialBlock?.heading}
+        body={homeSettings.editorialBlock?.body}
+        ctaText={homeSettings.editorialBlock?.ctaText}
+        ctaLink={homeSettings.editorialBlock?.ctaLink}
+        tag={homeSettings.editorialBlock?.tag}
+      />
+
+      {/* 6. Find Your Perfect Style (Collection Tabs) */}
       <PerfectSareeTabs 
         tabs={perfectSareeTabs} 
         title={homeSettings.perfectSareeTitle} 
         subtitle={homeSettings.perfectSareeSubtitle} 
       />
 
-      {/* Section 5: Explore Best Categories */}
-      <BestCategories 
-        collections={bestCategories} 
-        title={homeSettings.categoriesTitle} 
-        subtitle={homeSettings.categoriesSubtitle} 
-      />
+      {/* 7. Polaroid Lookbook Collage */}
+      <CelebritySpotlight />
 
-      {/* Section 6 + 7 + 8: Maroon Section (Features + Testimonials + FAQ) */}
+      {/* 8. Secondary Campaign Banners (Lower down to keep top clean) */}
+      <PromoBannerGrid banners={homeSettings.promoBanners} />
+
+      {/* 9. Upgraded Swatch Fabric Library Flip Grid */}
+      <FabricLibrary />
+
+      {/* 10. Upgraded Interactive Artisan Loom Stages Timeline */}
+      <ArtisanTimeline />
+
+      {/* 10.2. Interactive Story Weave Transformer */}
+      <StoryDrapeReveal />
+
+      {/* 10.5. As Seen In Media & Press Authority Bar */}
+      <AsSeenInPress />
+
+      {/* 11. Stats Strip — Big Numbers */}
+      <StatsStrip />
+
+      {/* 12. Maroon Section: Features Grid + Customer Testimonials + FAQ */}
       <section className="bg-maroonClr">
-        {/* Section 6: Features Grid */}
+        {/* Features Grid */}
         <FeaturesGrid 
           title={homeSettings.featuresTitle} 
           subtitle={homeSettings.featuresSubtitle} 
           features={homeSettings.features} 
         />
 
-        {/* Section 7: Testimonials */}
+        {/* Customer Reviews / Testimonials */}
         <div className="px-4 md:px-6 pb-12 sm:pb-16 md:pb-20">
           <TestimonialsSection customTestimonials={customTestimonials} />
         </div>
 
-        {/* Section 8: FAQ Accordion */}
+        {/* FAQ Accordion */}
         <FaqAccordion 
           title={homeSettings.faqTitle} 
           subtitle={homeSettings.faqSubtitle} 
@@ -196,6 +236,9 @@ export default async function Home() {
           faqs={homeSettings.faqs} 
         />
       </section>
+
+      {/* 13. Trust Icons Row — Free Shipping / Support / Secure / Easy Returns */}
+      <TrustIconsRow />
     </>
   );
 }

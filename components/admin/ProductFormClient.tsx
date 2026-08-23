@@ -73,6 +73,69 @@ export default function ProductFormClient({ product, collections }: ProductFormC
   );
   const [customSizeText, setCustomSizeText] = useState("");
 
+  // Specifications States
+  const DEFAULT_SPECS = [
+    { key: "Made of", value: "" },
+    { key: "Pattern", value: "" },
+    { key: "Fit Type", value: "" },
+    { key: "Color", value: "" },
+    { key: "Pocket", value: "" },
+    { key: "Care Instruction", value: "" },
+    { key: "Available sizes", value: "" },
+    { key: "SKU", value: "" },
+    { key: "Country of Origin", value: "" },
+  ];
+
+  const initialSpecs = (() => {
+    if (product?.specifications && typeof product.specifications === "object") {
+      const keys = Object.keys(product.specifications);
+      if (keys.length > 0) {
+        const keyMap: Record<string, string> = {
+          madeOf: "Made of",
+          "🧵 Made of": "Made of",
+          pattern: "Pattern",
+          "📐 Pattern": "Pattern",
+          fitType: "Fit Type",
+          "🕺 Fit Type": "Fit Type",
+          color: "Color",
+          "🎨 Color": "Color",
+          pocket: "Pocket",
+          "🎒 Pocket": "Pocket",
+          careInstruction: "Care Instruction",
+          "🧼 Care Instruction": "Care Instruction",
+          availableSizes: "Available sizes",
+          "📏 Available sizes": "Available sizes",
+          sku: "SKU",
+          "🏷️ SKU": "SKU",
+          country: "Country of Origin",
+          "🌍 Country of Origin": "Country of Origin"
+        };
+
+        const list: { key: string; value: string }[] = [];
+        keys.forEach(k => {
+          if (k !== "manufacturedBy" && k !== "shippedBy") {
+            list.push({
+              key: keyMap[k] || k,
+              value: String(product.specifications[k] || "")
+            });
+          }
+        });
+        return list.length > 0 ? list : DEFAULT_SPECS;
+      }
+    }
+    return DEFAULT_SPECS;
+  })();
+
+  const [specs, setSpecs] = useState<{ key: string; value: string }[]>(initialSpecs);
+  const [specManufacturedBy, setSpecManufacturedBy] = useState(
+    product?.specifications?.manufacturedBy || 
+    "Boutiique Vastraa\n2 No Gouranga Colony Koler Danga Road Nabadwip, West Bengal, Nadia, 741302"
+  );
+  const [specShippedBy, setSpecShippedBy] = useState(
+    product?.specifications?.shippedBy || 
+    "Boutiique Vastraa"
+  );
+
   const updateSizeOptions = (enabled: boolean, sizeList: string[]) => {
     let updatedOpts = options.filter((o: any) => o.name?.toLowerCase() !== "size");
     if (enabled && sizeList.length > 0) {
@@ -278,6 +341,21 @@ export default function ProductFormClient({ product, collections }: ProductFormC
     }
   };
 
+  // Dynamic Specs Row Management
+  const handleAddSpecRow = () => {
+    setSpecs([...specs, { key: "", value: "" }]);
+  };
+
+  const handleRemoveSpecRow = (idx: number) => {
+    setSpecs(specs.filter((_, i) => i !== idx));
+  };
+
+  const handleSpecChange = (idx: number, field: "key" | "value", val: string) => {
+    const next = [...specs];
+    next[idx][field] = val;
+    setSpecs(next);
+  };
+
   // Submit Handler
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -315,7 +393,20 @@ export default function ProductFormClient({ product, collections }: ProductFormC
         showSizeChart,
         sizeChartImage: sizeChartImage || "",
         sizesEnabled,
-        selectedSizes
+        selectedSizes,
+        specifications: (() => {
+          const obj: Record<string, string> = {};
+          specs.forEach(s => {
+            const tk = s.key.trim();
+            const tv = s.value.trim();
+            if (tk) {
+              obj[tk] = tv;
+            }
+          });
+          obj.manufacturedBy = specManufacturedBy;
+          obj.shippedBy = specShippedBy;
+          return obj;
+        })()
       });
 
       if (res.success) {
@@ -416,6 +507,96 @@ export default function ProductFormClient({ product, collections }: ProductFormC
                 placeholder="Write detailed information about the fabric, weaving style, border details, and care guidelines..."
                 className="w-full bg-neutral-900 border border-neutral-800 rounded-lg p-4 text-xs text-white focus:outline-none focus:border-maroonClr resize-none"
               />
+            </div>
+          </div>
+
+          {/* Section 1.5: Specifications Details */}
+          <div className="bg-neutral-950 p-6 rounded-xl border border-neutral-800 space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-neutral-900">
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Specifications & Manufacturing Info</h3>
+                <p className="text-[11px] text-neutral-500 mt-1">Configure specification details (emoji friendly!). Admin can dynamically add or delete rows.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddSpecRow}
+                className="bg-neutral-800 text-[#C9A84C] hover:bg-neutral-700 px-3 py-1.5 rounded text-xs font-bold uppercase transition-colors flex items-center gap-1 shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add Row
+              </button>
+            </div>
+
+            {specs.length > 0 && (
+              <div className="grid grid-cols-12 gap-3 mb-1 text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                <div className="col-span-5 pl-1">Specification Name (Key)</div>
+                <div className="col-span-6 pl-1">Value Description</div>
+                <div className="col-span-1"></div>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {specs.map((item, idx) => (
+                <div key={idx} className="grid grid-cols-12 gap-3 items-center">
+                  <div className="col-span-5">
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. 🧵 Made of"
+                      value={item.key}
+                      onChange={(e) => handleSpecChange(idx, "key", e.target.value)}
+                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-maroonClr"
+                    />
+                  </div>
+                  <div className="col-span-6">
+                    <input
+                      type="text"
+                      placeholder="e.g. 88% Nylon 12% Spandex"
+                      value={item.value}
+                      onChange={(e) => handleSpecChange(idx, "value", e.target.value)}
+                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-maroonClr"
+                    />
+                  </div>
+                  <div className="col-span-1 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSpecRow(idx)}
+                      className="text-neutral-500 hover:text-red-500 p-2 transition-colors"
+                      title="Remove Row"
+                    >
+                      <Trash2 className="w-4.5 h-4.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {specs.length === 0 && (
+              <p className="text-neutral-600 text-xs italic py-2">No specifications added. Click "Add Row" above to create one.</p>
+            )}
+
+            <div className="space-y-4 pt-4 border-t border-neutral-900">
+              <div>
+                <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Manufactured & Packed By</label>
+                <textarea
+                  value={specManufacturedBy}
+                  onChange={(e) => setSpecManufacturedBy(e.target.value)}
+                  placeholder="Company Name&#10;Address Details..."
+                  rows={3}
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr font-sans"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Shipped & Marketed By</label>
+                <textarea
+                  value={specShippedBy}
+                  onChange={(e) => setSpecShippedBy(e.target.value)}
+                  placeholder="Company Name&#10;Address Details..."
+                  rows={2}
+                  className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-4 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr font-sans"
+                />
+              </div>
             </div>
           </div>
 

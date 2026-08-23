@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { saveSeoSettingsAction, saveBannersSettingsAction, saveHomepageSettingsAction, saveFooterSettingsAction, saveHeaderSettingsAction, uploadFileAction } from "@/app/actions/adminSettings";
+import { saveSeoSettingsAction, saveBannersSettingsAction, saveHomepageSettingsAction, saveFooterSettingsAction, saveHeaderSettingsAction, saveCollectionBannersAction, uploadFileAction } from "@/app/actions/adminSettings";
 import { Sparkles, Save, Plus, Trash2, ArrowUp, ArrowDown, Image as ImageIcon, Globe, AlertCircle, CheckCircle2, Home, HelpCircle, Gift, Info, Star, PlusCircle, Link2, Mail, Phone, Heart, Grid, Video, Play, List, Compass, MessageSquare, Menu, Smile, Laptop, Smartphone } from "lucide-react";
 
 interface SettingsFormClientProps {
@@ -93,7 +93,7 @@ function ImageOrVideoUploader({
 }
 
 export default function SettingsFormClient({ initialSettings, products = [], collections = [] }: SettingsFormClientProps) {
-  const [activeTab, setActiveTab] = useState<"SEO" | "HEADER" | "BANNERS" | "HOMEPAGE" | "FOOTER">("SEO");
+  const [activeTab, setActiveTab] = useState<"SEO" | "HEADER" | "BANNERS" | "HOMEPAGE" | "FOOTER" | "COLLECTIONS">("SEO");
   const [activeSubSection, setActiveSubSection] = useState<string>("lovedCollections");
   
   const [seoSuccess, setSeoSuccess] = useState("");
@@ -101,8 +101,14 @@ export default function SettingsFormClient({ initialSettings, products = [], col
   const [bannersSuccess, setBannersSuccess] = useState("");
   const [homeSuccess, setHomeSuccess] = useState("");
   const [footerSuccess, setFooterSuccess] = useState("");
+  const [collectionsSuccess, setCollectionsSuccess] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // ----------------------------------------------------
+  // Collection Banners State
+  // ----------------------------------------------------
+  const [collectionBanners, setCollectionBanners] = useState<Record<string, string>>(initialSettings.collectionBanners || {});
 
   // ----------------------------------------------------
   // 1. SEO State
@@ -115,32 +121,32 @@ export default function SettingsFormClient({ initialSettings, products = [], col
   // 2. Header State
   // ----------------------------------------------------
   const hd = initialSettings.header || {};
+  const hp = initialSettings.homepage || {};
+  const [banners, setBanners] = useState<any[]>(initialSettings.banners || []);
+
   const [headerLogoUrl, setHeaderLogoUrl] = useState(hd.logoUrl || "");
   const [whatsappNumber, setWhatsappNumber] = useState(hd.whatsappNumber || "");
   const [announcements, setAnnouncements] = useState<string[]>(hd.announcements || []);
   const [marqueeItems, setMarqueeItems] = useState<any[]>(hd.marquee || []);
   const [menuLinks, setMenuLinks] = useState<any[]>(hd.menuLinks || []);
 
+  // Mega Menus State
+  const [megaMenuSarees, setMegaMenuSarees] = useState<any>(hd.megaMenuSarees || {});
+  const [megaMenuCollections, setMegaMenuCollections] = useState<any>(hd.megaMenuCollections || {});
 
-  // ----------------------------------------------------
-  // 3. Banners State
-  // ----------------------------------------------------
-  const [banners, setBanners] = useState<any[]>(initialSettings.banners || []);
-
-  // ----------------------------------------------------
-  // 4. Homepage Sections State
-  // ----------------------------------------------------
-  const hp = initialSettings.homepage || {};
-  
   // Section 1: Loved Collections
   const [lovedCollectionsTitle, setLovedCollectionsTitle] = useState(hp.lovedCollectionsTitle || "");
   const [lovedCollectionsSubtitle, setLovedCollectionsSubtitle] = useState(hp.lovedCollectionsSubtitle || "");
   const [lovedCollectionsItems, setLovedCollectionsItems] = useState<any[]>(hp.lovedCollectionsItems || []);
 
+  // Top Trending Collections Scalloped Cards
+  const [trendingCollectionsTitle, setTrendingCollectionsTitle] = useState(hp.trendingCollectionsTitle || "TOP TRENDING COLLECTIONS");
+  const [trendingCollectionsItems, setTrendingCollectionsItems] = useState<any[]>(hp.trendingCollectionsItems || []);
+
   const [patternBannerHeading, setPatternBannerHeading] = useState(hp.patternBanner?.heading || "");
   const [patternBannerType, setPatternBannerType] = useState<"IMAGE" | "VIDEO">(hp.patternBanner?.type || "IMAGE");
   const [patternBannerMediaUrl, setPatternBannerMediaUrl] = useState(hp.patternBanner?.mediaUrl || "");
-  const [reels, setReels] = useState<any[]>(hp.patternBanner?.reels || []);
+  const [reels, setReels] = useState<any[]>(hp.videoReels || hp.patternBanner?.reels || []);
 
   // Section 3: Top Sellings
   const [trendingTitle, setTrendingTitle] = useState(hp.trendingTitle || "");
@@ -462,7 +468,9 @@ export default function SettingsFormClient({ initialSettings, products = [], col
       whatsappNumber,
       announcements,
       marquee: marqueeItems,
-      menuLinks
+      menuLinks,
+      megaMenuSarees,
+      megaMenuCollections
     });
     setLoading(false);
     if (res.success) setHeaderSuccess("Header layouts saved successfully!");
@@ -487,6 +495,9 @@ export default function SettingsFormClient({ initialSettings, products = [], col
       lovedCollectionsTitle,
       lovedCollectionsSubtitle,
       lovedCollectionsItems,
+      trendingCollectionsTitle,
+      trendingCollectionsItems,
+      videoReels: reels,
       patternBanner: {
         heading: patternBannerHeading,
         type: patternBannerType,
@@ -538,6 +549,16 @@ export default function SettingsFormClient({ initialSettings, products = [], col
     else setError(res.error || "Failed to save footer settings.");
   };
 
+  const triggerSaveCollectionBanners = async () => {
+    setCollectionsSuccess("");
+    setError("");
+    setLoading(true);
+    const res = await saveCollectionBannersAction(collectionBanners);
+    setLoading(false);
+    if (res.success) setCollectionsSuccess("Category Banners saved successfully!");
+    else setError(res.error || "Failed to save collection banners.");
+  };
+
   return (
     <div className="space-y-6 max-w-6xl">
       
@@ -552,7 +573,7 @@ export default function SettingsFormClient({ initialSettings, products = [], col
 
         {/* Tab Switcher */}
         <div className="flex border border-neutral-800 rounded-lg bg-neutral-950 p-1 flex-wrap gap-1">
-          {(["SEO", "HEADER", "BANNERS", "HOMEPAGE", "FOOTER"] as const).map((tab) => (
+          {(["SEO", "HEADER", "BANNERS", "HOMEPAGE", "FOOTER", "COLLECTIONS"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => {
@@ -563,6 +584,7 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                 setBannersSuccess("");
                 setHomeSuccess("");
                 setFooterSuccess("");
+                setCollectionsSuccess("");
               }}
               className={`px-3.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
                 activeTab === tab
@@ -570,7 +592,7 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                   : "text-neutral-400 hover:text-white"
               }`}
             >
-              {tab === "SEO" ? "SEO & METADATA" : tab === "HEADER" ? "HEADER LAYOUT" : tab === "BANNERS" ? "HERO SLIDES" : tab === "HOMEPAGE" ? "HOMEPAGE SECTIONS" : "STORE FOOTER"}
+              {tab === "SEO" ? "SEO & METADATA" : tab === "HEADER" ? "HEADER LAYOUT" : tab === "BANNERS" ? "HERO SLIDES" : tab === "HOMEPAGE" ? "HOMEPAGE SECTIONS" : tab === "FOOTER" ? "STORE FOOTER" : "CATEGORY BANNERS"}
             </button>
           ))}
         </div>
@@ -985,8 +1007,9 @@ export default function SettingsFormClient({ initialSettings, products = [], col
           <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-3 flex flex-col gap-1 lg:sticky lg:top-24">
             <p className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider px-3 mb-2 pt-2">Homepage Sections</p>
             {[
-              { id: "lovedCollections", label: "Loved Collections", icon: Heart },
-              { id: "patternBanner", label: "Pattern Banner (Video/Img)", icon: Video },
+              { id: "lovedCollections", label: "Loved Collections (6 Boxes)", icon: Heart },
+              { id: "trendingCollections", label: "Top Trending Cards (5 Scalloped)", icon: Star },
+              { id: "patternBanner", label: "Shoppable Video Reels", icon: Video },
               { id: "topSellings", label: "Top-Sellings Products", icon: List },
               { id: "perfectSaree", label: "Perfect Saree Tabs", icon: Compass },
               { id: "bestCategories", label: "Best Categories Grid", icon: Grid },
@@ -1029,7 +1052,7 @@ export default function SettingsFormClient({ initialSettings, products = [], col
             {/* Subsection 1: Loved Collections */}
             {activeSubSection === "lovedCollections" && (
               <div className="space-y-4">
-                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">1. Our Most Loved Collections Slider</h3>
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">1. Our Most Loved Collections (6 Boxes)</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Title</label>
@@ -1073,16 +1096,86 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                   {lovedCollectionsItems.map((item, idx) => (
                     <div key={idx} className="flex justify-between items-center bg-neutral-900 border border-neutral-850 p-2.5 rounded-lg text-xs">
                       <div className="flex items-center gap-3">
-                        {item.customImage && <img src={item.customImage} alt="" className="w-7 h-7 object-cover rounded border border-neutral-800" />}
+                        {(item.customImage || item.image) && <img src={item.customImage || item.image} alt="" className="w-7 h-7 object-cover rounded border border-neutral-800" />}
                         <div>
-                          <span className="font-semibold text-white uppercase">{item.collectionHandle}</span>
-                          {item.customTitle && <span className="text-[10px] text-neutral-400 ml-2">({item.customTitle})</span>}
+                          <span className="font-semibold text-white uppercase">{item.customTitle || item.title || item.collectionHandle}</span>
+                          <span className="text-[10px] text-neutral-400 ml-2">({item.handle || item.collectionHandle})</span>
                         </div>
                       </div>
                       <div className="flex gap-1">
                         <button onClick={() => moveItem(lovedCollectionsItems, setLovedCollectionsItems, idx, "UP")} disabled={idx === 0} className="p-1 bg-neutral-955 text-neutral-450 disabled:opacity-20"><ArrowUp className="w-3.5 h-3.5" /></button>
                         <button onClick={() => moveItem(lovedCollectionsItems, setLovedCollectionsItems, idx, "DOWN")} disabled={idx === lovedCollectionsItems.length - 1} className="p-1 bg-neutral-955 text-neutral-450 disabled:opacity-20"><ArrowDown className="w-3.5 h-3.5" /></button>
                         <button onClick={() => deleteItem(lovedCollectionsItems, setLovedCollectionsItems, idx)} className="p-1 bg-neutral-955 hover:text-red-400 text-neutral-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Subsection 1.5: Trending Collections Cards */}
+            {activeSubSection === "trendingCollections" && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-[#C9A84C] uppercase tracking-widest pb-1 border-b border-neutral-900">Top Trending Collections (5 Scalloped Cards)</h3>
+                <div>
+                  <label className="block text-[9px] font-bold text-neutral-400 uppercase tracking-wider mb-1">Section Title</label>
+                  <input type="text" value={trendingCollectionsTitle} onChange={(e) => setTrendingCollectionsTitle(e.target.value)} className="w-full bg-neutral-900 border border-neutral-850 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-maroonClr" />
+                </div>
+
+                <div className="flex justify-between items-center bg-neutral-900 p-3 rounded-lg border border-neutral-850">
+                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Trending Cards List</span>
+                  <button
+                    type="button"
+                    onClick={() => setTrendingCollectionsItems([
+                      ...trendingCollectionsItems,
+                      { title: "New Trend", handle: "saree", image: "/images/client-1.jpg" }
+                    ])}
+                    className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[9px] font-bold uppercase rounded tracking-wider flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" /> Add Trending Card
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {trendingCollectionsItems.map((item, idx) => (
+                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-3 rounded-xl space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Card #{idx + 1}</span>
+                        <div className="flex gap-1">
+                          <button onClick={() => moveItem(trendingCollectionsItems, setTrendingCollectionsItems, idx, "UP")} disabled={idx === 0} className="p-1 bg-neutral-950 text-neutral-400 disabled:opacity-20"><ArrowUp className="w-3 h-3" /></button>
+                          <button onClick={() => moveItem(trendingCollectionsItems, setTrendingCollectionsItems, idx, "DOWN")} disabled={idx === trendingCollectionsItems.length - 1} className="p-1 bg-neutral-950 text-neutral-400 disabled:opacity-20"><ArrowDown className="w-3 h-3" /></button>
+                          <button onClick={() => deleteItem(trendingCollectionsItems, setTrendingCollectionsItems, idx)} className="p-1 bg-neutral-950 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                        </div>
+                      </div>
+
+                      <ImageOrVideoUploader
+                        label="Scalloped Card Cover Image"
+                        value={item.image}
+                        onChange={(url) => {
+                          const updated = [...trendingCollectionsItems];
+                          updated[idx] = { ...updated[idx], image: url };
+                          setTrendingCollectionsItems(updated);
+                        }}
+                        accept="image/*"
+                      />
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Card Title Name</label>
+                          <input type="text" value={item.title} onChange={(e) => {
+                            const updated = [...trendingCollectionsItems];
+                            updated[idx] = { ...updated[idx], title: e.target.value };
+                            setTrendingCollectionsItems(updated);
+                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1 text-xs text-white" />
+                        </div>
+                        <div>
+                          <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Target Collection Handle</label>
+                          <input type="text" value={item.handle} onChange={(e) => {
+                            const updated = [...trendingCollectionsItems];
+                            updated[idx] = { ...updated[idx], handle: e.target.value };
+                            setTrendingCollectionsItems(updated);
+                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1 text-xs text-white font-mono" />
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1665,6 +1758,64 @@ export default function SettingsFormClient({ initialSettings, products = [], col
 
           <div className="flex justify-end pt-2 border-t border-neutral-900">
             <button onClick={triggerSaveFooter} disabled={loading} className="bg-maroonClr hover:bg-[#A30C4D] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shadow-lg shadow-maroonClr/20 disabled:opacity-50"><Save className="w-4 h-4" /> Save Footer Settings</button>
+          </div>
+        </div>
+      )}
+
+      {/* ----------------------------------------------------
+          TAB 6: CATEGORY BANNERS
+          ---------------------------------------------------- */}
+      {activeTab === "COLLECTIONS" && (
+        <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-6 md:p-8 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 pb-2 border-b border-neutral-900 justify-between">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-[#C9A84C]" />
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Category Banner Images</h3>
+            </div>
+            {collectionsSuccess && (
+              <span className="text-[10px] text-green-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Saved!
+              </span>
+            )}
+          </div>
+
+          {collectionsSuccess && (
+            <div className="p-3.5 bg-green-950/40 border border-green-900/50 text-green-400 text-xs rounded-lg flex items-center gap-2">
+              <CheckCircle2 className="w-4.5 h-4.5" />
+              <span>{collectionsSuccess}</span>
+            </div>
+          )}
+
+          <div className="space-y-6 max-w-3xl">
+            <p className="text-xs text-neutral-400">Upload custom banners for your category collection pages. If left blank, the collection image set in Shopify will be used.</p>
+            
+            <div className="grid grid-cols-1 gap-6 bg-neutral-900/20 p-5 rounded-xl border border-neutral-850">
+              {collections.map((col: any) => (
+                <div key={col.id} className="p-4 bg-neutral-950 border border-neutral-800 rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <span className="text-sm font-bold text-white block">{col.title}</span>
+                    <span className="text-[10px] text-neutral-500 font-mono">Handle: {col.handle}</span>
+                  </div>
+                  <div className="flex-1 min-w-[250px]">
+                    <ImageOrVideoUploader
+                      label="Custom Banner Image"
+                      value={collectionBanners[col.handle] || ""}
+                      onChange={(url) => {
+                        setCollectionBanners({
+                          ...collectionBanners,
+                          [col.handle]: url
+                        });
+                      }}
+                      accept="image/*"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-neutral-900">
+            <button onClick={triggerSaveCollectionBanners} disabled={loading} className="bg-maroonClr hover:bg-[#A30C4D] text-white px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-2 shadow-lg shadow-maroonClr/20 disabled:opacity-50"><Save className="w-4 h-4" /> Save Category Banners</button>
           </div>
         </div>
       )}

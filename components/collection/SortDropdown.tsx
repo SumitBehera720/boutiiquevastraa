@@ -1,34 +1,20 @@
 "use client";
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
-export default function SortDropdown() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+interface SortDropdownProps {
+  sortValue: string;
+  onSortChange: (val: string) => void;
+}
 
+export default function SortDropdown({ 
+  sortValue = "DEFAULT", 
+  onSortChange 
+}: SortDropdownProps) {
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    const params = new URLSearchParams(searchParams.toString());
-    
-    if (value === "DEFAULT") {
-      params.delete("sort");
-      params.delete("reverse");
-    } else {
-      const [sortKey, reverse] = value.split("-");
-      params.set("sort", sortKey);
-      params.set("reverse", reverse);
-    }
-    
-    // Reset cursor for pagination when sorting changes
-    params.delete("after");
-
-    router.push(`${pathname}?${params.toString()}`);
+    onSortChange(e.target.value);
   };
 
-  const currentSort = searchParams.get("sort") || "COLLECTION_DEFAULT";
-  const currentReverse = searchParams.get("reverse") || "false";
-  const currentValue = currentSort === "COLLECTION_DEFAULT" ? "DEFAULT" : `${currentSort}-${currentReverse}`;
+  const currentValue = sortValue;
 
   return (
     <div className="flex items-center gap-2">

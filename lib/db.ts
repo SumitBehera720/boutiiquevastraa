@@ -311,9 +311,12 @@ export async function seedIfEmpty(): Promise<void> {
   if (!USE_DB) return;
 
   try {
-    const data = readJson<any>("settings");
-    if (data && Object.keys(data).length) {
-      await upsert("settings", "id", { id: 1, data: typeof data === "string" ? data : JSON.stringify(data) });
+    const settingsCount = await countRows("settings");
+    if (settingsCount === 0) {
+      const data = readJson<any>("settings");
+      if (data && Object.keys(data).length) {
+        await upsert("settings", "id", { id: 1, data: typeof data === "string" ? data : JSON.stringify(data) });
+      }
     }
 
     const productCount = await countRows("products");

@@ -11,19 +11,8 @@ import SearchBar from "@/components/search/SearchBar";
 
 interface HeaderProps {
   isLoggedIn?: boolean;
-  settings?: {
-    logoUrl?: string;
-    whatsappNumber?: string;
-    marquee?: { text: string; icon?: string }[];
-    menuLinks?: { label: string; url: string }[];
-  };
-  footerSettings?: {
-    facebookUrl?: string;
-    instagramUrl?: string;
-    pinterestUrl?: string;
-    youtubeUrl?: string;
-    contactEmail?: string;
-  };
+  settings?: any;
+  footerSettings?: any;
 }
 
 export default function Header({ isLoggedIn = false, settings, footerSettings }: HeaderProps) {
@@ -65,7 +54,311 @@ export default function Header({ isLoggedIn = false, settings, footerSettings }:
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [sareeOpen, setSareeOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
+
+  {/* SAREES MEGA MENU */}
+  const renderSareesMegaMenu = (closeFn: () => void) => {
+    const config = settings?.megaMenuSarees || settings?.header?.megaMenuSarees || {};
+    const fabrics = config.fabrics || [
+      { label: "TISSUE SAREES", handle: "tissuetales", img: "/images/client-3.jpg" },
+      { label: "LINEN SAREES", handle: "linen", img: "/images/client-2.jpg" },
+      { label: "MUL COTTON", handle: "mul-diaries", img: "/images/client-5.jpg" },
+      { label: "SILK SAREES", handle: "silk", img: "/images/client-1.jpg" },
+      { label: "ORGANZA SAREES", handle: "loom-aura", img: "/images/client-4.jpg" },
+      { label: "CHIFFON & GEORGETTE", handle: "saree", img: "/images/client-2.jpg" },
+    ];
+    const occasions = config.occasions || [
+      { label: "FESTIVE DRAPES", handle: "festive", img: "/images/client-2.jpg" },
+      { label: "WEDDING SAREES", handle: "wedding", img: "/images/client-3.jpg" },
+      { label: "PARTYWEAR SAREES", handle: "party-wear", img: "/images/client-4.jpg" },
+      { label: "CASUAL DRAPES", handle: "casual", img: "/images/client-1.jpg" },
+      { label: "WORKWEAR SAREES", handle: "office-wear", img: "/images/client-5.jpg" },
+      { label: "BESTSELLING SAREES", handle: "best-sellers", img: "/images/client-3.jpg" },
+    ];
+    const colors = config.colors || [
+      { label: "CRIMSON RED", handle: "red", img: "/images/client-3.jpg" },
+      { label: "LUXE GOLD", handle: "luxe-gold", img: "/images/client-1.jpg" },
+      { label: "PASTEL PEACH", handle: "peach", img: "/images/client-2.jpg" },
+      { label: "LAVENDER TONES", handle: "lavender", img: "/images/client-5.jpg" },
+      { label: "ROYAL BLUE", handle: "royal-blue", img: "/images/client-4.jpg" },
+      { label: "MUSTARD YELLOW", handle: "yellow", img: "/images/client-3.jpg" },
+    ];
+
+    return (
+      <div className="absolute left-1/2 -translate-x-1/2 top-full z-50 w-[94vw] max-w-[1040px] bg-[#FAF6F0] border border-[#EBE2CD] rounded-3xl shadow-2xl p-6 overflow-hidden animate-scaleUp text-left">
+        <div className="grid grid-cols-12 gap-6 items-start">
+          
+          {/* Col 1: SAREE FABRICS & TYPES */}
+          <div className="col-span-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-3.5 border-b border-gray-200/80 pb-2">
+              {config.fabricsTitle || "SAREE FABRICS & WEAVES"}
+            </h4>
+            <ul className="space-y-2.5">
+              {fabrics.map((item: any, idx: number) => (
+                <li key={idx}>
+                  <Link
+                    href={item.handle?.startsWith("/") ? item.handle : `/collections/${item.handle}`}
+                    onClick={closeFn}
+                    className="flex items-center gap-3 group/item hover:opacity-90 transition-opacity"
+                  >
+                    <div className="relative w-9 h-11 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 border border-gray-200">
+                      <Image src={item.img} alt={item.label} fill unoptimized className="object-cover object-top group-hover/item:scale-110 transition-transform duration-300" />
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 tracking-wide uppercase group-hover/item:text-[#9E3E28] transition-colors">
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 2: SAREES BY OCCASION */}
+          <div className="col-span-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-3.5 border-b border-gray-200/80 pb-2">
+              {config.occasionsTitle || "SAREES BY OCCASION"}
+            </h4>
+            <ul className="space-y-2.5">
+              {occasions.map((item: any, idx: number) => (
+                <li key={idx}>
+                  <Link
+                    href={item.handle?.startsWith("/") ? item.handle : `/collections/${item.handle}`}
+                    onClick={closeFn}
+                    className="flex items-center gap-3 group/item hover:opacity-90 transition-opacity"
+                  >
+                    <div className="relative w-9 h-11 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 border border-gray-200">
+                      <Image src={item.img} alt={item.label} fill unoptimized className="object-cover object-top group-hover/item:scale-110 transition-transform duration-300" />
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 tracking-wide uppercase group-hover/item:text-[#9E3E28] transition-colors">
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 3: SHOP BY COLOR & CRAFT */}
+          <div className="col-span-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-3.5 border-b border-gray-200/80 pb-2">
+              {config.colorsTitle || "SHOP BY COLOR & CRAFT"}
+            </h4>
+            <ul className="space-y-2">
+              {colors.map((item: any, idx: number) => (
+                <li key={idx}>
+                  <Link
+                    href={item.handle?.startsWith("/") ? item.handle : `/collections/${item.handle}`}
+                    onClick={closeFn}
+                    className="flex items-center gap-3 group/item hover:opacity-90 transition-opacity"
+                  >
+                    <div className="relative w-8 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 border border-gray-200">
+                      <Image src={item.img} alt={item.label} fill unoptimized className="object-cover object-top group-hover/item:scale-110 transition-transform duration-300" />
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 tracking-wide uppercase group-hover/item:text-[#9E3E28] transition-colors">
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 4: PROMO FEATURED BANNERS */}
+          <div className="col-span-3 flex flex-col gap-3">
+            <Link
+              href={config.promoTopLink || "/collections/silk"}
+              onClick={closeFn}
+              className="relative w-full h-[95px] rounded-2xl overflow-hidden bg-[#D8C7B0] p-1.5 flex items-center justify-between group shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="relative w-full h-full rounded-xl overflow-hidden">
+                <Image
+                  src={config.promoTopImage || "/images/client-1.jpg"}
+                  alt="Handloom saree"
+                  fill
+                  unoptimized
+                  className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-black/15 group-hover:bg-black/5 transition-colors" />
+              </div>
+            </Link>
+
+            <Link
+              href={config.promoBottomLink || "/collections/festive"}
+              onClick={closeFn}
+              className="group flex flex-col items-center cursor-pointer"
+            >
+              <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden bg-[#C58C80] border border-[#B3786B] shadow-md group-hover:shadow-xl transition-all duration-300">
+                <Image
+                  src={config.promoBottomImage || "/images/client-4.jpg"}
+                  alt="Festive Sarees"
+                  fill
+                  unoptimized
+                  className="object-cover object-top group-hover:scale-108 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
+              </div>
+              <span className="font-sans font-bold text-xs sm:text-sm text-gray-900 tracking-tight mt-2 text-center group-hover:text-[#9E3E28] transition-colors">
+                {config.promoBottomText || "Festive Sarees - 45% OFF"}
+              </span>
+            </Link>
+          </div>
+
+        </div>
+      </div>
+    );
+  };
+
+  {/* COLLECTIONS MEGA MENU */}
+  const renderCollectionsMegaMenu = (closeFn: () => void) => {
+    const config = settings?.megaMenuCollections || settings?.header?.megaMenuCollections || {};
+    const categories = config.categories || [
+      { label: "SAREES", handle: "saree", img: "/images/client-1.jpg" },
+      { label: "KURTIS & TUNICS", handle: "kurti", img: "/images/client-2.jpg" },
+      { label: "LEHENGAS", handle: "lehenga", img: "/images/client-4.jpg" },
+      { label: "JEWELLERY", handle: "jewellery", img: "/images/client-3.jpg" },
+      { label: "FABRIC LIBRARY", handle: "fabric", img: "/images/client-5.jpg" },
+      { label: "SALE & OFFERS", handle: "sale", img: "/images/client-3.jpg" },
+    ];
+    const occasions = config.occasions || [
+      { label: "FESTIVE SPECIALS", handle: "festive", img: "/images/client-2.jpg" },
+      { label: "CASUAL WEAR", handle: "casual", img: "/images/client-1.jpg" },
+      { label: "WEDDING EDIT", handle: "wedding", img: "/images/client-3.jpg" },
+      { label: "PARTY & EVENING", handle: "party-wear", img: "/images/client-4.jpg" },
+      { label: "NEW ARRIVALS", handle: "new-arrivals", img: "/images/client-5.jpg" },
+    ];
+    const colors = config.colors || [
+      { label: "RED", handle: "red", img: "/images/client-3.jpg" },
+      { label: "GOLD", handle: "luxe-gold", img: "/images/client-1.jpg" },
+      { label: "PEACH", handle: "peach", img: "/images/client-2.jpg" },
+      { label: "LAVENDER", handle: "lavender", img: "/images/client-5.jpg" },
+      { label: "ROYAL BLUE", handle: "royal-blue", img: "/images/client-4.jpg" },
+      { label: "BURGUNDY", handle: "burgundy", img: "/images/client-3.jpg" },
+    ];
+
+    return (
+      <div className="absolute left-1/2 -translate-x-1/2 top-full z-50 w-[94vw] max-w-[1040px] bg-[#FAF6F0] border border-[#EBE2CD] rounded-3xl shadow-2xl p-6 overflow-hidden animate-scaleUp text-left">
+        <div className="grid grid-cols-12 gap-6 items-start">
+          
+          {/* Col 1: ALL CATEGORIES */}
+          <div className="col-span-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-3.5 border-b border-gray-200/80 pb-2">
+              {config.categoriesTitle || "ALL CATEGORIES"}
+            </h4>
+            <ul className="space-y-2.5">
+              {categories.map((item: any, idx: number) => (
+                <li key={idx}>
+                  <Link
+                    href={item.handle?.startsWith("/") ? item.handle : `/collections/${item.handle}`}
+                    onClick={closeFn}
+                    className="flex items-center gap-3 group/item hover:opacity-90 transition-opacity"
+                  >
+                    <div className="relative w-9 h-11 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 border border-gray-200">
+                      <Image src={item.img} alt={item.label} fill unoptimized className="object-cover object-top group-hover/item:scale-110 transition-transform duration-300" />
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 tracking-wide uppercase group-hover/item:text-[#9E3E28] transition-colors">
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 2: SHOP BY OCCASION */}
+          <div className="col-span-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-3.5 border-b border-gray-200/80 pb-2">
+              {config.occasionsTitle || "SHOP BY OCCASION"}
+            </h4>
+            <ul className="space-y-2.5">
+              {occasions.map((item: any, idx: number) => (
+                <li key={idx}>
+                  <Link
+                    href={item.handle?.startsWith("/") ? item.handle : `/collections/${item.handle}`}
+                    onClick={closeFn}
+                    className="flex items-center gap-3 group/item hover:opacity-90 transition-opacity"
+                  >
+                    <div className="relative w-9 h-11 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 border border-gray-200">
+                      <Image src={item.img} alt={item.label} fill unoptimized className="object-cover object-top group-hover/item:scale-110 transition-transform duration-300" />
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 tracking-wide uppercase group-hover/item:text-[#9E3E28] transition-colors">
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 3: SHOP BY COLOR */}
+          <div className="col-span-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 mb-3.5 border-b border-gray-200/80 pb-2">
+              {config.colorsTitle || "SHOP BY COLOR"}
+            </h4>
+            <ul className="space-y-2">
+              {colors.map((item: any, idx: number) => (
+                <li key={idx}>
+                  <Link
+                    href={item.handle?.startsWith("/") ? item.handle : `/collections/${item.handle}`}
+                    onClick={closeFn}
+                    className="flex items-center gap-3 group/item hover:opacity-90 transition-opacity"
+                  >
+                    <div className="relative w-8 h-10 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 border border-gray-200">
+                      <Image src={item.img} alt={item.label} fill unoptimized className="object-cover object-top group-hover/item:scale-110 transition-transform duration-300" />
+                    </div>
+                    <span className="text-xs font-bold text-gray-800 tracking-wide uppercase group-hover/item:text-[#9E3E28] transition-colors">
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Col 4: PROMO FEATURED BANNERS */}
+          <div className="col-span-3 flex flex-col gap-3">
+            <Link
+              href={config.promoTopLink || "/collections"}
+              onClick={closeFn}
+              className="relative w-full h-[95px] rounded-2xl overflow-hidden bg-[#D8C7B0] p-1.5 flex items-center justify-between group shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="relative w-full h-full rounded-xl overflow-hidden">
+                <Image
+                  src={config.promoTopImage || "/images/client-2.jpg"}
+                  alt="Collections banner"
+                  fill
+                  unoptimized
+                  className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-black/15 group-hover:bg-black/5 transition-colors" />
+              </div>
+            </Link>
+
+            <Link
+              href={config.promoBottomLink || "/collections/sale"}
+              onClick={closeFn}
+              className="group flex flex-col items-center cursor-pointer"
+            >
+              <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden bg-[#C58C80] border border-[#B3786B] shadow-md group-hover:shadow-xl transition-all duration-300">
+                <Image
+                  src={config.promoBottomImage || "/images/client-5.jpg"}
+                  alt="Explore Collections"
+                  fill
+                  unoptimized
+                  className="object-cover object-top group-hover:scale-108 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity" />
+              </div>
+              <span className="font-sans font-bold text-xs sm:text-sm text-gray-900 tracking-tight mt-2 text-center group-hover:text-[#9E3E28] transition-colors">
+                {config.promoBottomText || "Explore Collections - 45% OFF"}
+              </span>
+            </Link>
+          </div>
+
+        </div>
+      </div>
+    );
+  };
 
   const [isCheckoutState, setIsCheckoutState] = useState(false);
 
@@ -278,31 +571,26 @@ export default function Header({ isLoggedIn = false, settings, footerSettings }:
       </div>
 
       {/* Desktop Navigation Bar */}
-      <div className="bg-[#EBE2CD] md:flex hidden justify-center py-0.5">
-        <nav aria-label="Main" className="relative flex max-w-max flex-1 items-center justify-center">
+      <div 
+        className="bg-[#EBE2CD] md:flex hidden justify-center py-0.5 relative"
+        onMouseLeave={() => { setCollectionsOpen(false); setSareeOpen(false); }}
+      >
+        <nav aria-label="Main" className="relative flex max-w-7xl mx-auto flex-1 items-center justify-center">
           <ul className="flex flex-1 list-none items-center justify-center gap-6 flex-wrap">
-            {/* Collections Dropdown */}
-            <li className="relative"
-              onMouseEnter={() => setCollectionsOpen(true)}
-              onMouseLeave={() => setCollectionsOpen(false)}
+
+            {/* 1. COLLECTIONS MEGA-MENU */}
+            <li 
+              onMouseEnter={() => { setCollectionsOpen(true); setSareeOpen(false); }}
             >
               <button className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
                 Collections
                 <ChevronDown className={`relative top-[1px] ml-1 size-3 transition duration-300 ${collectionsOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
               </button>
-              {collectionsOpen && (
-                <div className="absolute left-0 top-full z-50 min-w-[200px] bg-white border border-gray-200 rounded-md shadow-lg p-2">
-                  <Link href="/collections/saree" className="block px-4 py-2 text-sm hover:bg-creamClr rounded">Sarees</Link>
-                  <Link href="/collections/kurtis" className="block px-4 py-2 text-sm hover:bg-creamClr rounded">Kurtis</Link>
-                  <Link href="/collections/jewellery" className="block px-4 py-2 text-sm hover:bg-creamClr rounded">Jewellery</Link>
-                  <Link href="/collections" className="block px-4 py-2 text-sm hover:bg-creamClr rounded font-medium text-maroonClr">View All</Link>
-                </div>
-              )}
             </li>
 
-            {/* Products Dropdown */}
+            {/* 2. PRODUCTS DROPDOWN */}
             <li className="relative"
-              onMouseEnter={() => setProductsOpen(true)}
+              onMouseEnter={() => { setProductsOpen(true); setCollectionsOpen(false); setSareeOpen(false); }}
               onMouseLeave={() => setProductsOpen(false)}
             >
               <button className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
@@ -310,48 +598,103 @@ export default function Header({ isLoggedIn = false, settings, footerSettings }:
                 <ChevronDown className={`relative top-[1px] ml-1 size-3 transition duration-300 ${productsOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
               </button>
               {productsOpen && (
-                <div className="absolute left-0 top-full z-50 min-w-[200px] bg-white border border-gray-200 rounded-md shadow-lg p-2">
-                  <Link href="/products" className="block px-4 py-2 text-sm hover:bg-creamClr rounded">All Products</Link>
-                  <Link href="/products?sort=best-selling" className="block px-4 py-2 text-sm hover:bg-creamClr rounded">Best Sellers</Link>
-                  <Link href="/products?sort=created-descending" className="block px-4 py-2 text-sm hover:bg-creamClr rounded">New Arrivals</Link>
+                <div className="absolute left-0 top-full z-50 w-52 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden">
+                  <div className="p-1.5">
+                    <Link href="/products" onClick={() => setProductsOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-gray-700 hover:bg-creamClr hover:text-maroonClr rounded-lg transition-all">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-goldClr flex-shrink-0"><rect x="1" y="1" width="6" height="6" rx="1" /><rect x="9" y="1" width="6" height="6" rx="1" /><rect x="1" y="9" width="6" height="6" rx="1" /><rect x="9" y="9" width="6" height="6" rx="1" /></svg>
+                      All Products
+                    </Link>
+                    <Link href="/products?sort=best-selling" onClick={() => setProductsOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-gray-700 hover:bg-creamClr hover:text-maroonClr rounded-lg transition-all">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-goldClr flex-shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M8 2l1.5 4.5H15l-4 3 1.5 4.5L8 11l-4.5 3L5 9.5 1 6.5h5.5L8 2z" /></svg>
+                      Best Sellers
+                    </Link>
+                    <Link href="/products?sort=created-descending" onClick={() => setProductsOpen(false)} className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-gray-700 hover:bg-creamClr hover:text-maroonClr rounded-lg transition-all">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-goldClr flex-shrink-0"><path strokeLinecap="round" strokeLinejoin="round" d="M8 2v12M2 8l6-6 6 6" /></svg>
+                      New Arrivals
+                    </Link>
+                  </div>
+                  <div className="border-t border-gray-100 p-1.5">
+                    <Link href="/products?sort=price-ascending" onClick={() => setProductsOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-xs text-gray-500 hover:bg-creamClr hover:text-maroonClr rounded-lg transition-all">Price: Low to High</Link>
+                    <Link href="/products?sort=price-descending" onClick={() => setProductsOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-xs text-gray-500 hover:bg-creamClr hover:text-maroonClr rounded-lg transition-all">Price: High to Low</Link>
+                  </div>
                 </div>
               )}
             </li>
 
-            {/* Dynamic Links */}
-            {settings?.menuLinks && settings.menuLinks.map((link: any, idx: number) => {
-              const hasSubs = link.subLinks && link.subLinks.length > 0;
-              return (
-                <li key={idx} className="relative group/menu">
-                  {hasSubs ? (
-                    <>
-                      <button className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
+            {/* 3. SAREES MEGA-MENU */}
+            <li 
+              onMouseEnter={() => { setSareeOpen(true); setCollectionsOpen(false); }}
+            >
+              <button className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
+                Sarees
+                <ChevronDown className={`relative top-[1px] ml-1 size-3 transition duration-300 ${sareeOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              </button>
+            </li>
+
+            {/* 4. LEHENGA */}
+            <li>
+              <Link href="/collections/lehenga" className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
+                Lehenga
+              </Link>
+            </li>
+
+            {/* 5. KURTIS */}
+            <li>
+              <Link href="/collections/kurti" className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
+                Kurtis
+              </Link>
+            </li>
+
+            {/* 6. JEWELLERY */}
+            <li>
+              <Link href="/collections/jewellery" className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
+                Jewellery
+              </Link>
+            </li>
+
+            {/* Additional dynamic menu links from settings (filtered to prevent duplicates) */}
+            {settings?.menuLinks && settings.menuLinks
+              .filter((link: any) => {
+                const l = (link.label || "").toLowerCase();
+                return !["collections", "products", "saree", "sarees", "lehenga", "kurtis", "kurti", "jewellery"].includes(l);
+              })
+              .map((link: any, idx: number) => {
+                const hasSubs = link.subLinks && link.subLinks.length > 0;
+                return (
+                  <li key={idx} className="relative group/menu">
+                    {hasSubs ? (
+                      <>
+                        <button className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
+                          {link.label}
+                          <ChevronDown className="relative top-[1px] ml-1 size-3 transition duration-300 group-hover/menu:rotate-180" aria-hidden="true" />
+                        </button>
+                        <div className="absolute left-0 top-full z-50 min-w-[200px] bg-white border border-gray-100 rounded-xl shadow-xl p-1.5 hidden group-hover/menu:block">
+                          {link.url && (
+                            <Link href={link.url} className="block px-4 py-2 text-sm hover:bg-creamClr rounded-lg font-medium text-maroonClr">
+                              All {link.label}
+                            </Link>
+                          )}
+                          {link.subLinks.map((sub: any, sIdx: number) => (
+                            <Link key={sIdx} href={sub.url} className="block px-4 py-2 text-sm hover:bg-creamClr rounded-lg text-gray-700">
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <Link href={link.url} className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
                         {link.label}
-                        <ChevronDown className="relative top-[1px] ml-1 size-3 transition duration-300 group-hover/menu:rotate-180" aria-hidden="true" />
-                      </button>
-                      <div className="absolute left-0 top-full z-50 min-w-[200px] bg-white border border-gray-200 rounded-md shadow-lg p-2 hidden group-hover/menu:block">
-                        {link.url && (
-                          <Link href={link.url} className="block px-4 py-2 text-sm hover:bg-creamClr rounded font-medium text-maroonClr">
-                            All {link.label}
-                          </Link>
-                        )}
-                        {link.subLinks.map((sub: any, sIdx: number) => (
-                          <Link key={sIdx} href={sub.url} className="block px-4 py-2 text-sm hover:bg-creamClr rounded text-gray-700">
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <Link href={link.url} className="group inline-flex w-max items-center justify-center px-2 py-1 text-[15px] font-medium hover:text-maroonClr transition-all text-gray-800">
-                      {link.label}
-                    </Link>
-                  )}
-                </li>
-              );
-            })}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
           </ul>
         </nav>
+
+        {/* Mega Menu Panels Centered relative to Navbar Container */}
+        {collectionsOpen && renderCollectionsMegaMenu(() => setCollectionsOpen(false))}
+        {sareeOpen && renderSareesMegaMenu(() => setSareeOpen(false))}
       </div>
 
       {/* Marquee Banner */}
@@ -366,36 +709,53 @@ export default function Header({ isLoggedIn = false, settings, footerSettings }:
           <Link href="/products" className="block px-3 py-2 text-sm font-medium hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
             Products
           </Link>
-          {settings?.menuLinks && settings.menuLinks.map((link: any, idx: number) => {
-            const hasSubs = link.subLinks && link.subLinks.length > 0;
-            return (
-              <div key={idx} className="space-y-1">
-                {hasSubs ? (
-                  <>
-                    <div className="flex items-center justify-between px-3 py-2 text-sm font-semibold text-gray-800">
-                      <span>{link.label}</span>
-                    </div>
-                    <div className="pl-6 space-y-1">
-                      {link.url && (
-                        <Link href={link.url} className="block px-3 py-1.5 text-xs font-medium text-maroonClr hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
-                          All {link.label}
-                        </Link>
-                      )}
-                      {link.subLinks.map((sub: any, sIdx: number) => (
-                        <Link key={sIdx} href={sub.url} className="block px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
-                          {sub.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <Link href={link.url} className="block px-3 py-2 text-sm font-medium hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
-                    {link.label}
-                  </Link>
-                )}
-              </div>
-            );
-          })}
+          <Link href="/collections/saree" className="block px-3 py-2 text-sm font-medium hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
+            Sarees
+          </Link>
+          <Link href="/collections/lehenga" className="block px-3 py-2 text-sm font-medium hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
+            Lehenga
+          </Link>
+          <Link href="/collections/kurti" className="block px-3 py-2 text-sm font-medium hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
+            Kurtis
+          </Link>
+          <Link href="/collections/jewellery" className="block px-3 py-2 text-sm font-medium hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
+            Jewellery
+          </Link>
+          {settings?.menuLinks && settings.menuLinks
+            .filter((link: any) => {
+              const l = (link.label || "").toLowerCase();
+              return !["collections", "products", "saree", "sarees", "lehenga", "kurtis", "kurti", "jewellery"].includes(l);
+            })
+            .map((link: any, idx: number) => {
+              const hasSubs = link.subLinks && link.subLinks.length > 0;
+              return (
+                <div key={idx} className="space-y-1">
+                  {hasSubs ? (
+                    <>
+                      <div className="flex items-center justify-between px-3 py-2 text-sm font-semibold text-gray-800">
+                        <span>{link.label}</span>
+                      </div>
+                      <div className="pl-6 space-y-1">
+                        {link.url && (
+                          <Link href={link.url} className="block px-3 py-1.5 text-xs font-medium text-maroonClr hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
+                            All {link.label}
+                          </Link>
+                        )}
+                        {link.subLinks.map((sub: any, sIdx: number) => (
+                          <Link key={sIdx} href={sub.url} className="block px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <Link href={link.url} className="block px-3 py-2 text-sm font-medium hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
+                      {link.label}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
           <Link href="/track-order" className="block px-3 py-2 text-sm font-medium hover:bg-creamClr rounded" onClick={() => setMobileMenuOpen(false)}>
             Track Order
           </Link>

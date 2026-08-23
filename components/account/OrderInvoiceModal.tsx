@@ -178,7 +178,7 @@ export default function OrderInvoiceModal({ order, onClose }: OrderInvoiceModalP
               <p className="flex items-center gap-1 font-medium text-green-700">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Inclusive of all applicable taxes
               </p>
-              <p>For support or returns, visit boutiiquevastraa.com/contact</p>
+              <p>For support or returns, visit boutiiquevastraa.com/contact-us</p>
             </div>
             <div className="w-full sm:w-64 bg-gray-50 p-4 rounded-lg border border-gray-200 text-xs space-y-2">
               <div className="flex justify-between text-gray-600">
@@ -204,7 +204,7 @@ export default function OrderInvoiceModal({ order, onClose }: OrderInvoiceModalP
 
           {/* Footer note */}
           <div className="text-center pt-6 border-t border-gray-100 text-[11px] text-gray-400">
-            Thank you for shopping with Boutique Vastra!
+            Thank you for shopping with Boutiique Vastraa!
           </div>
         </div>
       </div>

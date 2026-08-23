@@ -216,7 +216,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
         {/* Sidebar Filters */}
         <div className={`w-full lg:w-64 flex-shrink-0 ${isMobileFiltersOpen ? 'block' : 'hidden lg:block'}`}>
-          <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm sticky top-24">
+          <div className="bg-white p-5 rounded-lg border border-gray-100 shadow-sm sticky top-[160px] max-h-[75vh] overflow-y-auto custom-scrollbar">
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
                <h3 className="font-bold text-maroonClr flex items-center gap-2 uppercase tracking-wide">
                  <Filter size={16} /> FILTERS
@@ -375,7 +375,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
             {/* Grid */}
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 xl:gap-6">
                 {filteredProducts.map(p => (
                   <ProductCard key={p.id} product={p} />
                 ))}

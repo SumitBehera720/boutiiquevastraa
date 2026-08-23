@@ -25,6 +25,100 @@ const getTransporter = () => {
   });
 };
 
+interface SendMailOptions {
+  from: string;
+  to: string | string[];
+  bcc?: string | string[];
+  replyTo?: string;
+  subject: string;
+  html: string;
+}
+
+async function sendMail(options: SendMailOptions): Promise<void> {
+  const pass = process.env.EMAIL_PASS || "";
+
+  if (pass.startsWith("xkeysib-")) {
+    console.log("[Email Service] Detected Brevo API Key. Sending email via Brevo HTTP API...");
+
+    let senderName = "Boutiique Vastraa";
+    let senderEmail = process.env.EMAIL_FROM || "boutiquevastra80@gmail.com";
+
+    const fromMatch = options.from.match(/^(?:"?([^"]*)"?\s)?<?([^>]+)>?$/);
+    if (fromMatch) {
+      if (fromMatch[1]) senderName = fromMatch[1].trim();
+      if (fromMatch[2]) senderEmail = fromMatch[2].trim();
+    }
+
+    const formatRecipients = (recipients: string | string[]): { email: string; name?: string }[] => {
+      const list = Array.isArray(recipients) ? recipients : [recipients];
+      return list.map(item => {
+        const match = item.match(/^(?:"?([^"]*)"?\s)?<?([^>]+)>?$/);
+        if (match) {
+          return {
+            email: match[2].trim(),
+            name: match[1] ? match[1].trim() : undefined
+          };
+        }
+        return { email: item.trim() };
+      });
+    };
+
+    const toList = formatRecipients(options.to);
+    const bccList = options.bcc ? formatRecipients(options.bcc) : undefined;
+
+    let replyToObj = undefined;
+    if (options.replyTo) {
+      const replyMatch = options.replyTo.match(/^(?:"?([^"]*)"?\s)?<?([^>]+)>?$/);
+      if (replyMatch) {
+        replyToObj = {
+          email: replyMatch[2].trim(),
+          name: replyMatch[1] ? replyMatch[1].trim() : undefined
+        };
+      } else {
+        replyToObj = { email: options.replyTo.trim() };
+      }
+    }
+
+    const payload: any = {
+      sender: { name: senderName, email: senderEmail },
+      to: toList,
+      subject: options.subject,
+      htmlContent: options.html,
+    };
+
+    if (bccList && bccList.length > 0) {
+      payload.bcc = bccList;
+    }
+
+    if (replyToObj) {
+      payload.replyTo = replyToObj;
+    }
+
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": pass,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(`Brevo API returned status ${res.status}: ${JSON.stringify(errorData)}`);
+    }
+
+    const data = await res.json();
+    console.log(`[Email Service] Email successfully sent via Brevo HTTP API. Message ID: ${data.messageId}`);
+    return;
+  }
+
+  console.log("[Email Service] Fallback: Sending via Nodemailer SMTP...");
+  const transporter = getTransporter();
+  await transporter.sendMail(options);
+}
+
 /**
  * Format currency in INR format
  */
@@ -42,7 +136,6 @@ const formatINR = (amount: any): string => {
  * Send an order confirmation email to the customer and a copy to the admin
  */
 export async function sendOrderConfirmationEmail(order: any): Promise<void> {
-  const transporter = getTransporter();
   const fromName = process.env.EMAIL_FROM_NAME || "Boutiique Vastraa";
   const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER;
   const customerEmail = order.email;
@@ -219,11 +312,11 @@ export async function sendOrderConfirmationEmail(order: any): Promise<void> {
                 <td style="background-color: #FFF8F0; padding: 30px 20px; text-align: center; border-top: 1px solid #fbeed2;">
                   <p style="color: #8D0B41; margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.5px;">Need Help?</p>
                   <p style="color: #525252; margin: 0 0 20px 0; font-size: 13px; line-height: 1.5;">
-                    If you have any questions regarding your order, feel free to reply directly to this email or contact support at <a href="mailto:info@boutiiquevastraa.com" style="color: #8D0B41; text-decoration: none; font-weight: 600;">info@boutiiquevastraa.com</a>.
+                    If you have any questions regarding your order, feel free to reply directly to this email or contact support at <a href="mailto:boutiiquevastraa@gmail.com" style="color: #8D0B41; text-decoration: none; font-weight: 600;">boutiiquevastraa@gmail.com</a>.
                   </p>
                   <p style="color: #a3a3a3; margin: 0; font-size: 11px;">
                     © ${new Date().getFullYear()} Boutiique Vastraa. All rights reserved.<br>
-                    Mumbai, Maharashtra, India.
+                    Nabadwip, West Bengal, Nadia, 741302, India.
                   </p>
                 </td>
               </tr>
@@ -245,7 +338,7 @@ export async function sendOrderConfirmationEmail(order: any): Promise<void> {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     console.log(`[Email Service] Order confirmation email successfully sent for Order #VSTR-${order.orderNumber} to ${customerEmail}`);
   } catch (err: any) {
     console.error(`[Email Service] Failed to send email for Order #VSTR-${order.orderNumber}:`, err.message);
@@ -257,7 +350,6 @@ export async function sendOrderConfirmationEmail(order: any): Promise<void> {
  * Send a contact form response directly to the admin
  */
 export async function sendContactFormEmail(name: string, email: string, message: string): Promise<void> {
-  const transporter = getTransporter();
   const fromName = process.env.EMAIL_FROM_NAME || "Boutiique Vastraa Support";
   const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER;
   const toEmail = process.env.EMAIL_USER || fromEmail; // Send to admin email
@@ -359,7 +451,7 @@ export async function sendContactFormEmail(name: string, email: string, message:
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     console.log(`[Email Service] Contact form notification email sent to admin (${toEmail}) for query from ${name}`);
   } catch (err: any) {
     console.error(`[Email Service] Failed to send contact form notification to admin:`, err.message);
@@ -371,7 +463,6 @@ export async function sendContactFormEmail(name: string, email: string, message:
  * Send a password reset link to the customer
  */
 export async function sendPasswordResetEmail(email: string, resetLink: string): Promise<void> {
-  const transporter = getTransporter();
   const fromName = process.env.EMAIL_FROM_NAME || "Boutiique Vastraa";
   const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER;
 
@@ -431,11 +522,11 @@ export async function sendPasswordResetEmail(email: string, resetLink: string): 
                 <td style="background-color: #FFF8F0; padding: 30px 20px; text-align: center; border-top: 1px solid #fbeed2;">
                   <p style="color: #8D0B41; margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.5px;">Need Help?</p>
                   <p style="color: #525252; margin: 0 0 20px 0; font-size: 13px; line-height: 1.5;">
-                    If you have any issues resetting your password, reply directly to this email or contact support at <a href="mailto:info@boutiiquevastraa.com" style="color: #8D0B41; text-decoration: none; font-weight: 600;">info@boutiiquevastraa.com</a>.
+                    If you have any issues resetting your password, reply directly to this email or contact support at <a href="mailto:boutiiquevastraa@gmail.com" style="color: #8D0B41; text-decoration: none; font-weight: 600;">boutiiquevastraa@gmail.com</a>.
                   </p>
                   <p style="color: #a3a3a3; margin: 0; font-size: 11px;">
                     © ${new Date().getFullYear()} Boutiique Vastraa. All rights reserved.<br>
-                    Mumbai, Maharashtra, India.
+                    Nabadwip, West Bengal, Nadia, 741302, India.
                   </p>
                 </td>
               </tr>
@@ -456,7 +547,7 @@ export async function sendPasswordResetEmail(email: string, resetLink: string): 
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     console.log(`[Email Service] Password reset email sent to ${email}`);
   } catch (err: any) {
     console.error(`[Email Service] Failed to send password reset email to ${email}:`, err.message);
@@ -468,7 +559,6 @@ export async function sendPasswordResetEmail(email: string, resetLink: string): 
  * Send an order status update email to the customer
  */
 export async function sendOrderStatusUpdateEmail(order: any, status: string, trackingDetails?: any): Promise<void> {
-  const transporter = getTransporter();
   const fromName = process.env.EMAIL_FROM_NAME || "Boutiique Vastraa";
   const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER;
   const customerEmail = order.email;
@@ -592,11 +682,11 @@ export async function sendOrderStatusUpdateEmail(order: any, status: string, tra
                 <td style="background-color: #FFF8F0; padding: 30px 20px; text-align: center; border-top: 1px solid #fbeed2;">
                   <p style="color: #8D0B41; margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.5px;">Need Help?</p>
                   <p style="color: #525252; margin: 0 0 20px 0; font-size: 13px; line-height: 1.5;">
-                    If you have any questions regarding your shipment, feel free to reply directly to this email or contact support at <a href="mailto:info@boutiiquevastraa.com" style="color: #8D0B41; text-decoration: none; font-weight: 600;">info@boutiiquevastraa.com</a>.
+                    If you have any questions regarding your shipment, feel free to reply directly to this email or contact support at <a href="mailto:boutiiquevastraa@gmail.com" style="color: #8D0B41; text-decoration: none; font-weight: 600;">boutiiquevastraa@gmail.com</a>.
                   </p>
                   <p style="color: #a3a3a3; margin: 0; font-size: 11px;">
                     © ${new Date().getFullYear()} Boutiique Vastraa. All rights reserved.<br>
-                    Mumbai, Maharashtra, India.
+                    Nabadwip, West Bengal, Nadia, 741302, India.
                   </p>
                 </td>
               </tr>
@@ -617,7 +707,7 @@ export async function sendOrderStatusUpdateEmail(order: any, status: string, tra
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     console.log(`[Email Service] Status update email sent successfully to ${customerEmail} for Order #VSTR-${order.orderNumber}`);
   } catch (err: any) {
     console.error(`[Email Service] Failed to send status update email for Order #VSTR-${order.orderNumber}:`, err.message);
@@ -628,7 +718,6 @@ export async function sendOrderStatusUpdateEmail(order: any, status: string, tra
  * Send back in stock email notification to customer
  */
 export async function sendBackInStockEmail(customerEmail: string, productTitle: string, productUrl: string): Promise<void> {
-  const transporter = getTransporter();
   const fromName = process.env.EMAIL_FROM_NAME || "Boutiique Vastraa";
   const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER;
 
@@ -686,11 +775,11 @@ export async function sendBackInStockEmail(customerEmail: string, productTitle: 
                 <td style="background-color: #FFF8F0; padding: 30px 20px; text-align: center; border-top: 1px solid #fbeed2;">
                   <p style="color: #8D0B41; margin: 0 0 8px 0; font-size: 13px; font-weight: 700; letter-spacing: 0.5px;">Need Help?</p>
                   <p style="color: #525252; margin: 0 0 20px 0; font-size: 13px; line-height: 1.5;">
-                    If you have any questions or need assistance, feel free to reply directly to this email or contact support at <a href="mailto:info@boutiiquevastraa.com" style="color: #8D0B41; text-decoration: none; font-weight: 600;">info@boutiiquevastraa.com</a>.
+                    If you have any questions or need assistance, feel free to reply directly to this email or contact support at <a href="mailto:boutiiquevastraa@gmail.com" style="color: #8D0B41; text-decoration: none; font-weight: 600;">boutiiquevastraa@gmail.com</a>.
                   </p>
                   <p style="color: #a3a3a3; margin: 0; font-size: 11px;">
                     © ${new Date().getFullYear()} Boutiique Vastraa. All rights reserved.<br>
-                    Mumbai, Maharashtra, India.
+                    Nabadwip, West Bengal, Nadia, 741302, India.
                   </p>
                 </td>
               </tr>
@@ -711,7 +800,7 @@ export async function sendBackInStockEmail(customerEmail: string, productTitle: 
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     console.log(`[Email Service] Back-in-stock notification sent to ${customerEmail} for "${productTitle}"`);
   } catch (err: any) {
     console.error(`[Email Service] Failed to send back-in-stock email for "${productTitle}":`, err.message);
@@ -722,7 +811,6 @@ export async function sendBackInStockEmail(customerEmail: string, productTitle: 
  * Send a welcome email to a newly registered user
  */
 export async function sendWelcomeEmail(user: any): Promise<void> {
-  const transporter = getTransporter();
   const fromName = process.env.EMAIL_FROM_NAME || "Boutiique Vastraa";
   const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER;
   const customerEmail = user.email;
@@ -758,7 +846,7 @@ export async function sendWelcomeEmail(user: any): Promise<void> {
                     <a href="https://boutiiquevastraa.com/collections/all" style="background-color: #8D0B41; color: #ffffff; padding: 14px 28px; border-radius: 6px; font-weight: bold; text-decoration: none; display: inline-block; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(141, 11, 65, 0.15);">Explore Collection</a>
                   </div>
                   <p style="color: #525252; font-size: 14px; line-height: 1.6; margin: 0;">
-                    Enjoy free shipping on all orders delivered within India. If you need any assistance, feel free to contact us via Call/WhatsApp at <strong>+91 - 9205248666</strong> or reply directly to this email.
+                    Enjoy free shipping on all orders delivered within India. If you need any assistance, feel free to contact us via Call/WhatsApp at <strong>+91 - 9205238666</strong> or reply directly to this email.
                   </p>
                 </td>
               </tr>
@@ -787,10 +875,85 @@ export async function sendWelcomeEmail(user: any): Promise<void> {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     console.log(`[Email Service] Welcome email successfully sent to ${customerEmail}`);
   } catch (err: any) {
     console.error(`[Email Service] Failed to send welcome email to ${customerEmail}:`, err.message);
   }
 }
+
+/**
+ * Send a welcome newsletter subscription email to the subscriber
+ */
+export async function sendNewsletterWelcomeEmail(email: string): Promise<void> {
+  const fromName = process.env.EMAIL_FROM_NAME || "Boutiique Vastraa";
+  const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Welcome to our Newsletter - Boutiique Vastraa</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #FFFDF9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #FFFDF9; padding: 20px 0;">
+        <tr>
+          <td align="center">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; border: 1px solid #FFF8F0; overflow: hidden; box-shadow: 0 4px 12px rgba(141, 11, 65, 0.03);">
+              <tr>
+                <td style="background-color: #8D0B41; padding: 40px 20px; text-align: center; border-bottom: 4px solid #C9A84C;">
+                  <h1 style="color: #C9A84C; margin: 0; font-size: 28px; font-family: Georgia, serif; letter-spacing: 2px;">BOUTIIQUE VASTRAA</h1>
+                  <p style="color: #ffffff; margin: 10px 0 0 0; font-size: 14px; font-weight: 300; letter-spacing: 1px; text-transform: uppercase;">Newsletter Subscription Confirmed</p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 40px 30px;">
+                  <p style="color: #171717; font-size: 20px; font-weight: 700; margin: 0 0 16px 0; font-family: Georgia, serif;">Namaste!</p>
+                  <p style="color: #525252; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+                    Thank you for subscribing to the Boutiique Vastraa newsletter. You are now part of our exclusive circle!
+                  </p>
+                  <p style="color: #525252; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+                    From now on, you'll be the first to receive updates on our latest handloom collections, direct weaver partnerships, exclusive privilege savings, and cultural stories from our legacy weavers across Bengal and Banaras.
+                  </p>
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="https://boutiiquevastraa.com/collections/all" style="background-color: #8D0B41; color: #ffffff; padding: 14px 28px; border-radius: 6px; font-weight: bold; text-decoration: none; display: inline-block; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(141, 11, 65, 0.15);">Shop New Arrivals</a>
+                  </div>
+                  <p style="color: #525252; font-size: 14px; line-height: 1.6; margin: 0;">
+                    If you did not sign up for this newsletter, you can safely unsubscribe at any time by contacting us at <a href="mailto:boutiiquevastraa@gmail.com" style="color: #8D0B41; text-decoration: none; font-weight: 600;">boutiiquevastraa@gmail.com</a>.
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td style="background-color: #FFF8F0; padding: 30px 20px; text-align: center; border-top: 1px solid #fbeed2;">
+                  <p style="color: #a3a3a3; margin: 0; font-size: 11px;">
+                    © ${new Date().getFullYear()} Boutiique Vastraa. All rights reserved.<br>
+                    Nabadwip, West Bengal, Nadia, 741302, India.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  const mailOptions = {
+    from: `"${fromName}" <${fromEmail}>`,
+    to: email,
+    subject: "Welcome to Boutiique Vastraa Newsletter!",
+    html: htmlContent,
+  };
+
+  try {
+    await sendMail(mailOptions);
+    console.log(`[Email Service] Newsletter welcome email successfully sent to ${email}`);
+  } catch (err: any) {
+    console.error(`[Email Service] Failed to send newsletter welcome email to ${email}:`, err.message);
+  }
+}
+
 

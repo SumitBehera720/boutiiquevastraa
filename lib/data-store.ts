@@ -83,6 +83,26 @@ function writeJson<T>(name: string, data: T): void {
   cache.delete(name);
 }
 
+// ─── Database TTL Query Cache (Optimizes MongoDB queries) ────────────────────
+const dbCache = new Map<string, { data: any; expiresAt: number }>();
+const DB_CACHE_TTL = 3000; // 3 seconds cache
+
+async function cachedDbQuery<T>(key: string, queryFn: () => Promise<T>, ttl = DB_CACHE_TTL): Promise<T> {
+  const now = Date.now();
+  const entry = dbCache.get(key);
+  if (entry && entry.expiresAt > now) {
+    return entry.data as T;
+  }
+  const data = await queryFn();
+  dbCache.set(key, { data, expiresAt: now + ttl });
+  return data;
+}
+
+// Clear relevant DB cache on mutations
+export function clearDbCache() {
+  dbCache.clear();
+}
+
 // ─── Users ──────────────────────────────────────────────────────────────────
 
 export const users = {
@@ -190,8 +210,10 @@ export const admins = {
 export const products = {
   all: async () => {
     if (await db()) {
-      const rows = await query<any[]>("SELECT * FROM products");
-      return rows.map(mapProductFromDb);
+      return cachedDbQuery("products_all", async () => {
+        const rows = await query<any[]>("SELECT * FROM products");
+        return rows.map(mapProductFromDb);
+      });
     }
     return cachedRead<any[]>("products").map(mapProductFromJson);
   },
@@ -352,6 +374,7 @@ export const products = {
     if (await db()) {
       const mapped = mappedItems.map(mapProductToDb);
       await replaceAll("products", mapped);
+      clearDbCache();
     } else {
       writeJson("products", mappedItems);
     }
@@ -418,6 +441,7 @@ function mapProductFromJson(p: any): any {
     sizeChartImage: p.sizeChartImage || null,
     sizesEnabled: p.sizesEnabled !== undefined ? !!p.sizesEnabled : null,
     selectedSizes: p.selectedSizes || [],
+    specifications: p.specifications || {},
   };
 }
 
@@ -455,6 +479,7 @@ function mapProductFromDb(row: any): any {
     sizeChartImage: row.size_chart_image || null,
     sizesEnabled: row.sizes_enabled !== null && row.sizes_enabled !== undefined ? !!row.sizes_enabled : null,
     selectedSizes: row.selected_sizes ? parse(row.selected_sizes) : [],
+    specifications: row.specifications ? parse(row.specifications) : {},
   };
 }
 
@@ -477,6 +502,7 @@ function mapProductToDb(p: any): any {
     size_chart_image: p.sizeChartImage || null,
     sizes_enabled: p.sizesEnabled === undefined ? null : (p.sizesEnabled ? 1 : 0),
     selected_sizes: JSON.stringify(p.selectedSizes || []),
+    specifications: JSON.stringify(p.specifications || {}),
   };
 }
 
@@ -485,8 +511,10 @@ function mapProductToDb(p: any): any {
 export const collections = {
   all: async () => {
     if (await db()) {
-      const rows = await query<any[]>("SELECT * FROM collections ORDER BY created_at DESC");
-      return rows.map(mapCollectionFromDb);
+      return cachedDbQuery("collections_all", async () => {
+        const rows = await query<any[]>("SELECT * FROM collections ORDER BY created_at DESC");
+        return rows.map(mapCollectionFromDb);
+      });
     }
     return cachedRead<any[]>("collections");
   },
@@ -524,6 +552,7 @@ export const collections = {
     if (await db()) {
       const mapped = items.map(mapCollectionToDb);
       await replaceAll("collections", mapped);
+      clearDbCache();
       return;
     }
     writeJson("collections", items);
@@ -1063,3 +1092,43 @@ async function triggerStockNotifications(product: any) {
     console.error("[DataStore] triggerStockNotifications error:", err.message);
   }
 }
+
+// ─── Newsletter Subscribers ──────────────────────────────────────────────────
+
+export const newsletterSubscribers = {
+  all: async () => {
+    if (await db()) {
+      const rows = await query<any[]>("SELECT * FROM newsletter_subscribers ORDER BY created_at DESC");
+      return rows.map((r: any) => ({
+        id: r.id,
+        email: r.email,
+        createdAt: r.created_at || r.createdAt
+      }));
+    }
+    return cachedRead<any[]>("newsletter_subscribers");
+  },
+  create: async (email: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const all = await newsletterSubscribers.all();
+    if (all.some((s: any) => s.email.toLowerCase() === cleanEmail)) {
+      return { success: false, message: "Email is already subscribed to our newsletter." };
+    }
+    const item = {
+      id: generateId(),
+      email: cleanEmail,
+      createdAt: new Date().toISOString()
+    };
+    if (await db()) {
+      await insert("newsletter_subscribers", {
+        id: item.id,
+        email: item.email,
+        created_at: item.createdAt
+      });
+    } else {
+      all.push(item);
+      writeJson("newsletter_subscribers", all);
+    }
+    return { success: true, item };
+  }
+};
+

@@ -383,7 +383,7 @@ export default function ProductInfo({ product, recommendedProducts }: { product:
         </div>
       </div>
 
-      <ProductAccordion descriptionHtml={product.descriptionHtml} />
+      <ProductAccordion descriptionHtml={product.descriptionHtml} specifications={product.specifications} />
 
       <SizeChartModal 
         isOpen={sizeChartOpen} 

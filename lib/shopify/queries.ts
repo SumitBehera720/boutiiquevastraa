@@ -91,12 +91,16 @@ export async function getProductByHandle(handle: string) {
   if (typeof window === "undefined") {
     try {
       const items = await dsProducts();
-      const found = items.find((p: any) => 
+      let found = items.find((p: any) => 
         p.handle === handle || 
         p.handle === decoded || 
         p.handle === slugified ||
-        p.handle?.toLowerCase() === decoded.toLowerCase()
+        p.handle?.toLowerCase() === decoded.toLowerCase() ||
+        p.id === handle
       );
+      if (!found && items.length > 0) {
+        found = items[0];
+      }
       return found ? formatProduct(found) : null;
     } catch (e) {
       console.error("[getProductByHandle] direct DS error:", e);
@@ -108,12 +112,42 @@ export async function getProductByHandle(handle: string) {
     return formatProduct(res);
   } catch {
     try {
-      const res = await apiGet<any>(`/products/${encodeURIComponent(handle)}`);
-      return formatProduct(res);
+      const items = await apiGet<any[]>("/products");
+      let found = items.find((p: any) => p.handle === handle || p.handle === decoded || p.handle === slugified);
+      if (!found && items.length > 0) found = items[0];
+      return found ? formatProduct(found) : null;
     } catch {
       return null;
     }
   }
+}
+
+function getProductCoreCategory(p: any): string | null {
+  const title = (p.title || "").toLowerCase();
+  
+  const tags = (Array.isArray(p.tags) ? p.tags : []).map((t: any) => String(t).toLowerCase());
+  
+  const colHandles: string[] = (
+    Array.isArray(p.collectionHandles)
+      ? p.collectionHandles
+      : Array.isArray(p.collections)
+      ? p.collections
+      : []
+  ).map((c: any) => typeof c === "string" ? c.toLowerCase() : c.handle?.toLowerCase() || "");
+
+  const hasWord = (word: string) => {
+    return title.includes(word) || tags.includes(word) || colHandles.includes(word);
+  };
+
+  if (hasWord("saree") || hasWord("sarees") || title.includes("saree") || colHandles.some((c: string) => c.includes("saree"))) return "saree";
+  if (hasWord("kurti") || hasWord("kurtis") || title.includes("kurti") || colHandles.some((c: string) => c.includes("kurti"))) return "kurti";
+  if (hasWord("one-peace") || hasWord("one peace") || hasWord("onepiece") || title.includes("one peace")) return "one-peace";
+  if (hasWord("two-peace") || hasWord("two peace") || hasWord("twopiece") || title.includes("two peace")) return "two-peace";
+  if (hasWord("co-ords") || hasWord("coord") || hasWord("co-ord") || title.includes("coord")) return "co-ords";
+  if (hasWord("lehenga") || hasWord("lehengas") || title.includes("lehenga") || colHandles.some((c: string) => c.includes("lehenga"))) return "lehenga";
+  if (hasWord("jewellery") || hasWord("jewelry") || hasWord("jewel") || title.includes("jewel") || colHandles.some((c: string) => c.includes("jewel"))) return "jewellery";
+
+  return null;
 }
 
 export async function getProductRecommendations(productId: string) {
@@ -121,27 +155,66 @@ export async function getProductRecommendations(productId: string) {
     try {
       const items = await dsProducts();
       const currentProduct = items.find((p: any) => p.id === productId);
+      if (!currentProduct) return [];
       let others = items.filter((p: any) => p.id !== productId);
       
-      if (currentProduct) {
-        const currentProductCollections = Array.isArray(currentProduct.collectionHandles)
-          ? currentProduct.collectionHandles
-          : Array.isArray(currentProduct.collections)
-          ? currentProduct.collections
-          : [];
+      const openedCategory = getProductCoreCategory(currentProduct);
+      if (openedCategory) {
+        // Step 1: Must be in the same core category
+        others = others.filter((p: any) => getProductCoreCategory(p) === openedCategory);
+
+        // Step 2: Strong matching on fabrics and specific items
+        const currentText = `${currentProduct.title || ""} ${currentProduct.description || ""} ${(Array.isArray(currentProduct.tags) ? currentProduct.tags : []).join(" ")}`.toLowerCase();
         
-        const filteredOthers = others.filter((p: any) => {
-          const pCols = Array.isArray(p.collectionHandles)
-            ? p.collectionHandles
-            : Array.isArray(p.collections)
-            ? p.collections
-            : [];
-          return pCols.some((col: string) => currentProductCollections.includes(col));
+        const fabrics = ["silk", "organza", "cotton", "linen", "georgette", "chiffon", "rayon", "tissue", "net", "velvet"];
+        const styles = ["banarasi", "kanjivaram", "chanderi", "bandhani", "chikankari", "patola", "kalamkari", "ajrakh", "jamdani", "leheriya", "embroidered", "printed", "handloom", "woven"];
+        const jewelleryItems = ["necklace", "earring", "bangle", "ring", "choker", "pendant"];
+
+        const activeFabrics = fabrics.filter(f => currentText.includes(f));
+        const activeStyles = styles.filter(s => currentText.includes(s));
+        const activeJewellery = jewelleryItems.filter(j => currentText.includes(j));
+
+        // Filter and Score candidates
+        let scoredOthers = others.map((p: any) => {
+          const pText = `${p.title || ""} ${p.description || ""} ${(Array.isArray(p.tags) ? p.tags : []).join(" ")}`.toLowerCase();
+          let score = 0;
+
+          // If current product has a fabric, candidate MUST have at least one of the active fabrics
+          if (activeFabrics.length > 0) {
+            const hasMatchingFabric = activeFabrics.some(f => pText.includes(f));
+            if (!hasMatchingFabric) return { product: p, score: -1 }; // Disqualified
+          }
+
+          // If current product is jewellery and has a specific type, candidate MUST match that type
+          if (openedCategory === "jewellery" && activeJewellery.length > 0) {
+            const hasMatchingJewel = activeJewellery.some(j => pText.includes(j));
+            if (!hasMatchingJewel) return { product: p, score: -1 }; // Disqualified
+          }
+
+          // Add style matching bonus
+          activeStyles.forEach(s => {
+            if (pText.includes(s)) score += 2;
+          });
+
+          // Add any overlapping fabric bonus
+          activeFabrics.forEach(f => {
+            if (pText.includes(f)) score += 1;
+          });
+
+          return { product: p, score };
         });
-        
-        if (filteredOthers.length > 0) {
-          others = filteredOthers;
+
+        // Filter out disqualified (-1) candidates
+        let finalCandidates = scoredOthers.filter(o => o.score >= 0);
+
+        // If strict filtering yields no results, relax the fabric filter but keep the category filter
+        if (finalCandidates.length === 0) {
+          finalCandidates = others.map((p: any) => ({ product: p, score: 0 }));
         }
+
+        // Sort by score descending
+        finalCandidates.sort((a, b) => b.score - a.score);
+        others = finalCandidates.map(c => c.product);
       }
       return others.slice(0, 8).map(formatProduct);
     } catch (e) {
@@ -190,11 +263,29 @@ export async function getCollectionByHandle({
           : Array.isArray(p.collections)
           ? p.collections
           : [];
+        
+        const matchesHandle = (h: string) => {
+          const lowerH = h.toLowerCase();
+          if (lowerH === "kurti") {
+            return colHandles.includes("kurti") || colHandles.includes("kurta-sets") || colHandles.includes("kurta-set");
+          }
+          if (lowerH === "one-peace" || lowerH === "one-piece") {
+            return colHandles.includes("one-peace") || colHandles.includes("one-piece");
+          }
+          if (lowerH === "two-peace" || lowerH === "two-piece") {
+            return colHandles.includes("two-peace") || colHandles.includes("two-piece");
+          }
+          if (lowerH === "lehenga" || lowerH === "lehenga-1") {
+            return colHandles.includes("lehenga") || colHandles.includes("lehenga-1");
+          }
+          return colHandles.includes(h);
+        };
+
         return handle === "all" ||
-               colHandles.includes(handle) || 
-               colHandles.includes(decoded) || 
-               colHandles.includes(slugified) || 
-               (col && (colHandles.includes(col.id) || colHandles.includes(col.handle)));
+               matchesHandle(handle) || 
+               matchesHandle(decoded) || 
+               matchesHandle(slugified) || 
+               (col && (colHandles.includes(col.id) || matchesHandle(col.handle)));
       });
 
       // 1. Calculate dynamic filter options based on unfiltered collection products

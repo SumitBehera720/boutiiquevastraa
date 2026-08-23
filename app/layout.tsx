@@ -15,6 +15,11 @@ import AnnouncementBar from "@/components/global/AnnouncementBar";
 import MobileSocialStrip from "@/components/global/MobileSocialStrip";
 import FloatingWhatsApp from "@/components/global/FloatingWhatsApp";
 import MetaPixel from "@/components/global/MetaPixel";
+import GoogleTagManager from "@/components/global/GoogleTagManager";
+import GoogleAnalytics from "@/components/global/GoogleAnalytics";
+import SvgFilters from "@/components/global/SvgFilters";
+import CursorGlow from "@/components/global/CursorGlow";
+import StoryTrackerNav from "@/components/global/StoryTrackerNav";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -69,12 +74,29 @@ export default async function RootLayout({
   const footerSettings = settings.footer || {};
   const headerSettings = settings.header || {};
 
-  const rawWaNum = headerSettings.whatsappNumber || "919205248666";
-  const cleanWaNum = rawWaNum.includes("38666") ? "919205248666" : rawWaNum;
+  const rawWaNum = headerSettings.whatsappNumber || "919205238666";
+  const cleanWaNum = rawWaNum;
+
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.variable} ${kalnia.variable} ${rubik.variable} font-poppins antialiased`}>
+        <SvgFilters />
+        <CursorGlow />
+        <StoryTrackerNav />
+        {gtmId && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
+        <GoogleTagManager />
+        <GoogleAnalytics />
         <MetaPixel />
         <Suspense fallback={null}>
           <ScrollToTopOnPageChange />
@@ -87,10 +109,10 @@ export default async function RootLayout({
         <CartDrawer />
         <CartInitializer />
         <GiftManager />
-        <main className="pb-24 sm:pb-0 min-h-screen font-poppins">
+        <main className="min-h-screen font-poppins">
           {children}
         </main>
-        <Footer settings={footerSettings} />
+        <Footer settings={footerSettings} whatsappNumber={cleanWaNum} />
         <MobileSocialStrip
           facebook={footerSettings.facebookUrl}
           instagram={footerSettings.instagramUrl}

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 300; // 5 minutes execution time for large video uploads
+
 // On Hostinger, UPLOAD_DIR must point to public_html/images/uploads so Apache
 // can serve the files directly. Locally it falls back to public/images/uploads.
 function getUploadDir(): string {

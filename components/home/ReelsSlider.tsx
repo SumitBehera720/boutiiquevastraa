@@ -20,6 +20,7 @@ interface ReelProduct {
 interface Reel {
   id: string;
   thumbnail: string;
+  videoUrl?: string;
   views: string;
   title: string;
   likes: string;
@@ -164,29 +165,42 @@ export default function ReelsSlider({ reels }: { reels?: any[] }) {
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const { cartId, setCart, openCart, totalQuantity } = useCartStore();
   const stripRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const displayReels = (reels && reels.length > 0)
-    ? reels.map((r, i) => ({
-        id: r.id || `reel_${i}`,
-        thumbnail: r.thumbnail || r.videoUrl || "/images/client-1.jpg",
-        views: r.views || "50K",
-        likes: r.likes || "120",
-        shares: r.shares || "85",
-        title: r.title || "Festive Handloom Drape",
-        product: {
-          id: r.productId || "gid://shopify/Product/15158668132716",
+    ? reels.map((r, i) => {
+        const videoUrl = r.videoUrl || r.video || r.mediaUrl || "";
+        const thumbnail = r.thumbnail || r.image || (videoUrl ? "" : "/images/client-1.jpg");
+        return {
+          id: r.id || `reel_${i}`,
+          videoUrl,
+          thumbnail: thumbnail || "/images/client-1.jpg",
+          views: r.views || "50K",
+          likes: r.likes || "120",
+          shares: r.shares || "85",
           title: r.title || "Festive Handloom Drape",
-          price: r.price || "₹ 1,999",
-          compareAtPrice: r.compareAtPrice || "₹ 3,899",
-          discountBadge: r.discountBadge || "49% off",
-          image: r.thumbnail || "/images/client-1.jpg",
-          thumbnails: [r.thumbnail || "/images/client-1.jpg", "/images/client-2.jpg", "/images/client-3.jpg"],
-          handle: r.productHandle || "woven-kanjivaram-silk-blend-saree-pink",
-        }
-      }))
+          product: {
+            id: r.productId || "gid://shopify/Product/15158668132716",
+            title: r.title || "Festive Handloom Drape",
+            price: r.price || "₹ 1,999",
+            compareAtPrice: r.compareAtPrice || "₹ 3,899",
+            discountBadge: r.discountBadge || "49% off",
+            image: thumbnail || "/images/client-1.jpg",
+            thumbnails: [thumbnail || "/images/client-1.jpg", "/images/client-2.jpg", "/images/client-3.jpg"],
+            handle: r.productHandle || "woven-kanjivaram-silk-blend-saree-pink",
+          }
+        };
+      })
     : REELS;
 
   const activeReel = activeReelIdx !== null ? displayReels[activeReelIdx] : null;
+
+  // Sync mute state to video element
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted, activeReelIdx]);
 
   // Lock body scroll when modal is active
   useEffect(() => {
@@ -284,15 +298,26 @@ export default function ReelsSlider({ reels }: { reels?: any[] }) {
               className="flex-shrink-0 w-[200px] min-[480px]:w-[240px] sm:w-[270px] md:w-[285px] lg:w-[295px] snap-start group cursor-pointer flex flex-col"
             >
               {/* Image Container — Tall 9:16 aspect ratio like Instagram Reel */}
-              <div className="relative w-full aspect-[9/16] rounded-2xl overflow-hidden border border-gray-200/80 shadow-md group-hover:shadow-xl group-hover:border-goldClr/50 transition-all duration-300">
-                <Image
-                  src={reel.thumbnail}
-                  alt={reel.title}
-                  fill
-                  unoptimized
-                  className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 640px) 55vw, (max-width: 1024px) 30vw, 20vw"
-                />
+              <div className="relative w-full aspect-[9/16] rounded-2xl overflow-hidden border border-gray-200/80 shadow-md group-hover:shadow-xl group-hover:border-goldClr/50 transition-all duration-300 bg-black">
+                {reel.videoUrl ? (
+                  <video
+                    src={reel.videoUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                  />
+                ) : (
+                  <Image
+                    src={reel.thumbnail}
+                    alt={reel.title}
+                    fill
+                    unoptimized
+                    className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 640px) 55vw, (max-width: 1024px) 30vw, 20vw"
+                  />
+                )}
 
                 {/* Views Badge Top-Left — Dark Pill with Eye Icon */}
                 <div className="absolute top-3 left-3 z-10 bg-black/65 backdrop-blur-md text-white text-[11px] sm:text-xs font-bold px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow">
@@ -350,15 +375,26 @@ export default function ReelsSlider({ reels }: { reels?: any[] }) {
           <div className="hidden lg:block absolute left-[calc(50%-360px)] top-1/2 -translate-y-1/2 z-10">
             <div
               onClick={handlePrevReel}
-              className="relative w-[240px] sm:w-[260px] aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer group opacity-85 hover:opacity-100 transition-all duration-300 shadow-2xl border border-white/10"
+              className="relative w-[240px] sm:w-[260px] aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer group opacity-85 hover:opacity-100 transition-all duration-300 shadow-2xl border border-white/10 bg-black"
             >
-              <Image
-                src={REELS[prevIdx].thumbnail}
-                alt="previous reel"
-                fill
-                unoptimized
-                className="object-cover object-center"
-              />
+              {displayReels[prevIdx]?.videoUrl ? (
+                <video
+                  src={displayReels[prevIdx].videoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : (
+                <Image
+                  src={displayReels[prevIdx]?.thumbnail || "/images/client-1.jpg"}
+                  alt="previous reel"
+                  fill
+                  unoptimized
+                  className="object-cover object-center"
+                />
+              )}
               <div className="absolute inset-0 bg-black/35 group-hover:bg-black/10 transition-colors" />
             </div>
           </div>
@@ -377,15 +413,27 @@ export default function ReelsSlider({ reels }: { reels?: any[] }) {
           <div
             className="relative z-30 w-full max-w-[340px] min-[480px]:max-w-[370px] sm:max-w-[390px] aspect-[9/16] max-h-[85vh] rounded-2xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.7)] border border-white/20 bg-black flex flex-col justify-between"
           >
-            {/* Background Image / Reel Video Fill */}
-            <div className="absolute inset-0 z-0">
-              <Image
-                src={activeReel.thumbnail}
-                alt={activeReel.title}
-                fill
-                unoptimized
-                className="object-cover object-center"
-              />
+            {/* Background Video / Reel Fill */}
+            <div className="absolute inset-0 z-0 bg-black">
+              {activeReel.videoUrl ? (
+                <video
+                  ref={videoRef}
+                  src={activeReel.videoUrl}
+                  autoPlay
+                  loop
+                  playsInline
+                  muted={isMuted}
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : (
+                <Image
+                  src={activeReel.thumbnail}
+                  alt={activeReel.title}
+                  fill
+                  unoptimized
+                  className="object-cover object-center"
+                />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
             </div>
 
@@ -592,15 +640,26 @@ export default function ReelsSlider({ reels }: { reels?: any[] }) {
           <div className="hidden lg:block absolute right-[calc(50%-360px)] top-1/2 -translate-y-1/2 z-10">
             <div
               onClick={handleNextReel}
-              className="relative w-[240px] sm:w-[260px] aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer group opacity-85 hover:opacity-100 transition-all duration-300 shadow-2xl border border-white/10"
+              className="relative w-[240px] sm:w-[260px] aspect-[9/16] rounded-2xl overflow-hidden cursor-pointer group opacity-85 hover:opacity-100 transition-all duration-300 shadow-2xl border border-white/10 bg-black"
             >
-              <Image
-                src={REELS[nextIdx].thumbnail}
-                alt="next reel"
-                fill
-                unoptimized
-                className="object-cover object-center"
-              />
+              {displayReels[nextIdx]?.videoUrl ? (
+                <video
+                  src={displayReels[nextIdx].videoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover object-center"
+                />
+              ) : (
+                <Image
+                  src={displayReels[nextIdx]?.thumbnail || "/images/client-1.jpg"}
+                  alt="next reel"
+                  fill
+                  unoptimized
+                  className="object-cover object-center"
+                />
+              )}
               <div className="absolute inset-0 bg-black/35 group-hover:bg-black/10 transition-colors" />
             </div>
           </div>

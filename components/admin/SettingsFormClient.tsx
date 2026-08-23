@@ -58,6 +58,16 @@ function ImageOrVideoUploader({
     }
   };
 
+  const isVideo = value && (
+    value.endsWith(".mp4") ||
+    value.endsWith(".webm") ||
+    value.endsWith(".mov") ||
+    value.endsWith(".m4v") ||
+    value.endsWith(".MOV") ||
+    value.endsWith(".MP4") ||
+    accept.includes("video")
+  );
+
   return (
     <div className="space-y-1.5">
       <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider">{label}</label>
@@ -65,8 +75,8 @@ function ImageOrVideoUploader({
         {/* Preview */}
         {value && (
           <div className="relative w-12 h-12 rounded border border-neutral-800 bg-neutral-900 overflow-hidden flex items-center justify-center flex-shrink-0">
-            {value.endsWith(".mp4") || value.endsWith(".webm") || value.endsWith(".mov") ? (
-              <Video className="w-6 h-6 text-[#C9A84C]" />
+            {isVideo ? (
+              <video src={value} autoPlay loop muted playsInline className="object-cover w-full h-full" />
             ) : (
               <img src={value} alt="Preview" className="object-cover w-full h-full" />
             )}

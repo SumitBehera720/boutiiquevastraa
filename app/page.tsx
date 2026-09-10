@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { getProducts, getCollections } from "@/lib/shopify/queries";
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 import CollectionsSlider from "@/components/home/CollectionsSlider";
 import TopSellings from "@/components/home/TopSellings";
 import PerfectSareeTabs from "@/components/home/PerfectSareeTabs";
@@ -29,15 +29,22 @@ export async function generateMetadata(): Promise<Metadata> {
   const cleanTitle = settings.seo?.titleTemplate
     ? settings.seo.titleTemplate.replace("%s | ", "")
     : "Boutiique Vastraa";
+  const desc =
+    settings.seo?.defaultDescription ||
+    "Discover handcrafted Banarasi silk sarees, designer lehengas & premium Indian ethnic wear at Boutiique Vastraa. Enjoy authentic silk mark quality & free shipping across India. Shop our exclusive collection today!";
+
   return {
-    title: "Home | " + cleanTitle,
-    description: settings.seo?.defaultDescription,
+    title: "Boutiique Vastraa – Handcrafted Sarees & Ethnic Wear",
+    description: desc,
+    alternates: {
+      canonical: "https://boutiiquevastraa.com",
+    },
     openGraph: {
-      type: 'website',
-      url: 'https://boutiiquevastraa.com',
-      title: cleanTitle,
-      description: settings.seo?.defaultDescription,
-      siteName: 'Boutiique Vastraa',
+      type: "website",
+      url: "https://boutiiquevastraa.com",
+      title: "Boutiique Vastraa – Handcrafted Sarees & Ethnic Wear",
+      description: desc,
+      siteName: "Boutiique Vastraa",
     },
   };
 }
@@ -151,6 +158,7 @@ export default async function Home() {
 
   return (
     <>
+      <h1 className="sr-only">Boutiique Vastraa – Handcrafted Sarees & Ethnic Wear</h1>
       {/* 1. Hero Slideshow */}
       <HeroBanner slides={bannerSlides} />
 

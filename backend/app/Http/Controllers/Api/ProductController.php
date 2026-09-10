@@ -10,8 +10,18 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $first = min((int) $request->query('first', 50), 250);
-        $products = Product::with('collections')->limit($first)->get();
+        $first = min((int) $request->query('first', $request->query('per_page', 50)), 10000);
+        $collectionId = $request->query('collection_id') ?? $request->query('collection');
+
+        $query = Product::with('collections');
+        if ($collectionId && $collectionId !== 'all') {
+            $query->whereHas('collections', function ($q) use ($collectionId) {
+                $q->where('collections.id', $collectionId)
+                  ->orWhere('collections.handle', $collectionId);
+            });
+        }
+
+        $products = $query->limit($first)->get();
 
         return response()->json(
             $products->map(fn($p) => $p->toShopifyFormat())

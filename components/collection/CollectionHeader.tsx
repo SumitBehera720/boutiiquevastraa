@@ -26,18 +26,20 @@ export default async function CollectionHeader({ collection }: { collection: any
           />
         </>
       )}
-      {!customBannerUrl && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 z-10">
-          <h1 className="text-4xl md:text-5xl font-kalnia text-maroonClr font-bold mb-4 drop-shadow-[0_2px_8px_rgba(255,255,255,0.9)]">
-            {capitalizedTitle}
-          </h1>
-          {collection.description && (
-            <p className="max-w-2xl text-gray-800 text-sm md:text-base font-medium drop-shadow-[0_1px_4px_rgba(255,255,255,0.9)]">
-              {collection.description}
-            </p>
-          )}
-        </div>
-      )}
+      <div className="absolute inset-0 bg-black/25 flex flex-col items-center justify-center text-center p-4 z-10">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-kalnia text-white font-bold mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]">
+          {capitalizedTitle}
+        </h1>
+        {collection.description ? (
+          <p className="max-w-2xl text-white/90 text-xs sm:text-sm md:text-base font-light drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+            {collection.description}
+          </p>
+        ) : (
+          <p className="max-w-2xl text-white/90 text-xs sm:text-sm md:text-base font-light drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+            Explore our handcrafted {capitalizedTitle} collection, woven with pure silk fibers and intricate traditional zari details.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

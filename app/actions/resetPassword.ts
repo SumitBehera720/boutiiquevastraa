@@ -52,7 +52,7 @@ export async function requestPasswordResetAction(data: RequestResetInput) {
     });
 
     // Construct reset URL
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://boutiiquevastraa.com";
     const resetLink = `${siteUrl}/account/reset-password?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
 
     // Send reset email

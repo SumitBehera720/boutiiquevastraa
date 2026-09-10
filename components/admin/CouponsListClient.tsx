@@ -20,6 +20,7 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
   const [type, setType] = useState<"PERCENTAGE" | "FIXED_AMOUNT">("PERCENTAGE");
   const [value, setValue] = useState("");
   const [minPurchase, setMinPurchase] = useState("");
+  const [usageLimit, setUsageLimit] = useState("");
   const [active, setActive] = useState(true);
 
   const openCreateDrawer = () => {
@@ -28,6 +29,7 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
     setType("PERCENTAGE");
     setValue("");
     setMinPurchase("0");
+    setUsageLimit("");
     setActive(true);
     setError("");
     setIsDrawerOpen(true);
@@ -39,6 +41,8 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
     setType(coupon?.type || "PERCENTAGE");
     setValue((coupon?.value ?? 0).toString());
     setMinPurchase((coupon?.minPurchaseAmount ?? coupon?.minPurchase ?? 0).toString());
+    const limit = coupon?.usageLimit ?? coupon?.maxUses ?? coupon?.max_uses ?? coupon?.usage_limit;
+    setUsageLimit(limit !== undefined && limit !== null && limit !== "" ? limit.toString() : "");
     setActive(!!coupon?.active);
     setError("");
     setIsDrawerOpen(true);
@@ -56,6 +60,8 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
     }
 
     try {
+      const parsedLimit = usageLimit.trim() !== "" ? parseInt(usageLimit, 10) : null;
+      const finalLimit = parsedLimit !== null && !isNaN(parsedLimit) ? Math.max(0, parsedLimit) : null;
       const res = await saveCouponAction({
         id: editingCoupon?.id,
         code,
@@ -64,6 +70,9 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
         active,
         minPurchaseAmount: parseFloat(minPurchase || "0"),
         minPurchase: parseFloat(minPurchase || "0"),
+        usageLimit: finalLimit,
+        maxUses: finalLimit,
+        usedCount: editingCoupon?.usedCount || 0,
       });
 
       if (res.success) {
@@ -148,111 +157,135 @@ export default function CouponsListClient({ initialCoupons }: CouponsListClientP
               </button>
             </div>
 
-            {/* Values */}
-            <div className="space-y-1">
-              <p className="text-2xl font-bold text-white font-mono flex items-baseline gap-1">
-                {coupon.type === "PERCENTAGE" ? (
-                  <>
-                    {coupon.value}<span className="text-xs text-neutral-400">% OFF</span>
-                  </>
-                ) : (
-                  <>
-                    ₹{coupon.value}<span className="text-xs text-neutral-400">FLAT OFF</span>
-                  </>
-                )}
-              </p>
-              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
-                Min Purchase: ₹{(coupon.minPurchaseAmount ?? coupon.minPurchase ?? 0).toLocaleString("en-IN")}
-              </p>
-            </div>
-
-            {/* Actions */}
-            <div className="pt-3 border-t border-neutral-850 flex justify-between items-center">
-              <button
-                onClick={() => openEditDrawer(coupon)}
-                className="text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-1 font-bold uppercase tracking-wider text-[10px]"
-              >
-                <Edit2 className="w-3.5 h-3.5" /> Edit
-              </button>
-              
-              <button
-                onClick={() => handleDelete(coupon.id)}
-                className="text-xs text-neutral-500 hover:text-red-400 transition-colors flex items-center gap-1 font-bold uppercase tracking-wider text-[10px]"
-              >
-                <Trash2 className="w-3.5 h-3.5" /> Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Create / Edit Drawer Overlay */}
-      {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-fadeIn">
-          <div className="w-full max-w-md bg-neutral-900 border-l border-neutral-800 h-full p-8 overflow-y-auto space-y-6 flex flex-col justify-between">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-serif font-bold text-white uppercase tracking-wider">
-                  {editingCoupon ? "Edit Promo Code" : "Create Promo Code"}
-                </h3>
-                <p className="text-xs text-neutral-500">Configure discounts, pricing triggers, and coupon codes.</p>
+              {/* Values */}
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-white font-mono flex items-baseline gap-1">
+                  {coupon.type === "PERCENTAGE" ? (
+                    <>
+                      {coupon.value}<span className="text-xs text-neutral-400">% OFF</span>
+                    </>
+                  ) : (
+                    <>
+                      ₹{coupon.value}<span className="text-xs text-neutral-400">FLAT OFF</span>
+                    </>
+                  )}
+                </p>
+                <div className="flex justify-between items-center text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
+                  <span>Min Purchase: ₹{(coupon.minPurchaseAmount ?? coupon.minPurchase ?? 0).toLocaleString("en-IN")}</span>
+                  {(() => {
+                    const lim = coupon.usageLimit ?? coupon.maxUses ?? coupon.max_uses ?? coupon.usage_limit;
+                    const hasLimit = lim !== undefined && lim !== null && lim !== "" && Number(lim) > 0;
+                    const used = coupon.usedCount || coupon.used_count || 0;
+                    const isReached = hasLimit && used >= Number(lim);
+                    return (
+                      <span className={isReached ? "text-red-400 font-extrabold" : "text-neutral-400"}>
+                        Uses: {used} / {hasLimit ? lim : "∞"}
+                      </span>
+                    );
+                  })()}
+                </div>
               </div>
 
-              {error && (
-                <div className="p-3 bg-red-950/40 border border-red-900/50 text-red-400 text-xs rounded-lg flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  <span>{error}</span>
-                </div>
-              )}
+              {/* Actions */}
+              <div className="pt-3 border-t border-neutral-850 flex justify-between items-center">
+                <button
+                  onClick={() => openEditDrawer(coupon)}
+                  className="text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-1 font-bold uppercase tracking-wider text-[10px]"
+                >
+                  <Edit2 className="w-3.5 h-3.5" /> Edit
+                </button>
+                
+                <button
+                  onClick={() => handleDelete(coupon.id)}
+                  className="text-xs text-neutral-500 hover:text-red-400 transition-colors flex items-center gap-1 font-bold uppercase tracking-wider text-[10px]"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
 
-              <form onSubmit={handleSave} className="space-y-4">
+        {/* Create / Edit Drawer Overlay */}
+        {isDrawerOpen && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end animate-fadeIn">
+            <div className="w-full max-w-md bg-neutral-900 border-l border-neutral-800 h-full p-8 overflow-y-auto space-y-6 flex flex-col justify-between">
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Coupon Code</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="E.G. FESTIVE20"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr uppercase font-mono"
-                  />
+                  <h3 className="text-lg font-serif font-bold text-white uppercase tracking-wider">
+                    {editingCoupon ? "Edit Promo Code" : "Create Promo Code"}
+                  </h3>
+                  <p className="text-xs text-neutral-500">Configure discounts, pricing triggers, and usage limit controls.</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Coupon Type</label>
-                    <select
-                      value={type}
-                      onChange={(e: any) => setType(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr"
-                    >
-                      <option value="PERCENTAGE">PERCENTAGE (%)</option>
-                      <option value="FIXED_AMOUNT">FLAT AMOUNT (₹)</option>
-                    </select>
+                {error && (
+                  <div className="p-3 bg-red-950/40 border border-red-900/50 text-red-400 text-xs rounded-lg flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{error}</span>
                   </div>
+                )}
+
+                <form onSubmit={handleSave} className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Value</label>
+                    <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Coupon Code</label>
                     <input
-                      type="number"
+                      type="text"
                       required
-                      placeholder={type === "PERCENTAGE" ? "20" : "500"}
-                      value={value}
-                      onChange={(e) => setValue(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr font-mono"
+                      placeholder="E.G. FESTIVE20"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr uppercase font-mono"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Minimum Purchase Requirement (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={minPurchase}
-                    onChange={(e) => setMinPurchase(e.target.value)}
-                    className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr font-mono"
-                  />
-                </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Coupon Type</label>
+                      <select
+                        value={type}
+                        onChange={(e: any) => setType(e.target.value)}
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr"
+                      >
+                        <option value="PERCENTAGE">PERCENTAGE (%)</option>
+                        <option value="FIXED_AMOUNT">FLAT AMOUNT (₹)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Value</label>
+                      <input
+                        type="number"
+                        required
+                        placeholder={type === "PERCENTAGE" ? "20" : "500"}
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Min Purchase (₹)</label>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={minPurchase}
+                        onChange={(e) => setMinPurchase(e.target.value)}
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Usage Limit (Max Uses)</label>
+                      <input
+                        type="number"
+                        placeholder="Unlimited (Leave empty)"
+                        value={usageLimit}
+                        onChange={(e) => setUsageLimit(e.target.value)}
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-lg px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-maroonClr font-mono"
+                      />
+                      <span className="text-[9px] text-neutral-500 font-normal">e.g. 10 to disable automatically after 10 uses</span>
+                    </div>
+                  </div>
 
                 <div className="flex items-center gap-2 pt-2">
                   <input

@@ -1,6 +1,6 @@
 import { getProducts } from "@/lib/shopify/queries";
 import ProductsClient from "@/components/collection/ProductsClient";
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export const metadata = {
   title: "All Products | Boutiique Vastraa",

@@ -410,7 +410,36 @@ export class ShiprocketService {
           }
         }
       }
-      return null;
+
+      // Zone-based dynamic estimate fallback based on postal region distance from warehouse
+      // Warehouse origin: Kolkata (700xxx) / Eastern India
+      const pinNum = parseInt(deliveryPincode, 10);
+      const prefix = Math.floor(pinNum / 10000); // First 2 digits of pincode
+
+      let daysMin = 3;
+      let daysMax = 5;
+
+      if (prefix >= 70 && prefix <= 74) {
+        // Local / West Bengal
+        daysMin = 1;
+        daysMax = 2;
+      } else if ((prefix >= 75 && prefix <= 79) || (prefix >= 80 && prefix <= 85)) {
+        // Eastern India (Odisha, Bihar, Jharkhand, Assam)
+        daysMin = 2;
+        daysMax = 4;
+      } else if ((prefix >= 11 && prefix <= 28) || (prefix >= 40 && prefix <= 44) || (prefix >= 50 && prefix <= 64)) {
+        // Major Metro Hubs & North/West/South (Delhi, Mumbai, Bengaluru, Hyderabad, Chennai)
+        daysMin = 3;
+        daysMax = 5;
+      } else {
+        // Far North / Northeast / Remote Islands (J&K, HP, NE States, Andaman, Lakshadweep)
+        daysMin = 5;
+        daysMax = 8;
+      }
+
+      const estimatedDate = new Date();
+      estimatedDate.setDate(estimatedDate.getDate() + daysMax);
+      return estimatedDate.toISOString();
     } catch (err: any) {
       console.error("[Shiprocket Serviceability Error]:", err.message);
       return null;

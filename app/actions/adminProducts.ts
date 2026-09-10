@@ -35,6 +35,12 @@ export async function uploadImageAction(formData: FormData) {
     const file = formData.get("file") || formData.get("image");
     if (!(file instanceof File)) throw new Error("No file uploaded");
     
+    // 2MB size limit validation (2 * 1024 * 1024 bytes)
+    const MAX_SIZE_BYTES = 2 * 1024 * 1024;
+    if (file.size > MAX_SIZE_BYTES) {
+      throw new Error(`File "${file.name}" exceeds the maximum allowed size limit of 2MB (File size: ${(file.size / (1024 * 1024)).toFixed(2)}MB).`);
+    }
+
     const ext = file.name.split(".").pop() || "png";
     const fileName = `upload-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());

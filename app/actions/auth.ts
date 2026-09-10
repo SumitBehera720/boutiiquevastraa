@@ -54,16 +54,39 @@ export async function registerAction(formData: FormData) {
   }
 
   try {
-    const data = await createCustomer({ firstName, lastName, email, password });
+    const { initDataStore, users, hashPassword, generateId } = await import("@/lib/data-store");
+    const { sendWelcomeEmail } = await import("@/lib/services/email");
 
-    if (data?.customerUserErrors?.length > 0) {
-      return { success: false, error: data.customerUserErrors[0].message };
+    await initDataStore();
+    const normalizedEmail = email.trim().toLowerCase();
+    const existing = await users.findByEmail(normalizedEmail);
+
+    if (existing) {
+      return { success: false, error: "This email address is already registered." };
+    }
+
+    const newUser = {
+      id: generateId(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: normalizedEmail,
+      passwordHash: hashPassword(password),
+      createdAt: new Date().toISOString(),
+    };
+
+    await users.create(newUser);
+
+    // Send Welcome Email
+    try {
+      await sendWelcomeEmail(newUser);
+    } catch (emailErr: any) {
+      console.error("[Register Action Email Error]:", emailErr.message);
     }
 
     return await loginAction(formData);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Register Action Error:", error);
-    return { success: false, error: "An unexpected error occurred during registration." };
+    return { success: false, error: error.message || "An unexpected error occurred during registration." };
   }
 }
 

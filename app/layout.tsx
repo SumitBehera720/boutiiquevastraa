@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Poppins, Rubik } from "next/font/google";
 import "./globals.css";
 
-export const dynamic = 'force-dynamic';
-
 import Header from "@/components/global/Header";
 import Footer from "@/components/global/Footer";
 import CartDrawer from "@/components/cart/CartDrawer";
@@ -25,12 +23,14 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-poppins",
+  display: "swap",
 });
 
 const rubik = Rubik({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-rubik",
+  display: "swap",
 });
 
 // Kalnia from Google Fonts — use next/font/google with display swap
@@ -39,19 +39,41 @@ const kalnia = Kalnia({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-kalnia",
+  display: "swap",
 });
 
 import { serverGetSettings } from "@/lib/server-data";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings: any = await serverGetSettings();
+  const defaultDesc =
+    settings.seo?.defaultDescription ||
+    "Discover handcrafted Banarasi silk sarees, designer lehengas & premium Indian ethnic wear at Boutiique Vastraa. Enjoy authentic silk mark quality & free shipping across India. Shop our exclusive collection today!";
+
   return {
+    metadataBase: new URL("https://boutiiquevastraa.com"),
     title: {
       template: settings.seo?.titleTemplate || "%s | Boutiique Vastraa",
-      default: "Boutiique Vastraa",
+      default: "Boutiique Vastraa – Handcrafted Sarees & Ethnic Wear",
     },
-    description: settings.seo?.defaultDescription,
-    keywords: settings.seo?.keywords,
+    description: defaultDesc,
+    keywords:
+      settings.seo?.keywords || [
+        "saree",
+        "Banarasi silk saree",
+        "handcrafted sarees",
+        "ethnic wear",
+        "designer lehengas",
+        "Boutiique Vastraa",
+        "silk mark sarees",
+      ],
+    alternates: {
+      canonical: "/",
+    },
+    icons: {
+      icon: "/favicon.ico",
+      apple: "/apple-touch-icon.png",
+    },
   };
 }
 
@@ -79,8 +101,55 @@ export default async function RootLayout({
 
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
+  const siteJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://boutiiquevastraa.com/#organization",
+        "name": "Boutiique Vastraa",
+        "url": "https://boutiiquevastraa.com",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://boutiiquevastraa.com/images/logo.png"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+91-9205238666",
+          "contactType": "customer service",
+          "areaServed": "IN",
+          "availableLanguage": ["en", "hi"]
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://boutiiquevastraa.com/#website",
+        "url": "https://boutiiquevastraa.com",
+        "name": "Boutiique Vastraa",
+        "description": "Handcrafted Banarasi Silk Sarees & Designer Ethnic Wear",
+        "publisher": {
+          "@id": "https://boutiiquevastraa.com/#organization"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://boutiiquevastraa.com/search?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+        />
+      </head>
       <body className={`${poppins.variable} ${kalnia.variable} ${rubik.variable} font-poppins antialiased`}>
         <SvgFilters />
         <CursorGlow />

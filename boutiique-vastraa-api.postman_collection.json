@@ -130,6 +130,22 @@
           }
         },
         {
+          "name": "List Products by Collection ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/products?collection_id=saree&per_page=10000",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","products"],
+              "query": [
+                { "key": "collection_id", "value": "saree" },
+                { "key": "per_page", "value": "10000" }
+              ]
+            },
+            "description": "Returns products filtered by collection_id (e.g. saree, kurti, lehenga, jewellery, 3-piece, party-wear, or all)."
+          }
+        },
+        {
           "name": "Search Products",
           "request": {
             "method": "GET",

@@ -14,11 +14,11 @@ export default function PageLoader() {
     setFadeOut(false);
     const hideTimer = setTimeout(() => {
       setFadeOut(true);
-      setTimeout(() => setVisible(false), 500);
-    }, 1000);
+      setTimeout(() => setVisible(false), 200);
+    }, 100);
     const fallbackTimer = setTimeout(() => {
       setVisible(false);
-    }, 4000);
+    }, 1000);
     return () => {
       clearTimeout(hideTimer);
       clearTimeout(fallbackTimer);

@@ -43,58 +43,88 @@ function ImageOrVideoUploader({
     setProgress(0);
     setLocalError("");
 
-    const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB per chunk to prevent HTTP 413 Entity Too Large errors
+    const CHUNK_SIZE = 512 * 1024; // 512KB per chunk
+    const CONCURRENCY = 4; // 4 concurrent streams for 8x faster video uploads
 
     try {
       if (file.size > CHUNK_SIZE) {
-        // Chunked upload stream for files larger than 5MB
         const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
         const fileId = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
         let finalUrl = "";
+        let completedChunks = 0;
 
-        for (let i = 0; i < totalChunks; i++) {
+        const indices = Array.from({ length: totalChunks }, (_, idx) => idx);
+
+        const uploadChunk = async (i: number) => {
           const start = i * CHUNK_SIZE;
           const end = Math.min(file.size, start + CHUNK_SIZE);
           const chunk = file.slice(start, end);
 
-          const formData = new FormData();
-          formData.append("file", chunk, file.name);
+          let chunkSuccess = false;
+          let attempts = 0;
+          let lastErr = "";
 
-          const res = await fetch("/api/upload", {
-            method: "POST",
-            headers: {
-              "x-chunk-index": String(i),
-              "x-total-chunks": String(totalChunks),
-              "x-file-id": fileId,
-              "x-file-name": file.name,
-            },
-            body: formData,
-          });
+          while (!chunkSuccess && attempts < 3) {
+            attempts++;
+            try {
+              const res = await fetch("/api/upload", {
+                method: "POST",
+                headers: {
+                  "x-chunk-index": String(i),
+                  "x-total-chunks": String(totalChunks),
+                  "x-file-id": fileId,
+                  "x-file-name": file.name,
+                  "content-type": "application/octet-stream",
+                },
+                body: chunk,
+              });
 
-          if (!res.ok) {
-            throw new Error(`Upload error (${res.status}): ${res.statusText}`);
+              if (!res.ok) {
+                const errText = res.status === 413 ? "Payload size exceeded server limit." : res.statusText;
+                throw new Error(`Upload error (${res.status}): ${errText}`);
+              }
+
+              const data = await res.json();
+              if (!data.success) {
+                throw new Error(data.error || "Chunk upload failed.");
+              }
+
+              if (data.url) {
+                finalUrl = data.url;
+              }
+              chunkSuccess = true;
+              completedChunks++;
+              const pct = Math.round((completedChunks / totalChunks) * 100);
+              setProgress(pct);
+            } catch (err: any) {
+              lastErr = err.message || "Network error";
+              if (attempts >= 3) {
+                throw new Error(`Failed uploading part ${i + 1}/${totalChunks}: ${lastErr}`);
+              }
+              await new Promise((r) => setTimeout(r, 800));
+            }
           }
+        };
 
-          const data = await res.json();
-          if (!data.success) {
-            throw new Error(data.error || "Chunk upload failed.");
+        const queue = [...indices];
+        const workers = Array.from({ length: Math.min(CONCURRENCY, totalChunks) }, async () => {
+          while (queue.length > 0) {
+            const nextIdx = queue.shift();
+            if (nextIdx !== undefined) {
+              await uploadChunk(nextIdx);
+            }
           }
+        });
 
-          if (data.url) {
-            finalUrl = data.url;
-          }
-
-          const pct = Math.round(((i + 1) / totalChunks) * 100);
-          setProgress(pct);
-        }
+        await Promise.all(workers);
 
         if (finalUrl) {
           onChange(finalUrl);
         } else {
-          throw new Error("Upload completed but no file URL was returned.");
+          throw new Error("Upload completed but file URL was missing.");
         }
       } else {
-        // Single POST request for small files (<5MB)
+        // Single POST request for small files (<1MB)
         const formData = new FormData();
         formData.append("file", file);
 
@@ -104,7 +134,8 @@ function ImageOrVideoUploader({
         });
 
         if (!res.ok) {
-          throw new Error(`Upload error (${res.status}): ${res.statusText}`);
+          const errText = res.status === 413 ? "Payload size exceeded server limit." : res.statusText;
+          throw new Error(`Upload error (${res.status}): ${errText}`);
         }
 
         const data = await res.json();
@@ -196,12 +227,15 @@ function ItemPickerPopover({
   const [tab, setTab] = useState<"ALL" | "COLLECTIONS" | "PRODUCTS">("ALL");
 
   const getProductImage = (p: any) => {
+    if (!p) return null;
     if (typeof p.featuredImage === "string") return p.featuredImage;
     if (p.featuredImage?.url) return p.featuredImage.url;
+    if (p.images?.edges?.[0]?.node?.url) return p.images.edges[0].node.url;
     if (Array.isArray(p.images) && p.images.length > 0) {
       const first = p.images[0];
       if (typeof first === "string") return first;
       if (first?.url) return first.url;
+      if (first?.node?.url) return first.node.url;
     }
     if (p.image?.url) return p.image.url;
     if (typeof p.image === "string") return p.image;
@@ -210,8 +244,10 @@ function ItemPickerPopover({
   };
 
   const getCollectionImage = (c: any) => {
+    if (!c) return null;
     if (typeof c.image === "string") return c.image;
     if (c.image?.url) return c.image.url;
+    if (c.image?.src) return c.image.src;
     if (c.coverImage) return c.coverImage;
     if (c.imageUrl) return c.imageUrl;
     return null;
@@ -1426,12 +1462,46 @@ export default function SettingsFormClient({ initialSettings, products = [], col
               </div>
             </div>
 
+            {/* Column Titles Editor for Sarees Megamenu */}
+            <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
+              <h5 className="text-xs font-bold text-white uppercase tracking-wider">Column Headlines (Sarees Menu)</h5>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[9px] font-bold text-[#C9A84C] uppercase mb-1">Col 1 Headline</label>
+                  <input
+                    type="text"
+                    value={megaMenuSarees.fabricsTitle || "SAREE FABRICS & WEAVES"}
+                    onChange={(e) => setMegaMenuSarees({ ...megaMenuSarees, fabricsTitle: e.target.value })}
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-[#C9A84C] uppercase mb-1">Col 2 Headline</label>
+                  <input
+                    type="text"
+                    value={megaMenuSarees.occasionsTitle || "SAREES BY OCCASION"}
+                    onChange={(e) => setMegaMenuSarees({ ...megaMenuSarees, occasionsTitle: e.target.value })}
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-[#C9A84C] uppercase mb-1">Col 3 Headline</label>
+                  <input
+                    type="text"
+                    value={megaMenuSarees.colorsTitle || "SHOP BY COLOR & CRAFT"}
+                    onChange={(e) => setMegaMenuSarees({ ...megaMenuSarees, colorsTitle: e.target.value })}
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Fabrics & Occasions Links List Editors */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Col 1: Fabrics List */}
               <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
                 <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
-                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 1: Fabrics & Weaves</h5>
+                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 1 Items</h5>
                   <button
                     type="button"
                     onClick={() => {
@@ -1460,6 +1530,34 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
+                      <ItemPickerPopover
+                        label="Choose Category / Collection"
+                        linkValue={item.handle ? `/collections/${item.handle}` : ""}
+                        textValue={item.label || ""}
+                        onSelect={(link, title) => {
+                          const selectedHandle = link.replace("/collections/", "").replace("/products/", "");
+                          const matchedCol = collections.find((c: any) => c.handle === selectedHandle || c.id === selectedHandle);
+                          const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                          let imgUrl = item.img || "/images/client-1.jpg";
+                          if (matchedCol) {
+                            if (typeof matchedCol.image === "string") imgUrl = matchedCol.image;
+                            else if (matchedCol.image?.url) imgUrl = matchedCol.image.url;
+                          } else if (matchedProd) {
+                            if (matchedProd.featuredImage?.url) imgUrl = matchedProd.featuredImage.url;
+                            else if (typeof matchedProd.featuredImage === "string") imgUrl = matchedProd.featuredImage;
+                          }
+                          const list = [...megaMenuSarees.fabrics];
+                          list[idx] = {
+                            ...list[idx],
+                            label: title || matchedCol?.title || matchedProd?.title || selectedHandle,
+                            handle: selectedHandle,
+                            img: imgUrl
+                          };
+                          setMegaMenuSarees({ ...megaMenuSarees, fabrics: list });
+                        }}
+                        collections={collections}
+                        products={products}
+                      />
                       <ImageOrVideoUploader
                         label="Thumbnail Image"
                         value={item.img}
@@ -1531,6 +1629,34 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
+                      <ItemPickerPopover
+                        label="Choose Category / Collection"
+                        linkValue={item.handle ? `/collections/${item.handle}` : ""}
+                        textValue={item.label || ""}
+                        onSelect={(link, title) => {
+                          const selectedHandle = link.replace("/collections/", "").replace("/products/", "");
+                          const matchedCol = collections.find((c: any) => c.handle === selectedHandle || c.id === selectedHandle);
+                          const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                          let imgUrl = item.img || "/images/client-2.jpg";
+                          if (matchedCol) {
+                            if (typeof matchedCol.image === "string") imgUrl = matchedCol.image;
+                            else if (matchedCol.image?.url) imgUrl = matchedCol.image.url;
+                          } else if (matchedProd) {
+                            if (matchedProd.featuredImage?.url) imgUrl = matchedProd.featuredImage.url;
+                            else if (typeof matchedProd.featuredImage === "string") imgUrl = matchedProd.featuredImage;
+                          }
+                          const list = [...megaMenuSarees.occasions];
+                          list[idx] = {
+                            ...list[idx],
+                            label: title || matchedCol?.title || matchedProd?.title || selectedHandle,
+                            handle: selectedHandle,
+                            img: imgUrl
+                          };
+                          setMegaMenuSarees({ ...megaMenuSarees, occasions: list });
+                        }}
+                        collections={collections}
+                        products={products}
+                      />
                       <ImageOrVideoUploader
                         label="Thumbnail Image"
                         value={item.img}
@@ -1602,6 +1728,34 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
+                      <ItemPickerPopover
+                        label="Choose Category / Collection"
+                        linkValue={item.handle ? `/collections/${item.handle}` : ""}
+                        textValue={item.label || ""}
+                        onSelect={(link, title) => {
+                          const selectedHandle = link.replace("/collections/", "").replace("/products/", "");
+                          const matchedCol = collections.find((c: any) => c.handle === selectedHandle || c.id === selectedHandle);
+                          const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                          let imgUrl = item.img || "/images/client-3.jpg";
+                          if (matchedCol) {
+                            if (typeof matchedCol.image === "string") imgUrl = matchedCol.image;
+                            else if (matchedCol.image?.url) imgUrl = matchedCol.image.url;
+                          } else if (matchedProd) {
+                            if (matchedProd.featuredImage?.url) imgUrl = matchedProd.featuredImage.url;
+                            else if (typeof matchedProd.featuredImage === "string") imgUrl = matchedProd.featuredImage;
+                          }
+                          const list = [...megaMenuSarees.colors];
+                          list[idx] = {
+                            ...list[idx],
+                            label: title || matchedCol?.title || matchedProd?.title || selectedHandle,
+                            handle: selectedHandle,
+                            img: imgUrl
+                          };
+                          setMegaMenuSarees({ ...megaMenuSarees, colors: list });
+                        }}
+                        collections={collections}
+                        products={products}
+                      />
                       <ImageOrVideoUploader
                         label="Thumbnail Image"
                         value={item.img}
@@ -1694,12 +1848,46 @@ export default function SettingsFormClient({ initialSettings, products = [], col
               </div>
             </div>
 
+            {/* Column Titles Editor for Collections Megamenu */}
+            <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
+              <h5 className="text-xs font-bold text-white uppercase tracking-wider">Column Headlines (Collections Menu)</h5>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[9px] font-bold text-[#C9A84C] uppercase mb-1">Col 1 Headline</label>
+                  <input
+                    type="text"
+                    value={megaMenuCollections.categoriesTitle || "ALL CATEGORIES"}
+                    onChange={(e) => setMegaMenuCollections({ ...megaMenuCollections, categoriesTitle: e.target.value })}
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-[#C9A84C] uppercase mb-1">Col 2 Headline</label>
+                  <input
+                    type="text"
+                    value={megaMenuCollections.occasionsTitle || "SHOP BY OCCASION"}
+                    onChange={(e) => setMegaMenuCollections({ ...megaMenuCollections, occasionsTitle: e.target.value })}
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-[#C9A84C] uppercase mb-1">Col 3 Headline</label>
+                  <input
+                    type="text"
+                    value={megaMenuCollections.colorsTitle || "SHOP BY COLOR & CRAFT"}
+                    onChange={(e) => setMegaMenuCollections({ ...megaMenuCollections, colorsTitle: e.target.value })}
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Categories & Occasions Links List Editors */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Col 1: All Categories List */}
               <div className="bg-neutral-950 border border-neutral-800 p-4 rounded-xl space-y-3">
                 <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
-                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 1: All Categories</h5>
+                  <h5 className="text-xs font-bold text-white uppercase tracking-wider">Col 1 Items</h5>
                   <button
                     type="button"
                     onClick={() => {
@@ -1728,6 +1916,34 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
+                      <ItemPickerPopover
+                        label="Choose Category / Collection"
+                        linkValue={item.handle ? `/collections/${item.handle}` : ""}
+                        textValue={item.label || ""}
+                        onSelect={(link, title) => {
+                          const selectedHandle = link.replace("/collections/", "").replace("/products/", "");
+                          const matchedCol = collections.find((c: any) => c.handle === selectedHandle || c.id === selectedHandle);
+                          const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                          let imgUrl = item.img || "/images/client-1.jpg";
+                          if (matchedCol) {
+                            if (typeof matchedCol.image === "string") imgUrl = matchedCol.image;
+                            else if (matchedCol.image?.url) imgUrl = matchedCol.image.url;
+                          } else if (matchedProd) {
+                            if (matchedProd.featuredImage?.url) imgUrl = matchedProd.featuredImage.url;
+                            else if (typeof matchedProd.featuredImage === "string") imgUrl = matchedProd.featuredImage;
+                          }
+                          const list = [...megaMenuCollections.categories];
+                          list[idx] = {
+                            ...list[idx],
+                            label: title || matchedCol?.title || matchedProd?.title || selectedHandle,
+                            handle: selectedHandle,
+                            img: imgUrl
+                          };
+                          setMegaMenuCollections({ ...megaMenuCollections, categories: list });
+                        }}
+                        collections={collections}
+                        products={products}
+                      />
                       <ImageOrVideoUploader
                         label="Thumbnail Image"
                         value={item.img}
@@ -1799,6 +2015,34 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
+                      <ItemPickerPopover
+                        label="Choose Category / Collection"
+                        linkValue={item.handle ? `/collections/${item.handle}` : ""}
+                        textValue={item.label || ""}
+                        onSelect={(link, title) => {
+                          const selectedHandle = link.replace("/collections/", "").replace("/products/", "");
+                          const matchedCol = collections.find((c: any) => c.handle === selectedHandle || c.id === selectedHandle);
+                          const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                          let imgUrl = item.img || "/images/client-2.jpg";
+                          if (matchedCol) {
+                            if (typeof matchedCol.image === "string") imgUrl = matchedCol.image;
+                            else if (matchedCol.image?.url) imgUrl = matchedCol.image.url;
+                          } else if (matchedProd) {
+                            if (matchedProd.featuredImage?.url) imgUrl = matchedProd.featuredImage.url;
+                            else if (typeof matchedProd.featuredImage === "string") imgUrl = matchedProd.featuredImage;
+                          }
+                          const list = [...megaMenuCollections.occasions];
+                          list[idx] = {
+                            ...list[idx],
+                            label: title || matchedCol?.title || matchedProd?.title || selectedHandle,
+                            handle: selectedHandle,
+                            img: imgUrl
+                          };
+                          setMegaMenuCollections({ ...megaMenuCollections, occasions: list });
+                        }}
+                        collections={collections}
+                        products={products}
+                      />
                       <ImageOrVideoUploader
                         label="Thumbnail Image"
                         value={item.img}
@@ -1870,6 +2114,34 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
+                      <ItemPickerPopover
+                        label="Choose Category / Collection"
+                        linkValue={item.handle ? `/collections/${item.handle}` : ""}
+                        textValue={item.label || ""}
+                        onSelect={(link, title) => {
+                          const selectedHandle = link.replace("/collections/", "").replace("/products/", "");
+                          const matchedCol = collections.find((c: any) => c.handle === selectedHandle || c.id === selectedHandle);
+                          const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                          let imgUrl = item.img || "/images/client-3.jpg";
+                          if (matchedCol) {
+                            if (typeof matchedCol.image === "string") imgUrl = matchedCol.image;
+                            else if (matchedCol.image?.url) imgUrl = matchedCol.image.url;
+                          } else if (matchedProd) {
+                            if (matchedProd.featuredImage?.url) imgUrl = matchedProd.featuredImage.url;
+                            else if (typeof matchedProd.featuredImage === "string") imgUrl = matchedProd.featuredImage;
+                          }
+                          const list = [...megaMenuCollections.colors];
+                          list[idx] = {
+                            ...list[idx],
+                            label: title || matchedCol?.title || matchedProd?.title || selectedHandle,
+                            handle: selectedHandle,
+                            img: imgUrl
+                          };
+                          setMegaMenuCollections({ ...megaMenuCollections, colors: list });
+                        }}
+                        collections={collections}
+                        products={products}
+                      />
                       <ImageOrVideoUploader
                         label="Thumbnail Image"
                         value={item.img}
@@ -2257,8 +2529,9 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                         
                         <h5 className="text-[10px] font-bold text-[#C9A84C] uppercase tracking-wider">Video Card #{index + 1}</h5>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="space-y-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Left Column: Video Uploader & Badge */}
+                          <div className="space-y-3 bg-neutral-900/60 p-3.5 rounded-xl border border-neutral-800 min-w-0">
                             <ImageOrVideoUploader
                               label="Video File"
                               value={reel.videoUrl || ""}
@@ -2266,10 +2539,13 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                               accept="video/*"
                             />
                             <div>
-                              <label className="block text-[8px] font-bold text-neutral-500 uppercase">Views Badge (e.g. 12K)</label>
-                              <input type="text" value={reel.views || ""} onChange={(e) => handleReelChange(index, "views", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1 text-xs text-white focus:outline-none" />
+                              <label className="block text-[8px] font-bold text-neutral-500 uppercase mb-1">Views Badge (e.g. 10K, 20K)</label>
+                              <input type="text" value={reel.views || ""} onChange={(e) => handleReelChange(index, "views", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none" />
                             </div>
-                                          <div className="space-y-2">
+                          </div>
+
+                          {/* Right Column: Linked Product Details & Custom Link */}
+                          <div className="space-y-3 bg-neutral-900/60 p-3.5 rounded-xl border border-neutral-800 min-w-0">
                             <ItemPickerPopover
                               label="Choose Store Product (Auto-Fills Details)"
                               linkValue={reel.productHandle ? `/products/${reel.productHandle}` : ""}
@@ -2310,24 +2586,24 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                               products={products}
                             />
                             <div>
-                              <label className="block text-[8px] font-bold text-neutral-500 uppercase">Product Title</label>
+                              <label className="block text-[8px] font-bold text-neutral-500 uppercase mb-1">Product Title</label>
                               <input type="text" value={reel.title || ""} onChange={(e) => handleReelChange(index, "title", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white focus:outline-none" />
-                            </div>               </div>
+                            </div>
                             <div className="grid grid-cols-2 gap-2">
                               <div>
-                                <label className="block text-[8px] font-bold text-neutral-500 uppercase">Price (INR)</label>
-                                <input type="text" value={reel.price || ""} onChange={(e) => handleReelChange(index, "price", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-xs text-white focus:outline-none" />
+                                <label className="block text-[8px] font-bold text-neutral-500 uppercase mb-1">Price (INR)</label>
+                                <input type="text" value={reel.price || ""} onChange={(e) => handleReelChange(index, "price", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none" />
                               </div>
                               <div>
-                                <label className="block text-[8px] font-bold text-neutral-500 uppercase">Compare Price</label>
-                                <input type="text" value={reel.compareAtPrice || ""} onChange={(e) => handleReelChange(index, "compareAtPrice", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1 text-xs text-white focus:outline-none" />
+                                <label className="block text-[8px] font-bold text-neutral-500 uppercase mb-1">Compare Price</label>
+                                <input type="text" value={reel.compareAtPrice || ""} onChange={(e) => handleReelChange(index, "compareAtPrice", e.target.value)} className="w-full bg-neutral-900 border border-neutral-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none" />
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            <label className="block text-[8px] font-bold text-neutral-500 uppercase mb-1">Product Action / Target Link</label>
-                            <input type="text" value={reel.link || ""} onChange={(e) => handleReelChange(index, "link", e.target.value)} placeholder="/products/handle" className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none" />
-                            <span className="text-[8px] text-neutral-500 block mt-1">E.g., /products/woven-kanjivaram-silk-blend-saree-pink</span>
+                            <div>
+                              <label className="block text-[8px] font-bold text-neutral-500 uppercase mb-1">Product Action / Target Link</label>
+                              <input type="text" value={reel.link || ""} onChange={(e) => handleReelChange(index, "link", e.target.value)} placeholder="/products/handle" className="w-full bg-neutral-900 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none" />
+                              <span className="text-[8px] text-neutral-500 block mt-1">E.g., /products/woven-kanjivaram-silk-blend-saree-pink</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2368,19 +2644,19 @@ export default function SettingsFormClient({ initialSettings, products = [], col
 
                 <div className="space-y-3">
                   {occasionFinderItems.map((item, idx) => (
-                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-3 rounded-xl space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Occasion #{idx + 1}</span>
+                    <div key={idx} className="bg-neutral-900/40 border border-neutral-850 p-4 rounded-xl space-y-3">
+                      <div className="flex justify-between items-center pb-2 border-b border-neutral-800">
+                        <span className="text-xs font-bold text-[#C9A84C] uppercase">Occasion #{idx + 1}: {item.name || "Untitled"}</span>
                         <button type="button" onClick={() => deleteItem(occasionFinderItems, setOccasionFinderItems, idx)} className="p-1 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Occasion Name</label>
                           <input type="text" value={item.name} onChange={(e) => {
                             const updated = [...occasionFinderItems];
                             updated[idx] = { ...updated[idx], name: e.target.value };
                             setOccasionFinderItems(updated);
-                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white" />
                         </div>
                         <div>
                           <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Subtitle Description</label>
@@ -2388,7 +2664,118 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                             const updated = [...occasionFinderItems];
                             updated[idx] = { ...updated[idx], subtitle: e.target.value };
                             setOccasionFinderItems(updated);
-                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                          }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2.5 py-1.5 text-xs text-white" />
+                        </div>
+                      </div>
+
+                      {/* Products List under this Occasion */}
+                      <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-800 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-bold text-white uppercase tracking-wider">Occasion Products List</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...occasionFinderItems];
+                              const prods = updated[idx].products ? [...updated[idx].products] : [];
+                              prods.push({ id: `p_${Date.now()}`, title: "New Saree Product", price: "₹ 2,999", comparePrice: "₹ 4,999", image: "/images/client-1.jpg", tag: "Silk", handle: "saree" });
+                              updated[idx] = { ...updated[idx], products: prods };
+                              setOccasionFinderItems(updated);
+                            }}
+                            className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-2 py-0.5 text-[8px] font-bold uppercase rounded flex items-center gap-1"
+                          >
+                            <Plus className="w-2.5 h-2.5" /> Add Product
+                          </button>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          {(item.products || []).map((prod: any, pIdx: number) => (
+                            <div key={pIdx} className="bg-neutral-900 border border-neutral-800 p-2.5 rounded-lg space-y-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[9px] font-bold text-[#C9A84C]">Product #{pIdx + 1}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...occasionFinderItems];
+                                    const prods = updated[idx].products.filter((_: any, i: number) => i !== pIdx);
+                                    updated[idx] = { ...updated[idx], products: prods };
+                                    setOccasionFinderItems(updated);
+                                  }}
+                                  className="text-neutral-500 hover:text-red-400 p-0.5"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                              <ItemPickerPopover
+                                label="Choose Store Product (Auto-Fills Details)"
+                                linkValue={prod.handle ? `/products/${prod.handle}` : ""}
+                                textValue={prod.title || ""}
+                                onSelect={(link, title) => {
+                                  const selectedHandle = link.replace("/products/", "").replace("/collections/", "");
+                                  const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                                  const updated = [...occasionFinderItems];
+                                  const prods = [...updated[idx].products];
+                                  if (matchedProd) {
+                                    const rawPrice = matchedProd.price?.amount || matchedProd.price || matchedProd.priceRange?.minVariantPrice?.amount;
+                                    const rawCompare = matchedProd.compareAtPrice?.amount || matchedProd.compareAtPrice || matchedProd.compareAtPriceRange?.minVariantPrice?.amount;
+                                    const formattedP = typeof rawPrice === 'number' ? `₹ ${rawPrice.toLocaleString("en-IN")}` : (rawPrice ? (String(rawPrice).startsWith("₹") ? String(rawPrice) : `₹ ${rawPrice}`) : "");
+                                    const formattedC = typeof rawCompare === 'number' ? `₹ ${rawCompare.toLocaleString("en-IN")}` : (rawCompare ? (String(rawCompare).startsWith("₹") ? String(rawCompare) : `₹ ${rawCompare}`) : "");
+                                    
+                                    let imgUrl = "/images/client-1.jpg";
+                                    if (matchedProd.featuredImage?.url) imgUrl = matchedProd.featuredImage.url;
+                                    else if (typeof matchedProd.featuredImage === "string") imgUrl = matchedProd.featuredImage;
+                                    else if (matchedProd.images?.edges?.[0]?.node?.url) imgUrl = matchedProd.images.edges[0].node.url;
+
+                                    prods[pIdx] = {
+                                      ...prods[pIdx],
+                                      title: matchedProd.title,
+                                      handle: matchedProd.handle,
+                                      price: formattedP || prods[pIdx].price,
+                                      comparePrice: formattedC || prods[pIdx].comparePrice,
+                                      image: imgUrl
+                                    };
+                                  } else {
+                                    prods[pIdx] = { ...prods[pIdx], title: title || selectedHandle, handle: selectedHandle };
+                                  }
+                                  updated[idx] = { ...updated[idx], products: prods };
+                                  setOccasionFinderItems(updated);
+                                }}
+                                collections={[]}
+                                products={products}
+                              />
+                              <div className="grid grid-cols-3 gap-1.5">
+                                <div>
+                                  <label className="block text-[8px] font-bold text-neutral-400 uppercase">Product Title</label>
+                                  <input type="text" value={prod.title || ""} onChange={(e) => {
+                                    const updated = [...occasionFinderItems];
+                                    const prods = [...updated[idx].products];
+                                    prods[pIdx] = { ...prods[pIdx], title: e.target.value };
+                                    updated[idx] = { ...updated[idx], products: prods };
+                                    setOccasionFinderItems(updated);
+                                  }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white w-full" />
+                                </div>
+                                <div>
+                                  <label className="block text-[8px] font-bold text-neutral-400 uppercase">Price</label>
+                                  <input type="text" value={prod.price || ""} onChange={(e) => {
+                                    const updated = [...occasionFinderItems];
+                                    const prods = [...updated[idx].products];
+                                    prods[pIdx] = { ...prods[pIdx], price: e.target.value };
+                                    updated[idx] = { ...updated[idx], products: prods };
+                                    setOccasionFinderItems(updated);
+                                  }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white w-full" />
+                                </div>
+                                <div>
+                                  <label className="block text-[8px] font-bold text-neutral-400 uppercase">Badge Tag</label>
+                                  <input type="text" value={prod.tag || ""} onChange={(e) => {
+                                    const updated = [...occasionFinderItems];
+                                    const prods = [...updated[idx].products];
+                                    prods[pIdx] = { ...prods[pIdx], tag: e.target.value };
+                                    updated[idx] = { ...updated[idx], products: prods };
+                                    setOccasionFinderItems(updated);
+                                  }} placeholder="Heritage Silk" className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-[10px] text-white w-full" />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -2433,6 +2820,36 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                         <span className="text-xs font-bold text-[#C9A84C] uppercase">Card #{idx + 1}</span>
                         <button type="button" onClick={() => deleteItem(celebritySpotlightItems, setCelebritySpotlightItems, idx)} className="p-1 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
+                      <ItemPickerPopover
+                        label="Choose Store Product (Auto-Fills Title & Price)"
+                        linkValue={item.handle ? `/products/${item.handle}` : ""}
+                        textValue={item.title || ""}
+                        onSelect={(link, title) => {
+                          const selectedHandle = link.replace("/products/", "").replace("/collections/", "");
+                          const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                          const updated = [...celebritySpotlightItems];
+                          if (matchedProd) {
+                            const rawPrice = matchedProd.price?.amount || matchedProd.price || matchedProd.priceRange?.minVariantPrice?.amount;
+                            const formattedP = typeof rawPrice === 'number' ? `₹ ${rawPrice.toLocaleString("en-IN")}` : (rawPrice ? (String(rawPrice).startsWith("₹") ? String(rawPrice) : `₹ ${rawPrice}`) : "");
+                            let imgUrl = item.image || "/images/client-1.jpg";
+                            if (matchedProd.featuredImage?.url) imgUrl = matchedProd.featuredImage.url;
+                            else if (typeof matchedProd.featuredImage === "string") imgUrl = matchedProd.featuredImage;
+
+                            updated[idx] = {
+                              ...updated[idx],
+                              title: matchedProd.title,
+                              price: formattedP || updated[idx].price,
+                              handle: matchedProd.handle,
+                              image: item.image || imgUrl
+                            };
+                          } else {
+                            updated[idx] = { ...updated[idx], title: title || selectedHandle, handle: selectedHandle };
+                          }
+                          setCelebritySpotlightItems(updated);
+                        }}
+                        collections={[]}
+                        products={products}
+                      />
                       <ImageOrVideoUploader
                         label="Customer Outfit Photo"
                         value={item.image}
@@ -2443,7 +2860,7 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                         }}
                         accept="image/*"
                       />
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-4 gap-2">
                         <input type="text" placeholder="Title" value={item.title} onChange={(e) => {
                           const updated = [...celebritySpotlightItems];
                           updated[idx] = { ...updated[idx], title: e.target.value };
@@ -2452,6 +2869,11 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                         <input type="text" placeholder="Location tag" value={item.location} onChange={(e) => {
                           const updated = [...celebritySpotlightItems];
                           updated[idx] = { ...updated[idx], location: e.target.value };
+                          setCelebritySpotlightItems(updated);
+                        }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                        <input type="text" placeholder="Price (e.g. ₹1,899)" value={item.price || ""} onChange={(e) => {
+                          const updated = [...celebritySpotlightItems];
+                          updated[idx] = { ...updated[idx], price: e.target.value };
                           setCelebritySpotlightItems(updated);
                         }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
                         <input type="text" placeholder="Handle" value={item.handle} onChange={(e) => {
@@ -2487,7 +2909,7 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                     type="button"
                     onClick={() => setFabricLibraryItems([
                       ...fabricLibraryItems,
-                      { id: `f_${Date.now()}`, name: "Pure Tussar Silk", origin: "Bhagalpur", description: "Rich textured wild silk weave", image: "/images/client-3.jpg", handle: "silk" }
+                      { id: `f_${Date.now()}`, name: "Pure Tussar Silk", origin: "Bhagalpur", description: "Rich textured wild silk weave", features: ["100% Pure Silk", "Handloom Weave"], image: "/images/client-3.jpg", handle: "silk" }
                     ])}
                     className="bg-neutral-800 hover:bg-[#C9A84C] hover:text-black text-white px-3 py-1 text-[9px] font-bold uppercase rounded flex items-center gap-1"
                   >
@@ -2502,6 +2924,35 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                         <span className="text-xs font-bold text-[#C9A84C] uppercase">Fabric Swatch #{idx + 1}</span>
                         <button type="button" onClick={() => deleteItem(fabricLibraryItems, setFabricLibraryItems, idx)} className="p-1 text-neutral-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
+                      <ItemPickerPopover
+                        label="Choose Store Collection or Product (Auto-Fills Redirect Target)"
+                        linkValue={item.handle ? (item.handle.startsWith("/") ? item.handle : `/collections/${item.handle}`) : ""}
+                        textValue={item.name || ""}
+                        onSelect={(link, title) => {
+                          const selectedHandle = link.replace("/collections/", "").replace("/products/", "");
+                          const matchedCol = collections.find((c: any) => c.handle === selectedHandle || c.id === selectedHandle);
+                          const matchedProd = products.find((p: any) => p.handle === selectedHandle || p.id === selectedHandle);
+                          let imgUrl = item.image || "/images/client-1.jpg";
+                          if (matchedCol) {
+                            if (typeof matchedCol.image === "string") imgUrl = matchedCol.image;
+                            else if (matchedCol.image?.url) imgUrl = matchedCol.image.url;
+                          } else if (matchedProd) {
+                            if (matchedProd.featuredImage?.url) imgUrl = matchedProd.featuredImage.url;
+                            else if (typeof matchedProd.featuredImage === "string") imgUrl = matchedProd.featuredImage;
+                          }
+
+                          const updated = [...fabricLibraryItems];
+                          updated[idx] = {
+                            ...updated[idx],
+                            name: item.name || title || matchedCol?.title || matchedProd?.title || selectedHandle,
+                            handle: selectedHandle,
+                            image: item.image || imgUrl
+                          };
+                          setFabricLibraryItems(updated);
+                        }}
+                        collections={collections}
+                        products={products}
+                      />
                       <ImageOrVideoUploader
                         label="Fabric Swatch Cover Image"
                         value={item.image}
@@ -2528,6 +2979,23 @@ export default function SettingsFormClient({ initialSettings, products = [], col
                           updated[idx] = { ...updated[idx], handle: e.target.value };
                           setFabricLibraryItems(updated);
                         }} className="bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white font-mono" />
+                      </div>
+                      <div>
+                        <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Weave Description (Shown on flip card)</label>
+                        <input type="text" placeholder="Description of fabric weave" value={item.description || ""} onChange={(e) => {
+                          const updated = [...fabricLibraryItems];
+                          updated[idx] = { ...updated[idx], description: e.target.value };
+                          setFabricLibraryItems(updated);
+                        }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
+                      </div>
+                      <div>
+                        <label className="block text-[8px] font-bold text-neutral-400 uppercase mb-0.5">Key Attributes (Comma Separated)</label>
+                        <input type="text" placeholder="Lightweight, 100% Pure Thread, Handloom" value={(item.features || []).join(", ")} onChange={(e) => {
+                          const updated = [...fabricLibraryItems];
+                          const feats = e.target.value.split(",").map(s => s.trim()).filter(Boolean);
+                          updated[idx] = { ...updated[idx], features: feats };
+                          setFabricLibraryItems(updated);
+                        }} className="w-full bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-xs text-white" />
                       </div>
                     </div>
                   ))}

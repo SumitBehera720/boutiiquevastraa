@@ -78,8 +78,24 @@ export async function applyPromoCodeAction(code: string, subtotal: number) {
     const coupon = await coupons.findByCode(code.trim());
     if (!coupon || !coupon.active) throw new Error("Invalid or expired promo code");
 
+    // Check usage limit
+    const used = coupon.usedCount || 0;
+    if (coupon.usageLimit !== undefined && coupon.usageLimit !== null && used >= coupon.usageLimit) {
+      // Auto-disable since usage limit reached
+      coupon.active = false;
+      await coupons.save(await coupons.all());
+      throw new Error("This promo code has reached its maximum usage limit and is no longer valid.");
+    }
+
+    // Check min purchase requirement
+    const minReq = parseFloat(coupon.minPurchaseAmount || coupon.minPurchase || "0");
+    if (subtotal < minReq) {
+      throw new Error(`Minimum purchase amount of ₹${minReq} required for this coupon`);
+    }
+
     let discountAmount = 0;
-    if (coupon.type === "percentage") {
+    const typeUpper = String(coupon.type || "").toUpperCase();
+    if (typeUpper === "PERCENTAGE") {
       discountAmount = subtotal * (parseFloat(coupon.value) / 100);
     } else {
       discountAmount = parseFloat(coupon.value);

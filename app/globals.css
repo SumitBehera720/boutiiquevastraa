@@ -58,7 +58,7 @@
   display: none;
 }
 
-/* Admin Light Theme Overrides */
+/* Admin Light Theme Overrides (Universal Light Mode Theme System) */
 .admin-light {
   background-color: #f9fafb !important;
   color: #111827 !important;
@@ -85,57 +85,96 @@
   color: #111827 !important;
 }
 
-.admin-light aside nav a[class*="bg-maroonClr"] {
+.admin-light aside nav a[class*="bg-maroonClr"],
+.admin-light aside nav a.bg-maroonClr {
   background-color: #8D0B41 !important;
   color: #ffffff !important;
 }
 
+/* Light theme card and panel background containers */
 .admin-light .bg-neutral-955,
 .admin-light .bg-neutral-950,
-.admin-light .bg-neutral-900 {
+.admin-light .bg-neutral-900,
+.admin-light .bg-neutral-855,
+.admin-light .bg-neutral-850,
+.admin-light .bg-neutral-800,
+.admin-light .bg-neutral-750 {
   background-color: #ffffff !important;
   color: #1f2937 !important;
   border-color: #e5e7eb !important;
 }
 
+/* Semi-transparent section wrappers turn to soft clean light grey */
+.admin-light .bg-neutral-900\/80,
+.admin-light .bg-neutral-900\/60,
+.admin-light .bg-neutral-900\/50,
+.admin-light .bg-neutral-900\/40,
+.admin-light .bg-neutral-900\/30,
+.admin-light .bg-neutral-950\/80,
+.admin-light .bg-neutral-950\/60,
+.admin-light .bg-neutral-950\/40,
+.admin-light .bg-neutral-800\/80,
+.admin-light .bg-neutral-800\/60,
+.admin-light .bg-neutral-800\/40 {
+  background-color: #f9fafb !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Text typography colors for light theme */
 .admin-light .text-white {
   color: #111827 !important;
 }
 
-.admin-light .text-neutral-205,
-.admin-light .text-neutral-200 {
+.admin-light h1, .admin-light h2, .admin-light h3, .admin-light h4, .admin-light h5, .admin-light h6 {
+  color: #111827 !important;
+}
+
+.admin-light label {
   color: #374151 !important;
 }
 
+.admin-light .text-neutral-100,
+.admin-light .text-neutral-200,
+.admin-light .text-neutral-205,
 .admin-light .text-neutral-300 {
+  color: #1f2937 !important;
+}
+
+.admin-light .text-neutral-400,
+.admin-light .text-neutral-500,
+.admin-light .text-neutral-600 {
   color: #4b5563 !important;
 }
 
-.admin-light .text-neutral-400 {
-  color: #6b7280 !important;
+/* Section accent headlines (#C9A84C gold becomes rich maroon in light mode for crisp readability) */
+.admin-light .text-\[\#C9A84C\],
+.admin-light .text-amber-400 {
+  color: #8D0B41 !important;
 }
 
-.admin-light .text-neutral-500 {
-  color: #9ca3af !important;
-}
-
+/* Border colors in light mode */
+.admin-light .border-neutral-750,
 .admin-light .border-neutral-800,
 .admin-light .border-neutral-850,
+.admin-light .border-neutral-855,
 .admin-light .border-neutral-900 {
   border-color: #e5e7eb !important;
 }
 
-.admin-light .bg-neutral-900\/40,
-.admin-light .bg-neutral-900\/30 {
-  background-color: #f9fafb !important;
-}
-
+/* Input, select, and textarea controls */
 .admin-light select,
-.admin-light input,
+.admin-light input[type="text"],
+.admin-light input[type="password"],
+.admin-light input[type="email"],
+.admin-light input[type="number"],
 .admin-light textarea {
   background-color: #ffffff !important;
   color: #111827 !important;
   border-color: #d1d5db !important;
+}
+
+.admin-light input[type="file"] {
+  color: #374151 !important;
 }
 
 .admin-light select:focus,
@@ -145,7 +184,46 @@
   outline: none;
 }
 
-/* Fix specific table headers & borders */
+.admin-light input::placeholder,
+.admin-light textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Button overrides for light mode */
+.admin-light button:not([class*="bg-maroonClr"]):not([class*="bg-[#8D0B41]"]):not(.bg-maroonClr),
+.admin-light button[class*="bg-neutral-"],
+.admin-light button[class*="bg-neutral-"]:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+.admin-light button:not([class*="bg-maroonClr"]):not([class*="bg-[#8D0B41]"]):not(.bg-maroonClr) *,
+.admin-light button[class*="bg-neutral-"] * {
+  color: #111827 !important;
+}
+
+/* Preserve bold maroon primary buttons with white text in light mode */
+.admin-light .bg-maroonClr,
+.admin-light [class*="bg-maroonClr"],
+.admin-light [class*="bg-[#8D0B41]"],
+.admin-light button.bg-maroonClr,
+.admin-light button[class*="bg-maroonClr"],
+.admin-light .file\:bg-maroonClr::file-selector-button {
+  background-color: #8D0B41 !important;
+  color: #ffffff !important;
+  border-color: #8D0B41 !important;
+}
+
+.admin-light .bg-maroonClr *,
+.admin-light [class*="bg-maroonClr"] *,
+.admin-light [class*="bg-[#8D0B41]"] *,
+.admin-light button.bg-maroonClr *,
+.admin-light button[class*="bg-maroonClr"] * {
+  color: #ffffff !important;
+}
+
+/* Table styling for light mode */
 .admin-light thead {
   background-color: #f3f4f6 !important;
   color: #4b5563 !important;
@@ -155,17 +233,23 @@
   background-color: #f9fafb !important;
 }
 
-.admin-light button[class*="bg-neutral-950"],
-.admin-light button[class*="bg-neutral-900"] {
-  background-color: #f3f4f6 !important;
-  color: #1f2937 !important;
-  border-color: #e5e7eb !important;
+/* Badges in light mode */
+.admin-light .bg-amber-950\/70 {
+  background-color: #fef3c7 !important;
+  border-color: #fde68a !important;
+  color: #92400e !important;
+}
+.admin-light .bg-amber-950\/70 * {
+  color: #92400e !important;
 }
 
-.admin-light button[class*="bg-neutral-950"]:hover,
-.admin-light button[class*="bg-neutral-900"]:hover {
-  background-color: #e5e7eb !important;
-  color: #111827 !important;
+.admin-light .bg-purple-950\/70 {
+  background-color: #f3e8ff !important;
+  border-color: #d8b4fe !important;
+  color: #6b21a8 !important;
+}
+.admin-light .bg-purple-950\/70 * {
+  color: #6b21a8 !important;
 }
 
 /* 3D Card Flipping utilities */

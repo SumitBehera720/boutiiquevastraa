@@ -6,21 +6,38 @@ import ProductInfo from "@/components/product/ProductInfo";
 import RelatedProducts from "@/components/product/RelatedProducts";
 import ScrollToTop from "@/components/product/ScrollToTop";
 import ProductReviewsQnA from "@/components/product/ProductReviewsQnA";
+import FabricCareFAQ from "@/components/product/FabricCareFAQ";
 
 export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }) {
   const resolvedParams = await params;
   const product = await getProductByHandle(resolvedParams.handle);
-  
+
   if (!product) {
-    return { title: 'Product Not Found' };
+    return { title: "Product Not Found | Boutiique Vastraa" };
   }
 
+  const rawDesc = product.descriptionHtml.replace(/<[^>]*>?/gm, "").trim();
+  const desc =
+    rawDesc.length >= 150
+      ? rawDesc.substring(0, 210) + "..."
+      : `${product.title} - Handcrafted Banarasi silk saree & authentic ethnic wear from Boutiique Vastraa. Premium silk mark certified quality, free shipping & easy returns across India.`;
+
+  const canonicalUrl = `https://boutiiquevastraa.com/products/${product.handle}`;
+  const firstImage = product.images.edges[0]?.node.url;
+
   return {
-    title: `${product.title} | Boutiique Vastraa`,
-    description: product.descriptionHtml.replace(/<[^>]*>?/gm, '').substring(0, 160),
+    title: `${product.title} – Handcrafted Sarees | Boutiique Vastraa`,
+    description: desc,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
-      images: product.images.edges.length > 0 ? [product.images.edges[0].node.url] : [],
-    }
+      title: product.title,
+      description: desc,
+      url: canonicalUrl,
+      images: firstImage ? [{ url: firstImage, alt: product.title }] : [],
+      type: "article",
+    },
   };
 }
 
@@ -32,31 +49,67 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
     notFound();
   }
 
-  // Import dynamically here to avoid having to change imports at the top
   const { getProductRecommendations } = await import("@/lib/shopify/queries");
   const recommendedProducts = await getProductRecommendations(product.id);
 
   const initialReviews = await serverGetAllReviews();
   const initialQnas = await serverGetQna();
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
+  const productPrice = product.priceRange.minVariantPrice.amount;
+  const currency = product.priceRange.minVariantPrice.currencyCode || "INR";
+  const firstImageUrl = product.images.edges[0]?.node.url;
+
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
     name: product.title,
-    image: product.images.edges[0]?.node.url,
-    description: product.descriptionHtml.replace(/<[^>]*>?/gm, '').substring(0, 160),
+    image: product.images.edges.map((e: any) => e.node.url),
+    description: product.descriptionHtml.replace(/<[^>]*>?/gm, "").substring(0, 220),
+    sku: product.id || product.handle,
     brand: {
-      '@type': 'Brand',
-      name: 'Boutiique Vastraa',
+      "@type": "Brand",
+      name: "Boutiique Vastraa",
     },
     offers: {
-      '@type': 'Offer',
+      "@type": "Offer",
       url: `https://boutiiquevastraa.com/products/${product.handle}`,
-      priceCurrency: product.priceRange.minVariantPrice.currencyCode,
-      price: product.priceRange.minVariantPrice.amount,
-      itemCondition: 'https://schema.org/NewCondition',
-      availability: product.availableForSale ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      priceCurrency: currency,
+      price: productPrice,
+      priceValidUntil: "2027-12-31",
+      itemCondition: "https://schema.org/NewCondition",
+      availability: product.availableForSale
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      seller: {
+        "@type": "Organization",
+        name: "Boutiique Vastraa",
+      },
     },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://boutiiquevastraa.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Products",
+        item: "https://boutiiquevastraa.com/collections/all",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.title,
+        item: `https://boutiiquevastraa.com/products/${product.handle}`,
+      },
+    ],
   };
 
   return (
@@ -64,12 +117,15 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
       <ScrollToTop />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
       />
-      {/* Breadcrumb could go here */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+
       <div className="container mx-auto px-4 pt-4 md:pt-8 max-w-7xl">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-          
           {/* Left: Gallery */}
           <div className="w-full lg:w-[45%]">
             <div className="sticky top-24">
@@ -77,11 +133,11 @@ export default async function ProductPage({ params }: { params: Promise<{ handle
             </div>
           </div>
 
-          {/* Right: Product Info */}
+          {/* Right: Product Info & Care FAQ */}
           <div className="w-full lg:w-[55%]">
             <ProductInfo product={product} recommendedProducts={recommendedProducts} />
+            <FabricCareFAQ productTitle={product.title} />
           </div>
-
         </div>
       </div>
 

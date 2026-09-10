@@ -15,6 +15,17 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "www.boutiiquevastraa.com",
+          },
+        ],
+        destination: "https://boutiiquevastraa.com/:path*",
+        permanent: true,
+      },
+      {
         source: "/collection/:path*",
         destination: "/collections/:path*",
         permanent: true,

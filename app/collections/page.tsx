@@ -1,7 +1,7 @@
 import { getCollections } from "@/lib/shopify/queries";
 import Image from "next/image";
 import Link from "next/link";
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export const metadata = {
   title: "Collections | Boutiique Vastraa",

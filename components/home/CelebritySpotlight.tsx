@@ -164,19 +164,23 @@ export default function CelebritySpotlight({
           {/* Polaroid Collage */}
           <div className={`w-full sm:w-3/5 flex justify-center py-2 transition-all duration-1000 ease-out ${visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-12"}`}>
             <div className="grid grid-cols-3 gap-2 sm:gap-5 max-w-[320px] sm:max-w-[460px] relative">
-              {looksList.map((look, idx) => (
-                <Link
-                  key={look.id}
-                  href={`/collections/${look.handle}`}
-                  className={`bg-white p-2 sm:p-3 pb-5 sm:pb-8 rounded-lg shadow-[0_8px_28px_rgb(0,0,0,0.08)] border border-gray-100/80 transition-all duration-500 ease-out cursor-pointer select-none
-                    ${look.angle}
-                    ${hoveredIdx === idx ? "rotate-0 scale-110 shadow-[0_20px_50px_rgba(141,11,65,0.15)] z-20" : "z-10"}
-                    ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}
-                  `}
-                  style={{ transitionDelay: `${idx * 120}ms` }}
-                  onMouseEnter={() => setHoveredIdx(idx)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                >
+              {looksList.map((look, idx) => {
+                const defaultAngles = ["-rotate-[2.5deg]", "rotate-[3deg] translate-y-3 sm:translate-y-6", "-rotate-[1.5deg] translate-y-1 sm:translate-y-2"];
+                const cardAngle = look.angle || defaultAngles[idx % defaultAngles.length];
+                const cardHref = look.handle?.startsWith("/") ? look.handle : `/collections/${look.handle || "saree"}`;
+                return (
+                  <Link
+                    key={look.id || idx}
+                    href={cardHref}
+                    className={`bg-white p-2 sm:p-3 pb-5 sm:pb-8 rounded-lg shadow-[0_8px_28px_rgb(0,0,0,0.08)] border border-gray-100/80 transition-all duration-500 ease-out cursor-pointer select-none
+                      ${cardAngle}
+                      ${hoveredIdx === idx ? "rotate-0 scale-110 shadow-[0_20px_50px_rgba(141,11,65,0.15)] z-20" : "z-10"}
+                      ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}
+                    `}
+                    style={{ transitionDelay: `${idx * 120}ms` }}
+                    onMouseEnter={() => setHoveredIdx(idx)}
+                    onMouseLeave={() => setHoveredIdx(null)}
+                  >
                   {/* Image */}
                   <div className="relative aspect-[3/4] w-full rounded overflow-hidden bg-gray-50 border border-gray-100">
                     <Image
@@ -202,7 +206,7 @@ export default function CelebritySpotlight({
                     </span>
                   </div>
                 </Link>
-              ))}
+              ); })}
             </div>
           </div>
 
@@ -214,18 +218,18 @@ export default function CelebritySpotlight({
                 Featured Styles
               </span>
               <div className="space-y-3">
-                {LOOKS.map((look, idx) => (
+                {looksList.map((look, idx) => (
                   <Link
-                    key={look.id}
-                    href={`/collections/${look.handle}`}
+                    key={look.id || idx}
+                    href={look.handle?.startsWith("/") ? look.handle : `/collections/${look.handle || "saree"}`}
                     className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-creamClr transition-all duration-300 border border-transparent hover:border-goldClr/20 group"
                   >
                     <div className="relative w-9 h-12 rounded overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
-                      <Image src={look.image} alt={look.title} fill unoptimized className="object-cover" />
+                      <Image src={look.image || "/images/client-1.jpg"} alt={look.title || "Featured Style"} fill unoptimized className="object-cover" />
                     </div>
                     <div className="min-w-0">
                       <p className="font-semibold text-gray-800 text-xs group-hover:text-maroonClr transition-colors truncate">{look.title}</p>
-                      <p className="text-maroonClr font-bold text-[11px] mt-0.5">{look.price}</p>
+                      {look.price && <p className="text-maroonClr font-bold text-[11px] mt-0.5">{look.price}</p>}
                     </div>
                     <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 ml-auto flex-shrink-0 text-gray-300 group-hover:text-maroonClr transition-all duration-300 group-hover:translate-x-0.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 9l3-3-3-3" />

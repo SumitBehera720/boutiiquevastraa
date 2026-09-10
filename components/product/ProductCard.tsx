@@ -153,7 +153,7 @@ export default function ProductCard({ product }: { product: Product }) {
           {/* Primary */}
           <Image
             src={image1}
-            alt={product.title}
+            alt={`${product.title} - Handcrafted Ethnic Wear`}
             fill
             className={`object-cover object-top absolute inset-0 transition-all duration-700 ease-in-out ${isHovered ? "opacity-0 scale-105" : "opacity-100 scale-100"}`}
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
@@ -161,7 +161,7 @@ export default function ProductCard({ product }: { product: Product }) {
           {/* Hover alt */}
           <Image
             src={image2}
-            alt={product.title}
+            alt={`${product.title} - Detailed Pallu View`}
             fill
             className={`object-cover object-top absolute inset-0 transition-all duration-700 ease-in-out ${isHovered ? "opacity-100 scale-100" : "opacity-0 scale-105"}`}
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
@@ -184,6 +184,7 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className={`absolute bottom-0 inset-x-0 flex justify-center pb-3 transition-all duration-300 ${isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}>
           <Link
             href={`/products/${product.handle}`}
+            aria-label={`Quick View ${product.title}`}
             className="bg-white/90 backdrop-blur-sm text-maroonClr text-[9px] font-bold uppercase tracking-widest px-4 py-1.5 rounded-full shadow border border-goldClr/30 hover:bg-maroonClr hover:text-white transition-colors duration-300"
           >
             Quick View

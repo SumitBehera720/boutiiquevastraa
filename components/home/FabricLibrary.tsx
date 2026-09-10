@@ -161,21 +161,23 @@ export default function FabricLibrary({
                     </p>
 
                     {/* Features list */}
-                    <div className="space-y-2">
-                      <p className="text-goldClr text-[10px] font-bold uppercase tracking-wider">Key Attributes</p>
-                      {fabric.features.map((feat, fIdx) => (
-                        <div key={fIdx} className="flex items-center gap-2 text-white/90 text-xs">
-                          <span className="text-goldClr font-bold">✥</span>
-                          <span>{feat}</span>
-                        </div>
-                      ))}
-                    </div>
+                    {(fabric.features && fabric.features.length > 0) && (
+                      <div className="space-y-2">
+                        <p className="text-goldClr text-[10px] font-bold uppercase tracking-wider">Key Attributes</p>
+                        {(fabric.features || []).map((feat, fIdx) => (
+                          <div key={fIdx} className="flex items-center gap-2 text-white/90 text-xs">
+                            <span className="text-goldClr font-bold">✥</span>
+                            <span>{feat}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* CTA Button */}
                   <div className="relative z-10 pt-4 border-t border-goldClr/20">
                     <Link
-                      href={`/collections/${fabric.handle}`}
+                      href={fabric.handle?.startsWith("/") ? fabric.handle : `/collections/${fabric.handle || "saree"}`}
                       className="w-full inline-flex items-center justify-center gap-2 bg-goldClr hover:bg-white text-maroonClr font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all duration-300"
                     >
                       Shop Collection

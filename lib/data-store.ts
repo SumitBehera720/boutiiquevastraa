@@ -85,7 +85,7 @@ function writeJson<T>(name: string, data: T): void {
 
 // ─── Database TTL Query Cache (Optimizes MongoDB queries) ────────────────────
 const dbCache = new Map<string, { data: any; expiresAt: number }>();
-const DB_CACHE_TTL = 3000; // 3 seconds cache
+const DB_CACHE_TTL = 60000; // 60 seconds memory cache for high-frequency queries
 
 async function cachedDbQuery<T>(key: string, queryFn: () => Promise<T>, ttl = DB_CACHE_TTL): Promise<T> {
   const now = Date.now();
@@ -584,8 +584,10 @@ function mapCollectionToDb(c: any): any {
 export const coupons = {
   all: async () => {
     if (await db()) {
-      const rows = await query<any[]>("SELECT * FROM coupons ORDER BY created_at DESC");
-      return rows.map(mapCouponFromDb);
+      return cachedDbQuery("coupons_all", async () => {
+        const rows = await query<any[]>("SELECT * FROM coupons ORDER BY created_at DESC");
+        return rows.map(mapCouponFromDb);
+      });
     }
     return cachedRead<any[]>("coupons");
   },
@@ -600,6 +602,7 @@ export const coupons = {
     if (await db()) {
       const mapped = items.map(mapCouponToDb);
       await replaceAll("coupons", mapped);
+      clearDbCache();
       return;
     }
     writeJson("coupons", items);
@@ -607,27 +610,35 @@ export const coupons = {
 };
 
 function mapCouponFromDb(row: any): any {
+  const limitVal = row.usage_limit !== undefined ? row.usage_limit : (row.usageLimit !== undefined ? row.usageLimit : row.max_uses);
+  const parsedLimit = limitVal !== null && limitVal !== undefined && limitVal !== "" ? Number(limitVal) : null;
   return {
     id: row.id,
     code: row.code,
     type: row.type || "percentage",
     value: Number(row.value) || 0,
-    minPurchase: Number(row.min_purchase) || 0,
-    maxUses: row.max_uses || 0,
-    usedCount: row.used_count || 0,
+    minPurchaseAmount: Number(row.min_purchase_amount ?? row.min_purchase ?? row.minPurchaseAmount ?? row.minPurchase) || 0,
+    minPurchase: Number(row.min_purchase_amount ?? row.min_purchase ?? row.minPurchaseAmount ?? row.minPurchase) || 0,
+    usageLimit: parsedLimit !== null && !isNaN(parsedLimit) ? parsedLimit : null,
+    maxUses: parsedLimit !== null && !isNaN(parsedLimit) ? parsedLimit : null,
+    usedCount: Number(row.used_count ?? row.usedCount) || 0,
     active: !!row.active,
-    expiresAt: row.expires_at,
+    expiresAt: row.expires_at || row.expiresAt || null,
   };
 }
 
 function mapCouponToDb(c: any): any {
+  const limitVal = c.usageLimit !== undefined ? c.usageLimit : c.maxUses;
+  const parsedLimit = limitVal !== null && limitVal !== undefined && limitVal !== "" ? Number(limitVal) : null;
   return {
     id: c.id,
     code: c.code,
     type: c.type || "percentage",
     value: c.value || 0,
-    min_purchase: c.minPurchase || 0,
-    max_uses: c.maxUses || 0,
+    min_purchase: c.minPurchaseAmount ?? c.minPurchase ?? 0,
+    min_purchase_amount: c.minPurchaseAmount ?? c.minPurchase ?? 0,
+    usage_limit: parsedLimit !== null && !isNaN(parsedLimit) ? parsedLimit : null,
+    max_uses: parsedLimit !== null && !isNaN(parsedLimit) ? parsedLimit : null,
     used_count: c.usedCount || 0,
     active: c.active ?? true,
     expires_at: c.expiresAt || null,
@@ -639,8 +650,10 @@ function mapCouponToDb(c: any): any {
 export const reviews = {
   all: async () => {
     if (await db()) {
-      const rows = await query<any[]>("SELECT * FROM reviews ORDER BY created_at DESC");
-      return rows.map(mapReviewFromDb);
+      return cachedDbQuery("reviews_all", async () => {
+        const rows = await query<any[]>("SELECT * FROM reviews ORDER BY created_at DESC");
+        return rows.map(mapReviewFromDb);
+      });
     }
     return cachedRead<any[]>("reviews");
   },
@@ -648,6 +661,7 @@ export const reviews = {
     if (await db()) {
       const mapped = items.map(mapReviewToDb);
       await replaceAll("reviews", mapped);
+      clearDbCache();
       return;
     }
     writeJson("reviews", items);
@@ -682,8 +696,10 @@ function mapReviewToDb(r: any): any {
 export const qna = {
   all: async () => {
     if (await db()) {
-      const rows = await query<any[]>("SELECT * FROM qna ORDER BY created_at DESC");
-      return rows.map(mapQnaFromDb);
+      return cachedDbQuery("qna_all", async () => {
+        const rows = await query<any[]>("SELECT * FROM qna ORDER BY created_at DESC");
+        return rows.map(mapQnaFromDb);
+      });
     }
     return cachedRead<any[]>("qna");
   },
@@ -691,6 +707,7 @@ export const qna = {
     if (await db()) {
       const mapped = items.map(mapQnaToDb);
       await replaceAll("qna", mapped);
+      clearDbCache();
       return;
     }
     writeJson("qna", items);
@@ -865,15 +882,18 @@ function mapOrderToDb(o: any): any {
 export const settings = {
   get: async () => {
     if (await db()) {
-      const row = await getOne<any>("SELECT data FROM settings WHERE id = 1");
-      if (row) return typeof row.data === "string" ? JSON.parse(row.data) : row.data;
-      return {};
+      return cachedDbQuery("settings_get", async () => {
+        const row = await getOne<any>("SELECT data FROM settings WHERE id = 1");
+        if (row) return typeof row.data === "string" ? JSON.parse(row.data) : row.data;
+        return {};
+      });
     }
     return cachedRead<any>("settings");
   },
   save: async (data: any) => {
     if (await db()) {
       await upsert("settings", "id", { id: 1, data: JSON.stringify(data) });
+      clearDbCache();
       return;
     }
     writeJson("settings", data);

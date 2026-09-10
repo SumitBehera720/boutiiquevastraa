@@ -364,6 +364,103 @@ async function handleAuth(path: string[], req: NextRequest) {
   return error("Not found", 404);
 }
 
+function formatProductForShiprocket(item: any) {
+  const variantsNodes = item.variants?.edges || [];
+  let formattedVariants = variantsNodes.map((edge: any) => {
+    const node = edge?.node || {};
+    const opts = node?.selectedOptions || [];
+    const optDict: Record<string, string> = {};
+    if (Array.isArray(opts)) {
+      opts.forEach((o: any) => {
+        if (o?.name && o?.value) optDict[o.name] = String(o.value);
+      });
+    }
+    if (Object.keys(optDict).length === 0) {
+      optDict["Size"] = String(node.title || "Free Size");
+    }
+    const rawPrice = node.price?.amount || item.priceRange?.minVariantPrice?.amount || "0";
+    const rawCmp = node.compareAtPrice?.amount || item.compareAtPriceRange?.minVariantPrice?.amount || "0";
+    
+    let numericId: number;
+    if (typeof node.id === "number") {
+      numericId = node.id;
+    } else {
+      const match = String(node.id || "").match(/\d+/g);
+      numericId = match ? parseInt(match.join("").slice(-9), 10) : Math.floor(Math.random() * 900000000) + 100000000;
+    }
+
+    return {
+      id: numericId,
+      title: String(node.title || "Default Title"),
+      price: Number(rawPrice).toFixed(2),
+      compare_at_price: Number(rawCmp).toFixed(2),
+      sku: String(item.specifications?.["🏷️ SKU"] || item.handle || item.id),
+      quantity: typeof item.inventory === "number" ? item.inventory : 10,
+      created_at: item.createdAt || "2023-11-07T09:50:12-05:00",
+      updated_at: item.updatedAt || item.createdAt || "2023-11-07T09:50:12-05:00",
+      taxable: true,
+      option_values: optDict,
+    };
+  });
+
+  if (formattedVariants.length === 0) {
+    const rawPrice = item.priceRange?.minVariantPrice?.amount || "0";
+    const rawCmp = item.compareAtPriceRange?.minVariantPrice?.amount || "0";
+    let numericVariantId: number;
+    const match = String(item.id || "").match(/\d+/g);
+    numericVariantId = match ? parseInt(match.join("").slice(-9), 10) : Math.floor(Math.random() * 900000000) + 100000000;
+
+    formattedVariants = [
+      {
+        id: numericVariantId,
+        title: "Free Size",
+        price: Number(rawPrice).toFixed(2),
+        compare_at_price: Number(rawCmp).toFixed(2),
+        sku: String(item.specifications?.["🏷️ SKU"] || item.handle || item.id),
+        quantity: typeof item.inventory === "number" ? item.inventory : 10,
+        created_at: item.createdAt || "2023-11-07T09:50:12-05:00",
+        updated_at: item.updatedAt || item.createdAt || "2023-11-07T09:50:12-05:00",
+        taxable: true,
+        option_values: {
+          Size: "Free Size",
+        },
+      },
+    ];
+  }
+
+  let numericProdId: number;
+  if (typeof item.id === "number") {
+    numericProdId = item.id;
+  } else {
+    const match = String(item.id || "").match(/\d+/g);
+    numericProdId = match ? parseInt(match.join("").slice(-9), 10) : Math.floor(Math.random() * 900000000) + 100000000;
+  }
+
+  let rawType = "Saree";
+  if (Array.isArray(item.collectionHandles) && item.collectionHandles.length > 0) {
+    rawType = item.collectionHandles[0];
+  } else if (Array.isArray(item.collections) && item.collections.length > 0) {
+    const firstCol = item.collections[0];
+    rawType = typeof firstCol === "string" ? firstCol : firstCol.handle || firstCol.title || "Saree";
+  }
+
+  const tagsStr = Array.isArray(item.tags) ? item.tags.join(", ") : String(item.tags || "");
+
+  return {
+    id: numericProdId,
+    title: String(item.title || ""),
+    body_html: String(item.descriptionHtml || item.description || ""),
+    vendor: "Boutiique Vastraa",
+    product_type: rawType,
+    created_at: item.createdAt || "2023-11-07T09:50:12-05:00",
+    handle: String(item.handle || ""),
+    updated_at: item.updatedAt || item.createdAt || "2023-11-07T09:50:12-05:00",
+    tags: tagsStr,
+    status: item.availableForSale !== false ? "active" : "draft",
+    variants: formattedVariants,
+  };
+}
+
 // ─── Product routes ──────────────────────────────────────────────────────────
 
 async function handleProducts(path: string[], req: NextRequest) {
@@ -371,9 +468,57 @@ async function handleProducts(path: string[], req: NextRequest) {
 
   if (path.length === 1 && req.method === "GET") {
     const url = new URL(req.url);
-    const perPage = parseInt(url.searchParams.get("per_page") || "50");
+    const perPage = parseInt(url.searchParams.get("per_page") || url.searchParams.get("first") || "10000");
+    const isStoreFrontendCall = url.searchParams.get("format") === "store" || url.searchParams.get("raw") === "true";
+    const collectionId = url.searchParams.get("collection_id") || url.searchParams.get("collection");
+
     const all = await products.all();
-    return json(all.slice(0, perPage));
+    let filtered = all;
+
+    if (collectionId && collectionId !== "all") {
+      const decoded = decodeURIComponent(collectionId).toLowerCase();
+      const slugified = decoded.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+      const allCols = await collections.all();
+      const matchedCol = allCols.find((c: any) =>
+        String(c.id).toLowerCase() === decoded ||
+        String(c.handle).toLowerCase() === decoded ||
+        String(c.handle).toLowerCase() === slugified
+      );
+
+      const validHandles = new Set([
+        decoded,
+        slugified,
+        ...(matchedCol ? [String(matchedCol.id).toLowerCase(), String(matchedCol.handle).toLowerCase()] : [])
+      ]);
+
+      filtered = all.filter((p: any) => {
+        const colHandles: string[] = Array.isArray(p.collectionHandles)
+          ? p.collectionHandles
+          : Array.isArray(p.collections)
+          ? p.collections
+          : [];
+        return colHandles.some((c: any) => {
+          const val = (typeof c === "string" ? c : c?.handle || c?.id || "").toLowerCase();
+          return validHandles.has(val);
+        });
+      });
+    }
+
+    const sliced = filtered.slice(0, perPage);
+
+    if (isStoreFrontendCall) {
+      return json(sliced);
+    }
+
+    const formattedProducts = sliced.map((item: any) => formatProductForShiprocket(item));
+
+    return json({
+      data: {
+        total: filtered.length,
+        products: formattedProducts,
+      },
+    });
   }
 
   if (path[1] === "search" && req.method === "GET") {
@@ -490,9 +635,14 @@ async function handleCollections(path: string[], req: NextRequest) {
 
   if (path.length === 1 && req.method === "GET") {
     const url = new URL(req.url);
-    const first = parseInt(url.searchParams.get("first") || "20");
-    const all = await collections.all();
-    return json(all.slice(0, first));
+    const collectionId = url.searchParams.get("collection_id") || url.searchParams.get("collection");
+    if (collectionId) {
+      path = ["collections", collectionId];
+    } else {
+      const first = parseInt(url.searchParams.get("first") || url.searchParams.get("per_page") || "100");
+      const all = await collections.all();
+      return json(all.slice(0, first));
+    }
   }
 
   if (path.length === 2 && req.method === "GET") {
@@ -710,6 +860,20 @@ async function handleCollections(path: string[], req: NextRequest) {
     const paginatedProducts = filteredProducts.slice(startIndex, startIndex + first);
     const hasNextPage = filteredProducts.length > startIndex + first;
     const endCursor = paginatedProducts.length > 0 ? paginatedProducts[paginatedProducts.length - 1].id : "";
+
+    // If request contains edges=true or filter or sort or reverse, or is coming from the website frontend (which expects { ...item, products: { edges } }), return store format.
+    // If request comes without edges or with format=shiprocket or for integration (e.g. GET /api/collections/saree?first=10000), return Shiprocket data format.
+    const isStoreFrontendCall = url.searchParams.has("filter") || url.searchParams.has("sort") || url.searchParams.has("edges") || url.searchParams.get("format") === "store";
+
+    if (!isStoreFrontendCall) {
+      const formattedProducts = paginatedProducts.map((p: any) => formatProductForShiprocket(p));
+      return json({
+        data: {
+          total: filteredProducts.length,
+          products: formattedProducts,
+        },
+      });
+    }
 
     return json({
       ...item,
@@ -944,17 +1108,40 @@ async function handleOrders(path: string[], req: NextRequest) {
 
     // Server-side coupon/discount validation — never trust the client
     let verifiedDiscount = 0;
-    if (body.promoCode && body.discount > 0) {
+    if (body.promoCode) {
       const existingCoupon = await coupons.findByCode(body.promoCode);
       if (existingCoupon && existingCoupon.active) {
+        const usedCount = existingCoupon.usedCount || 0;
+        if (existingCoupon.usageLimit !== undefined && existingCoupon.usageLimit !== null && usedCount >= existingCoupon.usageLimit) {
+          existingCoupon.active = false;
+          await coupons.save(await coupons.all());
+          return error("This promo code has reached its maximum usage limit and is no longer valid.", 400);
+        }
+
         const subtotal = parseFloat(formatted.subtotal);
-        if (existingCoupon.type === "percentage") {
+        const minReq = parseFloat(existingCoupon.minPurchaseAmount || existingCoupon.minPurchase || "0");
+        if (subtotal < minReq) {
+          return error(`Minimum purchase amount of ₹${minReq} required for this coupon`, 400);
+        }
+
+        const typeUpper = String(existingCoupon.type || "").toUpperCase();
+        if (typeUpper === "PERCENTAGE") {
           verifiedDiscount = subtotal * (parseFloat(existingCoupon.value) / 100);
         } else {
           verifiedDiscount = parseFloat(existingCoupon.value);
         }
         verifiedDiscount = Math.min(verifiedDiscount, subtotal);
         verifiedDiscount = Math.round(verifiedDiscount * 100) / 100;
+
+        // Increment usage count and auto-disable if limit reached
+        existingCoupon.usedCount = usedCount + 1;
+        if (existingCoupon.usageLimit !== undefined && existingCoupon.usageLimit !== null && existingCoupon.usedCount >= existingCoupon.usageLimit) {
+          existingCoupon.active = false;
+        }
+        const allCouponsList = await coupons.all();
+        const cIdx = allCouponsList.findIndex((c: any) => c.id === existingCoupon.id);
+        if (cIdx >= 0) allCouponsList[cIdx] = existingCoupon;
+        await coupons.save(allCouponsList);
       }
     }
     const totalAmount = (parseFloat(formatted.subtotal) - verifiedDiscount);
@@ -1086,9 +1273,25 @@ async function handleCoupons(path: string[], req: NextRequest) {
     const coupon = await coupons.findByCode(body.code);
     if (!coupon || !coupon.active) return error("Invalid or expired promo code", 404);
 
+    const usedCount = coupon.usedCount || 0;
+    if (coupon.usageLimit !== undefined && coupon.usageLimit !== null && usedCount >= coupon.usageLimit) {
+      coupon.active = false;
+      const allCols = await coupons.all();
+      const idx = allCols.findIndex((c: any) => c.id === coupon.id);
+      if (idx >= 0) allCols[idx].active = false;
+      await coupons.save(allCols);
+      return error("This promo code has reached its maximum usage limit and is no longer valid.", 400);
+    }
+
     const subtotal = parseFloat(body.cart_subtotal || "0");
+    const minReq = parseFloat(coupon.minPurchaseAmount || coupon.minPurchase || "0");
+    if (subtotal < minReq) {
+      return error(`Minimum purchase amount of ₹${minReq} required for this coupon`, 400);
+    }
+
     let discountAmount = 0;
-    if (coupon.type === "percentage") {
+    const typeUpper = String(coupon.type || "").toUpperCase();
+    if (typeUpper === "PERCENTAGE") {
       discountAmount = subtotal * (parseFloat(coupon.value) / 100);
     } else {
       discountAmount = parseFloat(coupon.value);
@@ -1821,17 +2024,42 @@ async function handleSearchSuggestions(path: string[], req: NextRequest) {
 
 async function routeGET(req: NextRequest, { params }: any) {
   const path = (await params).path || [];
-  // Shiprocket EDD
-  if (path[0] === "shiprocket" && path[1] === "edd") {
-    const url = new URL(req.url);
-    const pincode = url.searchParams.get("pincode");
-    const isCod = url.searchParams.get("isCod") === "true";
-    if (!pincode || !/^\d{6}$/.test(pincode)) {
-      return error("Valid 6-digit pincode required");
+  // Postal PIN Code Lookup Proxy
+  if (path[0] === "pincode" && path[1]) {
+    const cleanPin = String(path[1]).trim();
+    if (!/^\d{6}$/.test(cleanPin)) {
+      return error("Invalid PIN Code format", 400);
     }
-    const edd = await ShiprocketService.getExpectedDeliveryDate(pincode, isCod);
-    return json({ success: true, edd });
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${cleanPin}`, {
+        headers: { Accept: "application/json" },
+        next: { revalidate: 86400 } // cache for 24 hours
+      });
+      const data = await res.json();
+      if (Array.isArray(data) && data[0]?.Status === "Success" && Array.isArray(data[0]?.PostOffice) && data[0].PostOffice.length > 0) {
+        const postOffices = data[0].PostOffice;
+        const first = postOffices[0];
+        return json({
+          success: true,
+          state: first.State || "",
+          district: first.District || "",
+          city: first.District || first.Block || first.Name || "",
+          postOffices: postOffices.map((po: any) => ({
+            name: po.Name,
+            branchType: po.BranchType,
+            district: po.District,
+            state: po.State,
+            block: po.Block,
+          }))
+        });
+      } else {
+        return json({ success: false, message: "Invalid PIN Code" }, 444);
+      }
+    } catch {
+      return error("Failed to fetch PIN details", 500);
+    }
   }
+
   // PhonePe status — check by path prefix before falling through
   if (path[0] === "payment" && path[1] === "phonepe" && path[2] === "status") {
     return handlePhonepeStatus(req);

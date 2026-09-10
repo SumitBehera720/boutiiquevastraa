@@ -208,6 +208,13 @@ export default function ProductFormClient({ product, collections }: ProductFormC
 
     try {
       const filesArray = Array.from(fileList);
+      const MAX_SIZE = 2 * 1024 * 1024; // 2MB limit
+
+      const oversizedFile = filesArray.find(f => f.size > MAX_SIZE);
+      if (oversizedFile) {
+        throw new Error(`"${oversizedFile.name}" exceeds the 2MB size limit (${(oversizedFile.size / (1024 * 1024)).toFixed(2)}MB). Please choose images under 2MB.`);
+      }
+
       const uploadPromises = filesArray.map(async (file) => {
         const formData = new FormData();
         formData.append("image", file);
@@ -240,6 +247,11 @@ export default function ProductFormClient({ product, collections }: ProductFormC
 
     try {
       const file = fileList[0];
+      const MAX_SIZE = 2 * 1024 * 1024; // 2MB limit
+      if (file.size > MAX_SIZE) {
+        throw new Error(`Size chart image exceeds the 2MB size limit (${(file.size / (1024 * 1024)).toFixed(2)}MB). Please choose an image under 2MB.`);
+      }
+
       const formData = new FormData();
       formData.append("image", file);
 
@@ -249,9 +261,9 @@ export default function ProductFormClient({ product, collections }: ProductFormC
       } else {
         setError(res.error || "Size chart upload failed.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("An unexpected error occurred during size chart upload.");
+      setError(err.message || "An unexpected error occurred during size chart upload.");
     } finally {
       setSizeChartUploading(false);
     }
@@ -1017,11 +1029,13 @@ export default function ProductFormClient({ product, collections }: ProductFormC
 
             {/* File Upload Selector */}
             <div className="space-y-2">
-              <label className="block text-[9px] font-bold text-neutral-500 uppercase tracking-wider">Local Image File Upload</label>
+              <label className="block text-[9px] font-bold text-neutral-500 uppercase tracking-wider">
+                Local Image File Upload <span className="text-neutral-400 font-normal">(Max 2MB per image)</span>
+              </label>
               <label className={`w-full border border-dashed border-neutral-800 rounded-lg p-4 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-neutral-900/40 hover:border-neutral-700 ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
                 <Upload className="w-5 h-5 text-neutral-500 mb-1" />
                 <span className="text-[10px] text-neutral-400 font-bold uppercase">
-                  {uploading ? "Uploading file..." : "Browse Local File"}
+                  {uploading ? "Uploading file..." : "Browse Local File (Max 2MB)"}
                 </span>
                 <input
                   type="file"

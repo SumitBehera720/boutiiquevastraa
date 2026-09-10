@@ -79,6 +79,29 @@ export default function ProductInfo({ product, recommendedProducts }: { product:
     loadProfilePincode();
   }, []);
 
+  const [dynamicEddDate, setDynamicEddDate] = useState<string | null>(null);
+
+  const fetchEddForPincode = async (targetPin: string) => {
+    setIsChecking(true);
+    setPincodeError("");
+    try {
+      const res = await fetch(`/api/shiprocket/edd?pincode=${targetPin}`);
+      const data = await res.json();
+      if (data.success && data.edd) {
+        setDynamicEddDate(data.edd);
+        setCheckedPincode(targetPin);
+      } else {
+        setCheckedPincode(targetPin);
+        setDynamicEddDate(null);
+      }
+    } catch {
+      setCheckedPincode(targetPin);
+      setDynamicEddDate(null);
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
   const handleCheckPincode = (e: React.FormEvent) => {
     e.preventDefault();
     setPincodeError("");
@@ -87,11 +110,7 @@ export default function ProductInfo({ product, recommendedProducts }: { product:
       setPincodeError("Please enter a valid 6-digit Indian pincode.");
       return;
     }
-    setIsChecking(true);
-    setTimeout(() => {
-      setCheckedPincode(trimmed);
-      setIsChecking(false);
-    }, 400);
+    fetchEddForPincode(trimmed);
   };
 
   const titleLower = (product.title || "").toLowerCase();
@@ -311,7 +330,9 @@ export default function ProductInfo({ product, recommendedProducts }: { product:
                   Estimated Delivery to <span className="font-semibold text-gray-900">{checkedPincode}</span>:
                 </p>
                 <p className="text-green-700 font-bold text-sm mt-0.5">
-                  3 - 6 Business Days ({getDeliveryDateRange()})
+                  {dynamicEddDate 
+                    ? `Expected Delivery by ${new Date(dynamicEddDate).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}`
+                    : `3 - 5 Business Days (${getDeliveryDateRange()})`}
                 </p>
               </div>
               <button

@@ -86,6 +86,43 @@ export default function AddressForm({ initialAddress }: AddressFormProps) {
   const [successMessage, setSuccessMessage] = useState("");
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
+  // PIN Lookup States
+  const [pinLoading, setPinLoading] = useState(false);
+  const [pinError, setPinError] = useState("");
+
+  useEffect(() => {
+    const cleanZip = zip.trim();
+    if (cleanZip.length === 6 && /^\d{6}$/.test(cleanZip)) {
+      let isMounted = true;
+      const lookupPincode = async () => {
+        setPinLoading(true);
+        setPinError("");
+        try {
+          const res = await fetch(`/api/pincode/${cleanZip}`);
+          const data = await res.json();
+          if (isMounted) {
+            if (res.ok && data.success) {
+              if (data.city) setCity(data.city);
+              if (data.state) setProvince(data.state);
+              setPinError("");
+            } else {
+              setPinError(data.message || "Invalid PIN Code");
+            }
+          }
+        } catch {
+          if (isMounted) setPinError("");
+        } finally {
+          if (isMounted) setPinLoading(false);
+        }
+      };
+      lookupPincode();
+      return () => { isMounted = false; };
+    } else {
+      setPinError("");
+      setPinLoading(false);
+    }
+  }, [zip]);
+
   // Open Form for Adding
   const handleAddNewClick = () => {
     setName("");
@@ -458,15 +495,30 @@ export default function AddressForm({ initialAddress }: AddressFormProps) {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Pincode *</label>
+            <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 flex items-center justify-between">
+              <span>Pincode *</span>
+              {pinLoading && (
+                <span className="text-[9px] text-maroonClr font-normal flex items-center gap-1">
+                  <span className="w-2.5 h-2.5 border border-maroonClr border-t-transparent rounded-full animate-spin"></span>
+                  Fetching...
+                </span>
+              )}
+            </label>
             <input
               type="text"
               required
+              maxLength={6}
               value={zip}
-              onChange={(e) => setZip(e.target.value)}
+              onChange={(e) => setZip(e.target.value.replace(/\D/g, ""))}
               placeholder="6-digit PIN"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:border-maroonClr transition-all bg-[#FDFBF7]"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-xs focus:outline-none focus:border-maroonClr transition-all bg-[#FDFBF7] font-mono"
             />
+            {pinError && (
+              <p className="mt-1 text-[10px] text-red-600 font-sans flex items-center gap-1 font-medium">
+                <AlertCircle className="w-3 h-3 text-red-500" />
+                {pinError}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">Country *</label>

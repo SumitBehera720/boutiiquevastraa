@@ -111,17 +111,17 @@ export default function Footer({ settings, whatsappNumber }: FooterProps) {
             {/* Social Links */}
             <div className="flex gap-3 pt-2">
               {facebookUrl && (
-                <a href={facebookUrl} target="_blank" rel="noopener noreferrer" className="text-goldClr hover:text-white transition-colors">
+                <a href={facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Boutiique Vastraa Facebook Page" className="text-goldClr hover:text-white transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
                 </a>
               )}
               {instagramUrl && (
-                <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="text-goldClr hover:text-white transition-colors">
+                <a href={instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Boutiique Vastraa Instagram Profile" className="text-goldClr hover:text-white transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                 </a>
               )}
               {pinterestUrl && (
-                <a href={pinterestUrl} target="_blank" rel="noopener noreferrer" className="text-goldClr hover:text-white transition-colors">
+                <a href={pinterestUrl} target="_blank" rel="noopener noreferrer" aria-label="Boutiique Vastraa Pinterest Boards" className="text-goldClr hover:text-white transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 </a>
               )}

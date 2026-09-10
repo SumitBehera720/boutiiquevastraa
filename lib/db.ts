@@ -47,7 +47,13 @@ async function getDb(): Promise<Db> {
   if (!USE_DB) throw new Error("Database is not enabled (ENABLE_DATABASE is false or MONGODB_URI is missing)");
   if (!dbInstance) {
     if (!MONGODB_URI) throw new Error("MONGODB_URI is not set in environment variables");
-    clientInstance = new MongoClient(MONGODB_URI);
+    clientInstance = new MongoClient(MONGODB_URI, {
+      maxPoolSize: 20,
+      minPoolSize: 5,
+      maxIdleTimeMS: 60000,
+      connectTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 10000,
+    });
     await clientInstance.connect();
     dbInstance = clientInstance.db(MONGODB_DB_NAME);
     console.log("[MongoDB] Connected to database:", MONGODB_DB_NAME);
@@ -307,11 +313,19 @@ async function countRows(table: string): Promise<number> {
   return row?.cnt ?? 0;
 }
 
+let _isSeeded = false;
+
 export async function seedIfEmpty(): Promise<void> {
-  if (!USE_DB) return;
+  if (!USE_DB || _isSeeded) return;
 
   try {
     const settingsCount = await countRows("settings");
+    const productCount = await countRows("products");
+    if (settingsCount > 0 && productCount > 0) {
+      _isSeeded = true;
+      return;
+    }
+
     if (settingsCount === 0) {
       const data = readJson<any>("settings");
       if (data && Object.keys(data).length) {
@@ -319,7 +333,6 @@ export async function seedIfEmpty(): Promise<void> {
       }
     }
 
-    const productCount = await countRows("products");
     if (productCount === 0) {
       const items = readJson<any[]>("products");
       if (items.length) {

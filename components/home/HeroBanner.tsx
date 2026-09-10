@@ -86,9 +86,9 @@ export default function HeroBanner({ slides }: { slides?: BannerSlide[] }) {
           <div className="absolute inset-0 flex items-center px-6 sm:px-12 md:px-20 lg:px-28 z-10">
             <div className="max-w-xl text-left space-y-3 sm:space-y-4">
               {bannerSlides[currentSlide].title && (
-                <h1 className="font-kalnia text-goldClr text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
+                <h2 className="font-kalnia text-goldClr text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">
                   {bannerSlides[currentSlide].title}
-                </h1>
+                </h2>
               )}
               {bannerSlides[currentSlide].subtitle && (
                 <p className="text-white text-sm sm:text-base md:text-lg font-light leading-relaxed max-w-md drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">

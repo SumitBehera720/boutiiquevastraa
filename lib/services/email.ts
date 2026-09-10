@@ -123,8 +123,11 @@ async function sendMail(options: SendMailOptions): Promise<void> {
  * Format currency in INR format
  */
 const formatINR = (amount: any): string => {
-  const num = parseFloat(amount);
-  if (isNaN(num)) return "₹0.00";
+  if (amount === undefined || amount === null) return "₹0";
+  const raw = typeof amount === "object" ? (amount?.amount ?? amount?.price) : amount;
+  const str = typeof raw === "string" ? raw.replace(/[^0-9.]/g, "") : String(raw);
+  const num = parseFloat(str);
+  if (isNaN(num)) return "₹0";
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -137,8 +140,8 @@ const formatINR = (amount: any): string => {
  */
 export async function sendOrderConfirmationEmail(order: any): Promise<void> {
   const fromName = process.env.EMAIL_FROM_NAME || "Boutiique Vastraa";
-  const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-  const customerEmail = order.email;
+  const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER || "info@boutiiquevastraa.com";
+  const customerEmail = order.email || order.customer?.email;
 
   if (!customerEmail) {
     console.error(`[Email Service] Cannot send order email: Customer email is missing for Order #${order.orderNumber}`);
@@ -560,8 +563,8 @@ export async function sendPasswordResetEmail(email: string, resetLink: string): 
  */
 export async function sendOrderStatusUpdateEmail(order: any, status: string, trackingDetails?: any): Promise<void> {
   const fromName = process.env.EMAIL_FROM_NAME || "Boutiique Vastraa";
-  const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-  const customerEmail = order.email;
+  const fromEmail = process.env.EMAIL_FROM || process.env.EMAIL_USER || "info@boutiiquevastraa.com";
+  const customerEmail = order.email || order.customer?.email;
 
   if (!customerEmail) {
     console.error(`[Email Service] Cannot send status update email: Customer email is missing for Order #${order.orderNumber}`);
@@ -569,13 +572,13 @@ export async function sendOrderStatusUpdateEmail(order: any, status: string, tra
   }
 
   // Normalize status text for display
-  const statusUpper = status.toUpperCase();
+  const statusUpper = (status || "").toUpperCase();
   let statusTitle = "Order Updated";
   let statusDescription = `Your order status has been updated.`;
   let icon = "🔔";
   let subjectText = `Order Update - #VSTR-${order.orderNumber}`;
 
-  if (statusUpper.includes("SHIPPED")) {
+  if (statusUpper.includes("SHIPPED") || statusUpper.includes("DISPATCH") || statusUpper.includes("IN_TRANSIT")) {
     statusTitle = "Order Shipped!";
     statusDescription = "Exciting news! Your handcrafted items have been shipped and are on the way to you.";
     icon = "✈️";
@@ -590,7 +593,7 @@ export async function sendOrderStatusUpdateEmail(order: any, status: string, tra
     statusDescription = "Your handcrafted products have been delivered. We hope you love them!";
     icon = "🎁";
     subjectText = `Your Order Has Been Delivered! - #VSTR-${order.orderNumber}`;
-  } else if (statusUpper.includes("CANCELLED")) {
+  } else if (statusUpper.includes("CANCEL") || statusUpper.includes("REFUND")) {
     statusTitle = "Order Cancelled";
     statusDescription = "Your order has been cancelled. If payment was made, your refund is being processed.";
     icon = "❌";

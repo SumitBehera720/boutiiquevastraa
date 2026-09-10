@@ -254,12 +254,14 @@ export default function OccasionFinder({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-            {currentOccasion.products.map((p) => (
-              <Link
-                key={p.id}
-                href={`/collections/${p.handle}`}
-                className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-goldClr/40 shadow-sm hover:shadow-xl transition-all duration-400 flex flex-col"
-              >
+            {currentOccasion.products.map((p, pIdx) => {
+              const prodHref = p.handle?.startsWith("/") ? p.handle : `/products/${p.handle || "saree"}`;
+              return (
+                <Link
+                  key={p.id || pIdx}
+                  href={prodHref}
+                  className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:border-goldClr/40 shadow-sm hover:shadow-xl transition-all duration-400 flex flex-col"
+                >
                 <div className="relative aspect-[3/4] w-full overflow-hidden bg-gray-50">
                   <Image
                     src={p.image}
@@ -284,7 +286,7 @@ export default function OccasionFinder({
                   </div>
                 </div>
               </Link>
-            ))}
+            ); })}
           </div>
 
           {/* CTA */}

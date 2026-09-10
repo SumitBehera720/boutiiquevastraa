@@ -24,53 +24,77 @@ export async function POST(request: Request) {
     const fileId = request.headers.get("x-file-id");
     const fileName = request.headers.get("x-file-name");
 
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
+    let buffer: Buffer;
+    const contentType = request.headers.get("content-type") || "";
 
-    if (!file) {
-      return NextResponse.json({ success: false, error: "No file provided." }, { status: 400 });
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const file = formData.get("file") as File;
+      if (!file) {
+        return NextResponse.json({ success: false, error: "No file provided." }, { status: 400 });
+      }
+      buffer = Buffer.from(await file.arrayBuffer());
+    } else {
+      const rawBuf = await request.arrayBuffer();
+      if (!rawBuf || rawBuf.byteLength === 0) {
+        return NextResponse.json({ success: false, error: "Empty request payload." }, { status: 400 });
+      }
+      buffer = Buffer.from(rawBuf);
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
     const uploadDir = getUploadDir();
 
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    // Chunked upload handler for large files (videos up to 200MB+)
+    // Chunked upload handler for large files (supports concurrent parallel uploads)
     if (chunkIndex !== null && totalChunks !== null && fileId && fileName) {
       const idx = parseInt(chunkIndex, 10);
       const total = parseInt(totalChunks, 10);
       const ext = fileName.split(".").pop() || "mp4";
-      const tempDir = getTempDir();
-
-      if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-      }
-
       const safeId = fileId.replace(/[^a-zA-Z0-9_-]/g, "");
-      const tempFilePath = path.join(tempDir, `${safeId}.${ext}.part`);
+      const fileTempDir = path.join(getTempDir(), safeId);
 
-      if (idx === 0) {
-        fs.writeFileSync(tempFilePath, buffer);
-      } else {
-        fs.appendFileSync(tempFilePath, buffer);
+      if (!fs.existsSync(fileTempDir)) {
+        fs.mkdirSync(fileTempDir, { recursive: true });
       }
 
-      // Final chunk received - move temp file to permanent uploads directory
-      if (idx === total - 1) {
+      // Save individual chunk part (supports parallel/out-of-order arrival)
+      const partPath = path.join(fileTempDir, `part_${idx}`);
+      fs.writeFileSync(partPath, buffer);
+
+      // Check how many parts have arrived
+      const existingParts = fs.readdirSync(fileTempDir).filter((f) => f.startsWith("part_"));
+
+      // All parts received - merge in exact sequential order
+      if (existingParts.length === total) {
         const finalFilename = `${Date.now()}_${safeId}.${ext}`;
         const finalPath = path.join(uploadDir, finalFilename);
-        fs.renameSync(tempFilePath, finalPath);
+
+        const writeStream = fs.createWriteStream(finalPath);
+        for (let i = 0; i < total; i++) {
+          const chunkPath = path.join(fileTempDir, `part_${i}`);
+          if (fs.existsSync(chunkPath)) {
+            const chunkBuf = fs.readFileSync(chunkPath);
+            writeStream.write(chunkBuf);
+          }
+        }
+        writeStream.end();
+
+        // Clean up temp part directory
+        try {
+          fs.rmSync(fileTempDir, { recursive: true, force: true });
+        } catch {}
+
         return NextResponse.json({ success: true, url: `/images/uploads/${finalFilename}` });
       }
 
-      return NextResponse.json({ success: true, chunkReceived: idx, totalChunks: total });
+      return NextResponse.json({ success: true, chunkReceived: idx, totalChunks: total, partsCount: existingParts.length });
     }
 
     // Single-request upload handler for standard small files
-    const ext = file.name.split(".").pop() || "jpg";
+    const ext = fileName ? (fileName.split(".").pop() || "jpg") : "jpg";
     const filename = `${Date.now()}.${ext}`;
     fs.writeFileSync(path.join(uploadDir, filename), buffer);
 

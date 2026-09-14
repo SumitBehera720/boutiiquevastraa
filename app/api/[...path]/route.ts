@@ -364,7 +364,35 @@ async function handleAuth(path: string[], req: NextRequest) {
   return error("Not found", 404);
 }
 
+function toAbsUrl(url: string | null | undefined): string {
+  if (!url) return "https://boutiiquevastraa.com/images/logo.png";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/")) return `https://boutiiquevastraa.com${url}`;
+  return `https://boutiiquevastraa.com/${url}`;
+}
+
 function formatProductForShiprocket(item: any) {
+  let numericProdId: number;
+  if (typeof item.id === "number") {
+    numericProdId = item.id;
+  } else {
+    const match = String(item.id || "").match(/\d+/g);
+    numericProdId = match ? parseInt(match.join("").slice(-9), 10) : Math.floor(Math.random() * 900000000) + 100000000;
+  }
+
+  const rawImg = item.images?.edges?.[0]?.node?.url || item.image?.src || item.image || item.featuredImage?.url || "/images/saree.jpg";
+  const primaryImgUrl = toAbsUrl(typeof rawImg === "string" ? rawImg : rawImg?.url || rawImg?.src);
+
+  let formattedOptions = item.options || [];
+  if (!Array.isArray(formattedOptions) || formattedOptions.length === 0) {
+    formattedOptions = [
+      {
+        name: "Size",
+        values: ["Free Size"]
+      }
+    ];
+  }
+
   const variantsNodes = item.variants?.edges || [];
   let formattedVariants = variantsNodes.map((edge: any) => {
     const node = edge?.node || {};
@@ -389,6 +417,8 @@ function formatProductForShiprocket(item: any) {
       numericId = match ? parseInt(match.join("").slice(-9), 10) : Math.floor(Math.random() * 900000000) + 100000000;
     }
 
+    const varImgUrl = node.image?.url || node.image?.src || rawImg;
+
     return {
       id: numericId,
       title: String(node.title || "Default Title"),
@@ -399,6 +429,12 @@ function formatProductForShiprocket(item: any) {
       created_at: item.createdAt || "2023-11-07T09:50:12-05:00",
       updated_at: item.updatedAt || item.createdAt || "2023-11-07T09:50:12-05:00",
       taxable: true,
+      grams: 500,
+      weight: 0.5,
+      weight_unit: "kg",
+      image: {
+        src: toAbsUrl(typeof varImgUrl === "string" ? varImgUrl : varImgUrl?.url || varImgUrl?.src)
+      },
       option_values: optDict,
     };
   });
@@ -421,19 +457,17 @@ function formatProductForShiprocket(item: any) {
         created_at: item.createdAt || "2023-11-07T09:50:12-05:00",
         updated_at: item.updatedAt || item.createdAt || "2023-11-07T09:50:12-05:00",
         taxable: true,
+        grams: 500,
+        weight: 0.5,
+        weight_unit: "kg",
+        image: {
+          src: primaryImgUrl
+        },
         option_values: {
           Size: "Free Size",
         },
       },
     ];
-  }
-
-  let numericProdId: number;
-  if (typeof item.id === "number") {
-    numericProdId = item.id;
-  } else {
-    const match = String(item.id || "").match(/\d+/g);
-    numericProdId = match ? parseInt(match.join("").slice(-9), 10) : Math.floor(Math.random() * 900000000) + 100000000;
   }
 
   let rawType = "Saree";
@@ -457,7 +491,35 @@ function formatProductForShiprocket(item: any) {
     updated_at: item.updatedAt || item.createdAt || "2023-11-07T09:50:12-05:00",
     tags: tagsStr,
     status: item.availableForSale !== false ? "active" : "draft",
+    image: {
+      src: primaryImgUrl
+    },
+    options: formattedOptions,
     variants: formattedVariants,
+  };
+}
+
+function formatCollectionForShiprocket(col: any) {
+  let numericColId: number;
+  if (typeof col.id === "number") {
+    numericColId = col.id;
+  } else {
+    const match = String(col.id || "").match(/\d+/g);
+    numericColId = match ? parseInt(match.join("").slice(-9), 10) : Math.floor(Math.random() * 900000000) + 100000000;
+  }
+
+  const imgRaw = col.image?.src || col.image?.url || col.image;
+
+  return {
+    id: numericColId,
+    title: String(col.title || ""),
+    handle: String(col.handle || ""),
+    body_html: String(col.description || col.body_html || `<p>${col.title || "Collection"}</p>`),
+    image: {
+      src: toAbsUrl(typeof imgRaw === "string" ? imgRaw : imgRaw?.url || imgRaw?.src)
+    },
+    created_at: col.createdAt || "2023-11-07T09:50:12-05:00",
+    updated_at: col.updatedAt || col.createdAt || "2023-11-07T09:50:12-05:00",
   };
 }
 
@@ -468,7 +530,8 @@ async function handleProducts(path: string[], req: NextRequest) {
 
   if (path.length === 1 && req.method === "GET") {
     const url = new URL(req.url);
-    const perPage = parseInt(url.searchParams.get("per_page") || url.searchParams.get("first") || "10000");
+    const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
+    const limit = Math.max(1, parseInt(url.searchParams.get("limit") || url.searchParams.get("per_page") || url.searchParams.get("first") || "100", 10));
     const isStoreFrontendCall = url.searchParams.get("format") === "store" || url.searchParams.get("raw") === "true";
     const collectionId = url.searchParams.get("collection_id") || url.searchParams.get("collection");
 
@@ -505,7 +568,8 @@ async function handleProducts(path: string[], req: NextRequest) {
       });
     }
 
-    const sliced = filtered.slice(0, perPage);
+    const startIndex = (page - 1) * limit;
+    const sliced = filtered.slice(startIndex, startIndex + limit);
 
     if (isStoreFrontendCall) {
       return json(sliced);
@@ -639,9 +703,26 @@ async function handleCollections(path: string[], req: NextRequest) {
     if (collectionId) {
       path = ["collections", collectionId];
     } else {
-      const first = parseInt(url.searchParams.get("first") || url.searchParams.get("per_page") || "100");
+      const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
+      const limit = Math.max(1, parseInt(url.searchParams.get("limit") || url.searchParams.get("first") || url.searchParams.get("per_page") || "100", 10));
+      const isStoreFrontendCall = url.searchParams.get("format") === "store" || url.searchParams.get("raw") === "true";
+
       const all = await collections.all();
-      return json(all.slice(0, first));
+      const startIndex = (page - 1) * limit;
+      const sliced = all.slice(startIndex, startIndex + limit);
+
+      if (isStoreFrontendCall) {
+        return json(sliced);
+      }
+
+      const formattedCollections = sliced.map((c: any) => formatCollectionForShiprocket(c));
+
+      return json({
+        data: {
+          total: all.length,
+          collections: formattedCollections,
+        },
+      });
     }
   }
 

@@ -12,34 +12,30 @@ This file contains the production API endpoints and domain details for Postman, 
 
 ## Postman & Shiprocket Integration API Endpoints
 
-### 1. Products API
-- **URL**: `https://boutiiquevastraa.com/api/products?per_page=10000`
+### 1. Products API (Fetch Products)
+- **URL**: `https://boutiiquevastraa.com/api/products?page=1&limit=100`
 - **Method**: `GET`
 - **Parameters**: 
-  - `per_page` (optional, default `10000`): Limits the number of products returned. Set to a high value to fetch all products.
-- **Response Format**: Returns `{ "data": { "total": <count>, "products": [...] } }` matching standard Shiprocket JSON structure.
+  - `page` (optional, default `1`): Page number (1-indexed).
+  - `limit` (optional, default `100`): Number of products per page (also supports `per_page` or `first`).
+- **Response Format**: Returns `{ "data": { "total": <count>, "products": [...] } }` strictly following official Shiprocket JSON specification.
 
-### 2. Collections API
-- **URL**: `https://boutiiquevastraa.com/api/collections`
+### 2. Collections API (Fetch Collections)
+- **URL**: `https://boutiiquevastraa.com/api/collections?page=1&limit=100`
 - **Method**: `GET`
 - **Parameters**:
-  - `first` (optional, default `100`): Limits the number of collections returned.
+  - `page` (optional, default `1`): Page number (1-indexed).
+  - `limit` (optional, default `100`): Number of collections per page.
+- **Response Format**: Returns `{ "data": { "total": <count>, "collections": [...] } }` strictly following official Shiprocket JSON specification.
 
-### 3. Products by Collection API
-- **Primary URL (Query Parameter)**: `https://boutiiquevastraa.com/api/products?collection_id={collection_id}&per_page=10000`
-- **Alternative URL (Path Parameter)**: `https://boutiiquevastraa.com/api/collections/{collection_handle}?first=10000`
+### 3. Products by Collection API (Fetch Products by Collection)
+- **URL**: `https://boutiiquevastraa.com/api/products?collection_id={collection_id}&page=1&limit=100`
 - **Method**: `GET`
 - **Query Parameters**:
-  - `collection_id` (required): Collection ID or handle string (e.g., `saree`, `kurti`, `lehenga`, `jewellery`, `3-piece`, `party-wear`, or `all`).
-  - `per_page` (optional, default `10000`): Limits the number of products returned within the collection. Set high to fetch all.
-- **Collection IDs / Handles**:
-  - `all`: Returns all products.
-  - `saree`: Returns saree products.
-  - `kurti`: Returns kurti products.
-  - `lehenga`: Returns lehenga products.
-  - `jewellery`: Returns jewellery products.
-  - `3-piece`: Returns 3-piece suit products.
-  - `party-wear`: Returns party wear products.
+  - `collection_id` (required): Collection ID or handle (e.g. `saree`, `kurti`, `lehenga`, `jewellery`, `3-piece`, `party-wear`, or `all`).
+  - `page` (optional, default `1`): Page number (1-indexed).
+  - `limit` (optional, default `100`): Number of products per page.
+- **Response Format**: Returns `{ "data": { "total": <count>, "products": [...] } }` strictly following official Shiprocket JSON specification.
 
 ### 4. Search API
 - **URL**: `https://boutiiquevastraa.com/api/products/search`

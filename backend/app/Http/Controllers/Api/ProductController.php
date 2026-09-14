@@ -10,7 +10,8 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $first = min((int) $request->query('first', $request->query('per_page', 50)), 10000);
+        $page = max(1, (int) $request->query('page', 1));
+        $limit = min((int) $request->query('limit', $request->query('per_page', $request->query('first', 100))), 1000);
         $collectionId = $request->query('collection_id') ?? $request->query('collection');
 
         $query = Product::with('collections');
@@ -21,11 +22,15 @@ class ProductController extends Controller
             });
         }
 
-        $products = $query->limit($first)->get();
+        $total = $query->count();
+        $products = $query->skip(($page - 1) * $limit)->take($limit)->get();
 
-        return response()->json(
-            $products->map(fn($p) => $p->toShopifyFormat())
-        );
+        return response()->json([
+            'data' => [
+                'total' => $total,
+                'products' => $products->map(fn($p) => $p->toShopifyFormat()),
+            ]
+        ]);
     }
 
     public function show(string $handle)

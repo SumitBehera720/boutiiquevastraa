@@ -11,18 +11,41 @@ class CollectionController extends Controller
 {
     public function index(Request $request)
     {
-        $first = min((int) $request->query('first', 50), 100);
-        $collections = Collection::limit($first)->get();
+        $page = max(1, (int) $request->query('page', 1));
+        $limit = min((int) $request->query('limit', $request->query('first', $request->query('per_page', 100))), 1000);
 
-        return response()->json(
-            $collections->filter(fn($c) => $c->handle !== 'frontpage')->values()->map(fn($c) => [
-                'id' => 'gid://shopify/Collection/' . $c->id,
+        $query = Collection::where('handle', '!=', 'frontpage');
+        $total = $query->count();
+        $collections = $query->skip(($page - 1) * $limit)->take($limit)->get();
+
+        $formatted = $collections->map(function ($c) {
+            $imgSrc = is_array($c->image) ? ($c->image['url'] ?? $c->image['src'] ?? '') : (string) $c->image;
+            if ($imgSrc && !str_starts_with($imgSrc, 'http')) {
+                $imgSrc = 'https://boutiiquevastraa.com' . (str_starts_with($imgSrc, '/') ? '' : '/') . $imgSrc;
+            }
+            if (!$imgSrc) {
+                $imgSrc = 'https://boutiiquevastraa.com/images/logo.png';
+            }
+
+            return [
+                'id' => (int) $c->id,
                 'title' => $c->title,
                 'handle' => $c->handle,
-                'description' => $c->description,
-                'image' => $c->image,
-            ])
-        );
+                'body_html' => $c->description ?? "<p>{$c->title}</p>",
+                'image' => [
+                    'src' => $imgSrc,
+                ],
+                'created_at' => $c->created_at ? $c->created_at->toIso8601String() : '2023-11-07T09:50:12-05:00',
+                'updated_at' => $c->updated_at ? $c->updated_at->toIso8601String() : '2023-11-07T09:50:12-05:00',
+            ];
+        });
+
+        return response()->json([
+            'data' => [
+                'total' => $total,
+                'collections' => $formatted,
+            ]
+        ]);
     }
 
     public function show(Request $request, string $handle)

@@ -56,7 +56,15 @@ export async function launchShiprocketCheckout({
   fallbackUrl = "/checkout",
 }: {
   event?: any;
-  items: Array<{ id?: string; merchandiseId?: string; variantId?: string; quantity: number }>;
+  items: Array<{
+    id?: string;
+    merchandiseId?: string;
+    variantId?: string;
+    quantity: number;
+    selectedSize?: string;
+    title?: string;
+    handle?: string;
+  }>;
   fallbackUrl?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
@@ -67,11 +75,14 @@ export async function launchShiprocketCheckout({
     // Ensure SDK script is present
     await ensureShiprocketScript();
 
-    // Map items ensuring merchandiseId / variantId is preserved
+    // Map items ensuring merchandiseId / variantId / metadata is preserved
     const formattedItems = items.map((item: any) => ({
       id: item.id,
       merchandiseId: item.merchandiseId || item.variantId || item.id,
       variantId: item.variantId || item.merchandiseId || item.id,
+      selectedSize: item.selectedSize || undefined,
+      title: item.title || undefined,
+      handle: item.handle || undefined,
       quantity: Math.max(1, Number(item.quantity) || 1),
     }));
 

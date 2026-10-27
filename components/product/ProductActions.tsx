@@ -66,7 +66,15 @@ export default function ProductActions({
       // Attempt to launch Shiprocket Fastrr 1-Click Checkout
       const fastrrRes = await launchShiprocketCheckout({
         event: e.nativeEvent || e,
-        items: [{ variantId, quantity: Math.max(1, quantity) }],
+        items: [{
+          id: variantId,
+          variantId,
+          merchandiseId: variantId,
+          selectedSize,
+          title: productTitle,
+          handle: productHandle,
+          quantity: Math.max(1, quantity),
+        }],
         fallbackUrl: checkoutFallback,
       });
 

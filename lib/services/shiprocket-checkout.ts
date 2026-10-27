@@ -38,6 +38,89 @@ export function getShiprocketVariantId(variantIdOrNode: any, product?: any): str
 }
 
 /**
+ * Resolves any product or variant ID to the exact 9-digit variant ID known to Shiprocket's catalog
+ */
+export async function resolveSyncedShiprocketVariantId(item: any): Promise<string> {
+  const rawId = String(
+    item.merchandiseId ||
+    item.variantId ||
+    item.id ||
+    ""
+  );
+
+  const selectedSize = String(
+    item.selectedSize ||
+    item.variantTitle ||
+    item.title ||
+    ""
+  ).trim().toLowerCase();
+
+  const rawHandle = String(item.handle || "").trim().toLowerCase();
+
+  try {
+    const allProds = await products.all();
+
+    // 1. Check if rawId matches a variant node ID in any product
+    for (const p of allProds) {
+      let variantsObj = p.variants;
+      if (typeof variantsObj === "string") {
+        try { variantsObj = JSON.parse(variantsObj); } catch {}
+      }
+      const edges = variantsObj?.edges || [];
+      for (const e of edges) {
+        const node = e.node || {};
+        const nodeId = String(node.id || "");
+        if (nodeId === rawId || (rawId && nodeId.includes(rawId))) {
+          const match = nodeId.match(/\d+/g);
+          if (match) return match.join("").slice(-9);
+        }
+      }
+    }
+
+    // 2. Check if rawId or rawHandle matches product id or handle
+    for (const p of allProds) {
+      const pHandle = String(p.handle || "").toLowerCase();
+      const pId = String(p.id || "");
+      const isMatch =
+        (rawHandle && (pHandle === rawHandle || rawHandle.includes(pHandle) || pHandle.includes(rawHandle))) ||
+        (rawId && (pId === rawId || pHandle === rawId.toLowerCase() || pId.includes(rawId) || rawId.includes(pHandle)));
+
+      if (isMatch) {
+        let variantsObj = p.variants;
+        if (typeof variantsObj === "string") {
+          try { variantsObj = JSON.parse(variantsObj); } catch {}
+        }
+        const edges = variantsObj?.edges || [];
+        if (edges.length > 0) {
+          if (selectedSize && selectedSize !== "default title") {
+            const matchedVariant = edges.find((e: any) => {
+              const node = e.node || {};
+              const title = String(node.title || "").toLowerCase();
+              const opts = node.selectedOptions || [];
+              return (
+                title === selectedSize ||
+                opts.some((o: any) => String(o.value || "").toLowerCase() === selectedSize)
+              );
+            });
+            if (matchedVariant) {
+              const match = String(matchedVariant.node?.id || "").match(/\d+/g);
+              if (match) return match.join("").slice(-9);
+            }
+          }
+          const firstMatch = String(edges[0]?.node?.id || "").match(/\d+/g);
+          if (firstMatch) return firstMatch.join("").slice(-9);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[resolveSyncedShiprocketVariantId error]:", err);
+  }
+
+  // 3. Fallback
+  return getShiprocketVariantId(rawId);
+}
+
+/**
  * Generates Base64 HMAC-SHA256 signature for Shiprocket Checkout API
  */
 export function generateShiprocketHMAC(payloadString: string, secretKey: string): string {

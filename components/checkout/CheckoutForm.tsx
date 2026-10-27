@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   Zap,
   ShoppingBag,
+  ChevronDown,
 } from "lucide-react";
 import { getCartForCheckout, submitOrder, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/api/checkout-client";
 import { applyPromoCode } from "@/lib/api/promo-client";
@@ -96,7 +97,7 @@ export default function CheckoutForm({ cartId: initialCartId, initialCustomer }:
 
   const [launchingFastrr, setLaunchingFastrr] = useState(false);
 
-  const handleLaunchFastrr = async (e: React.MouseEvent) => {
+  const handleLaunchFastrr = async (e?: React.MouseEvent | any) => {
     const rawLines = cart?.lines?.length > 0 ? cart.lines : storeLines;
     if (!rawLines || rawLines.length === 0) return;
     setLaunchingFastrr(true);
@@ -109,7 +110,7 @@ export default function CheckoutForm({ cartId: initialCartId, initialCustomer }:
       }));
 
       const res = await launchShiprocketCheckout({
-        event: e.nativeEvent || e,
+        event: e?.nativeEvent || e || null,
         items,
         fallbackUrl: `/checkout?fastrr_dismissed=1`,
       });
@@ -260,40 +261,45 @@ export default function CheckoutForm({ cartId: initialCartId, initialCustomer }:
     setCountry("India");
   };
 
-  // Robust Cart Loader with Store Fallback
+  const [showManualForm, setShowManualForm] = useState(false);
+  const fetchedCartIdRef = useRef<string | null>(null);
+  const autoLaunchedRef = useRef(false);
+  const isFastrrDismissed = searchParams?.get("fastrr_dismissed") === "1";
+
+  // Robust Cart Loader with Single-Fetch Guard (Eliminates infinite GET /api/cart loop)
   useEffect(() => {
     let isMounted = true;
     const activeCartId = initialCartId || storeCartId;
 
+    // Use current in-memory store lines immediately
+    if (storeLines && storeLines.length > 0) {
+      setCartData({
+        id: activeCartId || "client_cart",
+        lines: storeLines,
+        subtotal: storeSubtotal || "0.00",
+        totalQuantity: storeLines.reduce((acc: number, l: any) => acc + (Number(l.quantity) || 1), 0),
+      });
+      setLoading(false);
+    }
+
+    if (!activeCartId || fetchedCartIdRef.current === activeCartId) {
+      if (isMounted) setLoading(false);
+      return;
+    }
+    fetchedCartIdRef.current = activeCartId;
+
     async function loadCart() {
-      // 1. If we have active lines already in Zustand store, start with them immediately
-      if (storeLines && storeLines.length > 0) {
+      try {
+        const res = await getCartForCheckout(activeCartId!);
+        if (isMounted && res.success && res.cart && res.cart.lines && res.cart.lines.length > 0) {
+          setCartData(res.cart);
+        }
+      } catch (err) {
+        console.warn("[Checkout] Server cart fetch notice:", err);
+      } finally {
         if (isMounted) {
-          setCartData({
-            id: activeCartId || "client_cart",
-            lines: storeLines,
-            subtotal: storeSubtotal || "0.00",
-            totalQuantity: storeLines.reduce((acc: number, l: any) => acc + (Number(l.quantity) || 1), 0),
-          });
           setLoading(false);
         }
-      }
-
-      // 2. Try fetching freshest server cart data if cartId is available
-      if (activeCartId) {
-        try {
-          const res = await getCartForCheckout(activeCartId);
-          if (isMounted && res.success && res.cart && res.cart.lines && res.cart.lines.length > 0) {
-            setCartData(res.cart);
-            setCart(res.cart);
-          }
-        } catch (err) {
-          console.warn("[Checkout] Server cart fetch notice:", err);
-        }
-      }
-
-      if (isMounted) {
-        setLoading(false);
       }
     }
 
@@ -301,7 +307,17 @@ export default function CheckoutForm({ cartId: initialCartId, initialCustomer }:
     return () => {
       isMounted = false;
     };
-  }, [initialCartId, storeCartId, storeLines, storeSubtotal, setCart]);
+  }, [initialCartId, storeCartId]);
+
+  // Auto-launch Fastrr 1-Click Buy by default (one-time per checkout session)
+  useEffect(() => {
+    if (autoLaunchedRef.current || isFastrrDismissed) return;
+    const activeItems = cart?.lines?.length > 0 ? cart.lines : storeLines;
+    if (activeItems && activeItems.length > 0 && !loading) {
+      autoLaunchedRef.current = true;
+      handleLaunchFastrr();
+    }
+  }, [cart, storeLines, loading, isFastrrDismissed]);
 
   const handleApplyPromo = async () => {
     const currentSubtotal = cart?.subtotal || storeSubtotal || "0";
@@ -584,43 +600,79 @@ export default function CheckoutForm({ cartId: initialCartId, initialCustomer }:
               </div>
             )}
 
-            {/* Express Shiprocket Fastrr 1-Click Checkout Banner */}
-            <div className="mb-8 p-5 bg-gradient-to-r from-[#7B1C35]/5 via-amber-50/50 to-[#7B1C35]/5 border border-[#7B1C35]/20 rounded-2xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center justify-center bg-[#7B1C35] text-white p-1 rounded-md">
-                      <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
-                    </span>
-                    <h3 className="text-sm font-bold text-gray-900 tracking-wide">
-                      Shiprocket Fastrr 1-Click Checkout
-                    </h3>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Auto-fill your saved address & checkout in 1-Click via OTP
-                  </p>
+            {/* Express Shiprocket Fastrr 1-Click Checkout Hero Card (Default & Primary) */}
+            <div className="mb-6 p-6 md:p-8 bg-gradient-to-br from-amber-50/80 via-[#7B1C35]/5 to-amber-50/40 border-2 border-[#7B1C35]/25 rounded-2xl shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-32 h-32 bg-[#7B1C35]/5 rounded-full blur-2xl pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="inline-flex items-center justify-center bg-[#7B1C35] text-white p-1.5 rounded-lg shadow-sm">
+                    <Zap className="w-4 h-4 fill-amber-300 text-amber-300 animate-pulse" />
+                  </span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#7B1C35] bg-[#7B1C35]/10 px-2.5 py-1 rounded-full">
+                    Recommended Fast Checkout
+                  </span>
                 </div>
+
+                <h2 className="text-xl md:text-2xl font-serif font-bold text-gray-900 mt-2 mb-1">
+                  ⚡ Fastrr 1-Click Buy
+                </h2>
+                <p className="text-xs md:text-sm text-gray-600 mb-6 max-w-lg">
+                  Instant OTP verification, saved addresses & 1-Click checkout. Supports Cash on Delivery (COD), UPI (GPay/PhonePe), Credit/Debit Cards, and Netbanking.
+                </p>
+
+                {/* Primary Fastrr CTA */}
                 <button
                   type="button"
                   disabled={launchingFastrr}
                   onClick={handleLaunchFastrr}
-                  className="bg-[#7B1C35] text-white hover:bg-[#6A102A] px-5 py-2.5 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-60 whitespace-nowrap"
+                  className="w-full bg-[#7B1C35] text-white hover:bg-[#6A102A] py-4 px-6 rounded-xl font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all shadow-lg hover:shadow-xl active:scale-[0.99] disabled:opacity-60"
                 >
-                  <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
-                  <span>{launchingFastrr ? "Opening Fastrr..." : "⚡ Fastrr 1-Click Buy"}</span>
+                  {launchingFastrr ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Opening Fastrr 1-Click Buy...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-5 h-5 fill-amber-300 text-amber-300" />
+                      <span>⚡ Complete Order with Fastrr 1-Click Buy</span>
+                    </>
+                  )}
                 </button>
+
+                {/* Trust Highlights */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 pt-5 border-t border-[#7B1C35]/15 text-xs text-gray-600 font-medium">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#7B1C35] shrink-0" />
+                    <span>Instant OTP & Auto-fill</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-4 h-4 text-[#7B1C35] shrink-0" />
+                    <span>Cash on Delivery Available</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-[#7B1C35] shrink-0" />
+                    <span>100% Verified by Shiprocket</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="relative flex py-2 items-center mb-6">
-              <div className="flex-grow border-t border-gray-200"></div>
-              <span className="flex-shrink mx-4 text-xs font-semibold text-gray-400 uppercase tracking-widest">
-                Or Enter Details Manually
-              </span>
-              <div className="flex-grow border-t border-gray-200"></div>
+            {/* Collapsible Manual Form Toggle */}
+            <div className="pt-2 pb-2 text-center">
+              <button
+                type="button"
+                onClick={() => setShowManualForm(!showManualForm)}
+                className="inline-flex items-center gap-2 text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors py-2 px-4 rounded-lg border border-gray-200 hover:border-gray-300 bg-gray-50/60"
+              >
+                <span>{showManualForm ? "Hide manual address form" : "Prefer to enter shipping address manually?"}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showManualForm ? "rotate-180" : ""}`} />
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {showManualForm && (
+              <form onSubmit={handleSubmit} className="space-y-6 pt-4 border-t border-gray-100">
               {/* Customer Contact */}
               <div>
                 <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4">Contact Information</h3>
@@ -934,6 +986,7 @@ export default function CheckoutForm({ cartId: initialCartId, initialCustomer }:
                 )}
               </button>
             </form>
+            )}
           </div>
 
           {/* Sidebar Order Summary */}
@@ -1076,30 +1129,49 @@ export default function CheckoutForm({ cartId: initialCartId, initialCustomer }:
 
       {/* Sticky Bottom Bar for Mobile Checkout Button */}
       <div className="sm:hidden fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-white/95 backdrop-blur-md border-t border-gray-200 z-[9999] shadow-[0_-6px_25px_rgba(0,0,0,0.18)]">
-        <button
-          type="button"
-          onClick={() => {
-            const form = document.querySelector("form");
-            if (form) form.requestSubmit();
-          }}
-          disabled={submitting}
-          className="w-full bg-[#7B1C35] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#6A102A] transition-colors flex items-center justify-center gap-2 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          {submitting ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>{paymentMethod === "RAZORPAY" ? "Opening Payment..." : "Placing Order..."}</span>
-            </>
-          ) : (
-            <>
+        {!showManualForm ? (
+          <button
+            type="button"
+            onClick={handleLaunchFastrr}
+            disabled={launchingFastrr}
+            className="w-full bg-[#7B1C35] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#6A102A] transition-colors flex items-center justify-center gap-2 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {launchingFastrr ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Opening Fastrr...</span>
+              </>
+            ) : (
+              <>
+                <Zap className="w-4 h-4 fill-amber-300 text-amber-300" />
+                <span>⚡ Fastrr 1-Click Buy - ₹{finalTotal.toFixed(0)}</span>
+              </>
+            )}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              const form = document.querySelector("form");
+              if (form) form.requestSubmit();
+            }}
+            disabled={submitting}
+            className="w-full bg-[#7B1C35] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#6A102A] transition-colors flex items-center justify-center gap-2 shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            {submitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>{paymentMethod === "RAZORPAY" ? "Opening Payment..." : "Placing Order..."}</span>
+              </>
+            ) : (
               <span>
                 {paymentMethod === "RAZORPAY"
                   ? `Pay Online ₹${finalTotal.toFixed(0)}`
                   : `Place Order ₹${finalTotal.toFixed(0)}`}
               </span>
-            </>
-          )}
-        </button>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateCheckoutAccessToken, getShiprocketVariantId } from "@/lib/services/shiprocket-checkout";
+import { generateCheckoutAccessToken, resolveSyncedShiprocketVariantId } from "@/lib/services/shiprocket-checkout";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,10 +12,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const formattedItems = body.items.map((item: any) => ({
-      variant_id: getShiprocketVariantId(item.merchandiseId || item.variantId || item.id),
-      quantity: Math.max(1, Number(item.quantity) || 1),
-    }));
+    const formattedItems = await Promise.all(
+      body.items.map(async (item: any) => ({
+        variant_id: await resolveSyncedShiprocketVariantId(item),
+        quantity: Math.max(1, Number(item.quantity) || 1),
+      }))
+    );
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://boutiiquevastraa.com";
     const redirectUrl = body.redirectUrl || `${siteUrl}/checkout/success`;

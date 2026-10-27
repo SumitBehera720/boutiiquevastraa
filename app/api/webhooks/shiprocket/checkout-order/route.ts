@@ -12,14 +12,14 @@ export async function POST(req: NextRequest) {
 
     console.log("[Shiprocket Checkout Webhook] Received payload:", JSON.stringify(payload));
 
-    const fastrrOrderId = payload.order_id || payload.fastrr_order_id || payload.id;
+    const fastrrOrderId = payload.order_id || payload.fastrr_order_id || payload.cart_id || payload.id || `sr_${Date.now()}`;
     const items = payload.cart_data?.items || payload.items || [];
     const status = (payload.status || "SUCCESS").toUpperCase();
 
     // Check if order already exists in our database
     const allOrders = await orders.all();
     const existing = allOrders.find(
-      (o: any) => o.fastrrOrderId === fastrrOrderId || (fastrrOrderId && o.id === fastrrOrderId)
+      (o: any) => fastrrOrderId && (o.fastrrOrderId === fastrrOrderId || o.id === fastrrOrderId)
     );
 
     if (existing) {

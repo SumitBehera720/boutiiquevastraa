@@ -27,6 +27,10 @@ local_env = load_local_env()
 def log(msg):
     print(f"[{time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
+def run_cmd(ssh, cmd):
+    stdin, stdout, stderr = ssh.exec_command(cmd)
+    return stdout.channel.recv_exit_status()
+
 CWD = os.getcwd()
 DOTNEXT_TAR = os.path.join(CWD, "standalone_dotnext.tar.gz")
 STATIC_TAR = os.path.join(CWD, "next_static.tar.gz")
@@ -84,52 +88,59 @@ def deploy_vps_root():
     vps_port = int(local_env.get("VPS_PORT", "22"))
     vps_user = local_env.get("VPS_USER", "root")
     vps_pass = local_env.get("VPS_PASS", "")
+    if not vps_pass:
+        log("VPS_PASS not configured, skipping VPS deployment.")
+        return
+
     log(f"=== Deploying to Target VPS ({vps_ip}:{vps_port}) ===")
-    ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(vps_ip, port=vps_port, username=vps_user, password=vps_pass, timeout=30)
-    sftp = ssh.open_sftp()
-    log("VPS SSH connected!")
+    try:
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect(vps_ip, port=vps_port, username=vps_user, password=vps_pass, timeout=30)
+        sftp = ssh.open_sftp()
+        log("VPS SSH connected!")
 
-    REMOTE_DIR = "/var/www/boutiquevastra"
-    log("Clearing old server cache on VPS...")
-    ssh.exec_command(f"rm -rf {REMOTE_DIR}/.next")
-    ssh.exec_command(f"mkdir -p {REMOTE_DIR}")
+        REMOTE_DIR = "/var/www/boutiquevastra"
+        log("Clearing old server cache on VPS...")
+        run_cmd(ssh, f"rm -rf {REMOTE_DIR}/.next")
+        run_cmd(ssh, f"mkdir -p {REMOTE_DIR}")
 
-    log("Uploading standalone bundle to VPS...")
-    sftp.put(DOTNEXT_TAR, REMOTE_DIR + "/dotnext.tar.gz", confirm=False)
-    ssh.exec_command(f"cd {REMOTE_DIR} && tar -xzf dotnext.tar.gz && rm dotnext.tar.gz")
-    log("Standalone bundle extracted on VPS.")
+        log("Uploading standalone bundle to VPS...")
+        sftp.put(DOTNEXT_TAR, REMOTE_DIR + "/dotnext.tar.gz", confirm=False)
+        run_cmd(ssh, f"cd {REMOTE_DIR} && tar -xzf dotnext.tar.gz && rm dotnext.tar.gz")
+        log("Standalone bundle extracted on VPS.")
 
-    log("Uploading static files to VPS...")
-    sftp.put(STATIC_TAR, REMOTE_DIR + "/static.tar.gz", confirm=False)
-    ssh.exec_command(f"mkdir -p {REMOTE_DIR}/.next && cd {REMOTE_DIR}/.next && tar -xzf ../static.tar.gz && rm ../static.tar.gz")
-    log("Static files extracted on VPS.")
+        log("Uploading static files to VPS...")
+        sftp.put(STATIC_TAR, REMOTE_DIR + "/static.tar.gz", confirm=False)
+        run_cmd(ssh, f"mkdir -p {REMOTE_DIR}/.next && cd {REMOTE_DIR}/.next && tar -xzf ../static.tar.gz && rm ../static.tar.gz")
+        log("Static files extracted on VPS.")
 
-    log("Uploading public assets (images & videos) to VPS...")
-    sftp.put(PUBLIC_TAR, REMOTE_DIR + "/public.tar.gz", confirm=False)
-    ssh.exec_command(f"cd {REMOTE_DIR} && tar -xzf public.tar.gz && rm public.tar.gz")
-    log("Public assets extracted on VPS.")
+        log("Uploading public assets (images & videos) to VPS...")
+        sftp.put(PUBLIC_TAR, REMOTE_DIR + "/public.tar.gz", confirm=False)
+        run_cmd(ssh, f"cd {REMOTE_DIR} && tar -xzf public.tar.gz && rm public.tar.gz")
+        log("Public assets extracted on VPS.")
 
-    log("Uploading server.js, package.json & env files to VPS...")
-    sftp.put(os.path.join(CWD, ".next", "standalone", "server.js"), REMOTE_DIR + "/server.js", confirm=False)
-    sftp.put(os.path.join(CWD, ".next", "standalone", "package.json"), REMOTE_DIR + "/package.json", confirm=False)
-    if os.path.exists(os.path.join(CWD, ".env.local")):
-        sftp.put(os.path.join(CWD, ".env.local"), REMOTE_DIR + "/.env.local", confirm=False)
-        sftp.put(os.path.join(CWD, ".env.local"), REMOTE_DIR + "/.env", confirm=False)
+        log("Uploading server.js, package.json & env files to VPS...")
+        sftp.put(os.path.join(CWD, ".next", "standalone", "server.js"), REMOTE_DIR + "/server.js", confirm=False)
+        sftp.put(os.path.join(CWD, ".next", "standalone", "package.json"), REMOTE_DIR + "/package.json", confirm=False)
+        if os.path.exists(os.path.join(CWD, ".env.local")):
+            sftp.put(os.path.join(CWD, ".env.local"), REMOTE_DIR + "/.env.local", confirm=False)
+            sftp.put(os.path.join(CWD, ".env.local"), REMOTE_DIR + "/.env", confirm=False)
 
-    log("Restarting boutiquevastra PM2 process on VPS...")
-    ssh.exec_command(f"cd {REMOTE_DIR} && pm2 restart boutiquevastra --update-env || pm2 start server.js --name boutiquevastra")
-    ssh.exec_command("pm2 save")
-    time.sleep(4)
+        log("Restarting boutiquevastra PM2 process on VPS...")
+        run_cmd(ssh, f"cd {REMOTE_DIR} && pm2 restart boutiquevastra --update-env || pm2 start server.js --name boutiquevastra")
+        run_cmd(ssh, "pm2 save")
+        time.sleep(4)
 
-    stdin, stdout, stderr = ssh.exec_command("curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/")
-    code = stdout.read().decode().strip()
-    log(f"VPS Server HTTP status: {code}")
+        stdin, stdout, stderr = ssh.exec_command("curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/")
+        code = stdout.read().decode().strip()
+        log(f"VPS Server HTTP status: {code}")
 
-    sftp.close()
-    ssh.close()
-    log("VPS deployment SUCCESSFUL!")
+        sftp.close()
+        ssh.close()
+        log("VPS deployment SUCCESSFUL!")
+    except Exception as e:
+        log(f"VPS deployment notice: {e}")
 
 def deploy_hostinger():
     log("=== Deploying to Hostinger (145.79.58.122:65002) ===")
@@ -146,11 +157,11 @@ def deploy_hostinger():
 
         log("Uploading standalone bundle to Hostinger...")
         sftp.put(DOTNEXT_TAR, REMOTE_FRONTEND + "/dotnext.tar.gz", confirm=False)
-        ssh.exec_command(f"cd {REMOTE_FRONTEND} && tar -xzf dotnext.tar.gz && rm dotnext.tar.gz")
+        run_cmd(ssh, f"cd {REMOTE_FRONTEND} && tar -xzf dotnext.tar.gz && rm dotnext.tar.gz")
 
         log("Uploading static files to Hostinger...")
         sftp.put(STATIC_TAR, REMOTE_FRONTEND + "/static.tar.gz", confirm=False)
-        ssh.exec_command(f"mkdir -p {REMOTE_PUBLIC_HTML}/_next && cd {REMOTE_PUBLIC_HTML}/_next && tar -xzf {REMOTE_FRONTEND}/static.tar.gz && rm {REMOTE_FRONTEND}/static.tar.gz")
+        run_cmd(ssh, f"mkdir -p {REMOTE_PUBLIC_HTML}/_next && cd {REMOTE_PUBLIC_HTML}/_next && tar -xzf {REMOTE_FRONTEND}/static.tar.gz && rm {REMOTE_FRONTEND}/static.tar.gz")
 
         sftp.put(os.path.join(CWD, ".next", "standalone", "server.js"), REMOTE_FRONTEND + "/server.js", confirm=False)
         sftp.put(os.path.join(CWD, ".next", "standalone", "package.json"), REMOTE_FRONTEND + "/package.json", confirm=False)
@@ -158,7 +169,7 @@ def deploy_hostinger():
             sftp.put(os.path.join(CWD, ".env.local"), REMOTE_FRONTEND + "/.env.local", confirm=False)
             sftp.put(os.path.join(CWD, ".env.local"), REMOTE_FRONTEND + "/.env", confirm=False)
 
-        ssh.exec_command("ps aux | grep -E 'node.*server\\.js' | grep -v grep | awk '{print $2}' | xargs -r kill -9 2>/dev/null")
+        run_cmd(ssh, "ps aux | grep -E 'node.*server\\.js' | grep -v grep | awk '{print $2}' | xargs -r kill -9 2>/dev/null")
         time.sleep(2)
 
         node = "/opt/alt/alt-nodejs20/root/usr/bin/node"

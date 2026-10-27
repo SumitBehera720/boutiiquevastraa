@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     // Idempotency check
     if (order.paymentStatus === "PAID") {
-      return NextResponse.json({ success: true, message: "Order already paid", orderId: order.id });
+      return NextResponse.json({ success: true, message: "Order already paid", orderId: order.id, orderNumber: order.orderNumber });
     }
 
     // Mark order as PAID

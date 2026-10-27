@@ -44,6 +44,32 @@ export async function serverGetOrders(): Promise<any[]> {
   } catch (e) { console.error("[serverGetOrders]", e); return []; }
 }
 
+export async function serverGetOrder(identifier: string | number): Promise<any | null> {
+  try {
+    if (!identifier) return null;
+    await ensureDs();
+    const { orders } = await import("@/lib/data-store");
+    if (typeof orders.findByIdOrNumber === "function") {
+      return await orders.findByIdOrNumber(identifier);
+    }
+    const all = await orders.all();
+    const str = String(identifier).trim();
+    const cleanNum = str.replace(/[^0-9]/g, "");
+    return all.find((o: any) =>
+      o.id === str ||
+      String(o.orderNumber) === str ||
+      (cleanNum && String(o.orderNumber) === cleanNum) ||
+      o.razorpayOrderId === str ||
+      o.merchantTransactionId === str ||
+      `#VSTR-${o.orderNumber}`.toLowerCase() === str.toLowerCase() ||
+      `VSTR-${o.orderNumber}`.toLowerCase() === str.toLowerCase()
+    ) || null;
+  } catch (e) {
+    console.error("[serverGetOrder]", e);
+    return null;
+  }
+}
+
 export async function serverGetUsers(): Promise<any[]> {
   try {
     await ensureDs();

@@ -357,6 +357,32 @@ export const products = {
         });
       }
       
+      // Ensure priceRange reflects true variant prices and zero variants are fixed
+      if (variants.edges && variants.edges.length > 0) {
+        const cardAmt = parseFloat(priceRange?.minVariantPrice?.amount || "0");
+        variants.edges = variants.edges.map((edge: any) => {
+          if (edge.node) {
+            const vPrice = parseFloat(edge.node.price?.amount || "0");
+            if (vPrice <= 0 && cardAmt > 0) {
+              edge.node.price = { amount: cardAmt.toString(), currencyCode: "INR" };
+            }
+          }
+          return edge;
+        });
+
+        const validVariantPrices = variants.edges
+          .map((e: any) => parseFloat(e.node?.price?.amount || "0"))
+          .filter((v: number) => v > 0);
+        if (validVariantPrices.length > 0) {
+          const minP = Math.min(...validVariantPrices);
+          const maxP = Math.max(...validVariantPrices);
+          priceRange = {
+            minVariantPrice: { amount: minP.toString(), currencyCode: "INR" },
+            maxVariantPrice: { amount: maxP.toString(), currencyCode: "INR" }
+          };
+        }
+      }
+
       return {
         ...p,
         priceRange,
@@ -464,12 +490,29 @@ function mapProductFromDb(row: any): any {
     inventory: row.inventory !== null && row.inventory !== undefined ? Number(row.inventory) : null,
   };
   if (baseProd.variants && Array.isArray(baseProd.variants.edges)) {
+    const cardPrice = parseFloat(baseProd.priceRange?.minVariantPrice?.amount || "0");
     baseProd.variants.edges = baseProd.variants.edges.map((edge: any) => {
       if (edge.node) {
         edge.node.availableForSale = isAvailable;
+        const vPrice = parseFloat(edge.node.price?.amount || "0");
+        if (vPrice <= 0 && cardPrice > 0) {
+          edge.node.price = { amount: cardPrice.toString(), currencyCode: "INR" };
+        }
       }
       return edge;
     });
+
+    const validPrices = baseProd.variants.edges
+      .map((e: any) => parseFloat(e.node?.price?.amount || "0"))
+      .filter((x: number) => x > 0);
+    if (validPrices.length > 0) {
+      const minP = Math.min(...validPrices);
+      const maxP = Math.max(...validPrices);
+      baseProd.priceRange = {
+        minVariantPrice: { amount: minP.toString(), currencyCode: "INR" },
+        maxVariantPrice: { amount: maxP.toString(), currencyCode: "INR" },
+      };
+    }
   }
   return {
     ...baseProd,
@@ -773,6 +816,55 @@ export const orders = {
     }
     return cachedRead<any[]>("orders").map(normalizeOrder);
   },
+  findByIdOrNumber: async (identifier: string | number) => {
+    if (!identifier) return null;
+    const str = String(identifier).trim();
+    const cleanNum = str.replace(/[^0-9]/g, "");
+
+    if (await db()) {
+      // 1. Try direct find by id in DB
+      try {
+        const byId = await query<any[]>("SELECT * FROM orders WHERE id = ?", [str]);
+        if (byId && byId.length > 0) return mapOrderFromDb(byId[0]);
+      } catch {}
+
+      if (cleanNum) {
+        try {
+          const byNum = await query<any[]>("SELECT * FROM orders WHERE order_number = ?", [cleanNum]);
+          if (byNum && byNum.length > 0) return mapOrderFromDb(byNum[0]);
+        } catch {}
+
+        try {
+          const byNumInt = await query<any[]>("SELECT * FROM orders WHERE order_number = ?", [Number(cleanNum)]);
+          if (byNumInt && byNumInt.length > 0) return mapOrderFromDb(byNumInt[0]);
+        } catch {}
+      }
+
+      // 2. Fallback to all() scan
+      const allOrders = await orders.all();
+      return allOrders.find((o: any) =>
+        o.id === str ||
+        String(o.orderNumber) === str ||
+        (cleanNum && String(o.orderNumber) === cleanNum) ||
+        o.razorpayOrderId === str ||
+        o.merchantTransactionId === str ||
+        `#VSTR-${o.orderNumber}`.toLowerCase() === str.toLowerCase() ||
+        `VSTR-${o.orderNumber}`.toLowerCase() === str.toLowerCase()
+      ) || null;
+    }
+
+    // JSON mode
+    const all = cachedRead<any[]>("orders").map(normalizeOrder);
+    return all.find((o: any) =>
+      o.id === str ||
+      String(o.orderNumber) === str ||
+      (cleanNum && String(o.orderNumber) === cleanNum) ||
+      o.razorpayOrderId === str ||
+      o.merchantTransactionId === str ||
+      `#VSTR-${o.orderNumber}`.toLowerCase() === str.toLowerCase() ||
+      `VSTR-${o.orderNumber}`.toLowerCase() === str.toLowerCase()
+    ) || null;
+  },
   save: async (items: any[]) => {
     if (await db()) {
       const mapped = items.map(mapOrderToDb);
@@ -787,17 +879,20 @@ function mapOrderFromDb(row: any): any {
   const parse = (v: any) => (v ? (typeof v === "string" ? JSON.parse(v) : v) : {});
   const customer = parse(row.customer);
   const items = parse(row.items);
+  const rawTotal = parse(row.total_price);
+  const totalAmount = rawTotal?.amount !== undefined ? String(rawTotal.amount) : (typeof rawTotal === "string" || typeof rawTotal === "number" ? String(rawTotal) : "0.00");
+  const shippingAddress = parse(row.shipping_address) || {};
   return {
-    id: row.id,
+    id: row.id || (row._id ? String(row._id) : ""),
     orderNumber: row.order_number,
-    email: row.email,
+    email: row.email || customer?.email || "",
     customer,
-    customerName: customer.name || `${customer.firstName || ""} ${customer.lastName || ""}`.trim() || "",
-    phone: customer.phone || "",
+    customerName: customer.name || `${customer.firstName || ""} ${customer.lastName || ""}`.trim() || row.customer_name || "Customer",
+    phone: customer.phone || row.phone || "",
     items,
     lineItems: items,
-    shippingAddress: parse(row.shipping_address),
-    totalPrice: parse(row.total_price),
+    shippingAddress,
+    totalPrice: { amount: totalAmount, currencyCode: rawTotal?.currencyCode || "INR" },
     fulfillmentStatus: row.fulfillment_status || "unfulfilled",
     createdAt: row.created_at || new Date().toISOString(),
     processedAt: row.created_at || new Date().toISOString(),

@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShoppingBag, ArrowRight, AlertTriangle, Gift } from "lucide-react";
+import { X, ShoppingBag, ArrowRight, AlertTriangle, Gift, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useCartStore } from "@/store/cartStore";
 import CartItem from "./CartItem";
@@ -130,6 +131,14 @@ export default function CartDrawer() {
               const remaining = 3000 - regularSubtotal;
               const percentage = Math.min((regularSubtotal / 3000) * 100, 100);
 
+              const totalMrp = lines
+                .filter((l: any) => !l.isGift)
+                .reduce((sum, l) => {
+                  const cmp = parseFloat(l.compareAtPrice || l.price || "0");
+                  return sum + (cmp > 0 ? cmp : parseFloat(l.price || "0")) * l.quantity;
+                }, 0);
+              const totalDiscount = Math.max(0, totalMrp - regularSubtotal);
+
               return (
                 <div className="border-t border-gray-200 p-5 sm:p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] bg-gray-50">
                   {/* Gift Status Banner */}
@@ -179,20 +188,35 @@ export default function CartDrawer() {
                     </div>
                   )}
 
-                  <div className="flex justify-between items-center mb-4 text-gray-800">
-                    <span className="font-semibold uppercase tracking-wider text-sm">Subtotal</span>
-                    <span className="font-bold text-xl text-primary">₹{parseFloat(subtotal).toFixed(2)}</span>
+                  <div className="space-y-1.5 mb-4 text-xs">
+                    {totalDiscount > 0 && (
+                      <div className="flex justify-between items-center text-gray-500">
+                        <span>Total MRP</span>
+                        <span className="line-through">₹{totalMrp.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {totalDiscount > 0 && (
+                      <div className="flex justify-between items-center text-green-700 font-semibold">
+                        <span>Store Discount</span>
+                        <span>-₹{totalDiscount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center text-gray-800 pt-1.5 border-t border-gray-200">
+                      <span className="font-semibold uppercase tracking-wider text-sm">Total Amount</span>
+                      <span className="font-bold text-xl text-primary">₹{regularSubtotal.toFixed(2)}</span>
+                    </div>
                   </div>
                   <p className="text-xs text-gray-500 mb-6 text-center">
                     Shipping, taxes, and discount codes calculated at checkout.
                   </p>
-                  <a 
-                    href={checkoutUrl || "#"}
+                  <Link
+                    href={checkoutUrl || "/checkout"}
                     onClick={closeCart}
-                    className="w-full bg-primary text-white py-4 rounded font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2 hover:bg-[#6A102A] transition-colors shadow-md"
+                    className="w-full bg-primary text-white py-4 rounded font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2 hover:bg-[#6A102A] transition-colors shadow-md text-center"
                   >
-                    Checkout <ArrowRight className="w-4 h-4" />
-                  </a>
+                    <span>Proceed to Checkout</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
               );
             })()}

@@ -1108,10 +1108,13 @@ function resolveProductInfo(merchandiseId: string, allProducts: any[], gifts: an
   );
   if (prod) {
     const variant = prod.variants?.edges?.find((e: any) => e.node.id === merchandiseId)?.node || prod.variants?.edges?.[0]?.node;
+    const price = variant?.price?.amount || prod.priceRange?.minVariantPrice?.amount || "0";
+    const compareAtPrice = variant?.compareAtPrice?.amount || prod.compareAtPriceRange?.minVariantPrice?.amount || null;
     return {
       title: prod.title,
       handle: prod.handle || "",
-      price: variant?.price?.amount || prod.priceRange?.minVariantPrice?.amount || "0",
+      price,
+      compareAtPrice,
       image: variant?.image?.url || prod.images?.edges?.[0]?.node?.url || null,
       variantTitle: variant?.title || "Default Title",
     };
@@ -1124,35 +1127,46 @@ function resolveProductInfo(merchandiseId: string, allProducts: any[], gifts: an
       title: gift.title,
       handle: gift.handle || "",
       price: "0",
+      compareAtPrice: null,
       image: gift.image || null,
       variantTitle: "Default Title",
     };
   }
 
-  return { title: "Unknown", handle: "", price: "0", image: null, variantTitle: "Default" };
+  return { title: "Unknown", handle: "", price: "0", compareAtPrice: null, image: null, variantTitle: "Default" };
 }
 
 function formatCartCheckout(cart: any) {
   let subtotal = 0;
+  let totalMrp = 0;
   const lines = (cart.lines || []).map((l: any) => {
     const isGift = !!l.isGift;
     const price = isGift ? 0 : parseFloat(l.price || "0");
+    const compareAt = isGift ? 0 : parseFloat(l.compareAtPrice || l.price || "0");
     subtotal += price * l.quantity;
+    totalMrp += (compareAt > 0 ? compareAt : price) * l.quantity;
+    const vId = l.merchandiseId || l.variantId || l.id;
     return {
       id: l.id,
+      merchandiseId: vId,
+      variantId: vId,
       title: l.title,
       variantTitle: l.variantTitle,
       quantity: l.quantity,
       price: price.toString(),
+      compareAtPrice: l.compareAtPrice || null,
       image: l.image,
       isGift,
       handle: l.handle || "",
     };
   });
+  const totalDiscount = Math.max(0, totalMrp - subtotal);
   return {
     id: cart.id,
     lines,
     subtotal: subtotal.toFixed(2),
+    totalMrp: totalMrp.toFixed(2),
+    totalDiscount: totalDiscount.toFixed(2),
     totalQuantity: lines.reduce((s: number, l: any) => s + l.quantity, 0),
     checkoutUrl: `/checkout?cartId=${cart.id}`,
   };
@@ -1225,7 +1239,16 @@ async function handleOrders(path: string[], req: NextRequest) {
         await coupons.save(allCouponsList);
       }
     }
-    const totalAmount = (parseFloat(formatted.subtotal) - verifiedDiscount);
+    const subtotal = parseFloat(formatted.subtotal);
+    let prepaidDiscount = 0;
+    if (isRazorpay && body.discount && Number(body.discount) > verifiedDiscount) {
+      const requestedPrepaid = Number(body.discount) - verifiedDiscount;
+      const maxPrepaid = (subtotal - verifiedDiscount) * 0.10;
+      prepaidDiscount = Math.min(requestedPrepaid, maxPrepaid);
+      prepaidDiscount = Math.round(prepaidDiscount * 100) / 100;
+    }
+    const totalDiscount = verifiedDiscount + prepaidDiscount;
+    const totalAmount = Math.max(0, subtotal - totalDiscount);
 
     // ─── Inventory Check & Deduction ─────────────────────────────────
     const allProducts = await products.all();
@@ -1277,7 +1300,7 @@ async function handleOrders(path: string[], req: NextRequest) {
       items: formatted.lines,
       totalPrice: { amount: Math.max(0, totalAmount).toFixed(2), currencyCode: "INR" },
       couponCode: body.promoCode || null,
-      discount: verifiedDiscount,
+      discount: totalDiscount,
       fulfillmentStatus: "UNFULFILLED",
       // Razorpay orders start PENDING; COD orders start UNPAID but fulfilled immediately
       financialStatus: isRazorpay ? "PENDING" : "UNPAID",
@@ -1337,6 +1360,31 @@ async function handleOrders(path: string[], req: NextRequest) {
     });
     if (!order) return error("Not found", 404);
     return json(order);
+  }
+
+  if (path[1] === "lookup" && req.method === "GET") {
+    const url = new URL(req.url);
+    const identifier = url.searchParams.get("id") || url.searchParams.get("orderNumber") || url.searchParams.get("number");
+    if (!identifier) return error("Order identifier required");
+
+    const foundOrder = typeof (orders as any).findByIdOrNumber === "function"
+      ? await (orders as any).findByIdOrNumber(identifier)
+      : null;
+
+    if (foundOrder) {
+      return json({ success: true, id: foundOrder.id, orderNumber: foundOrder.orderNumber });
+    }
+
+    const all = await orders.all();
+    const str = identifier.trim();
+    const cleanNum = str.replace(/[^0-9]/g, "");
+    const match = all.find((o: any) =>
+      o.id === str ||
+      String(o.orderNumber) === str ||
+      (cleanNum && String(o.orderNumber) === cleanNum)
+    );
+    if (!match) return error("Not found", 404);
+    return json({ success: true, id: match.id, orderNumber: match.orderNumber });
   }
 
   return error("Not found", 404);

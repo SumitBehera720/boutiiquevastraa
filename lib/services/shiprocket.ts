@@ -39,14 +39,14 @@ export class ShiprocketService {
       return cachedToken;
     }
 
-    const email = process.env.SHIPROCKET_EMAIL;
-    const password = process.env.SHIPROCKET_PASSWORD;
+    const email = process.env.SHIPROCKET_EMAIL || process.env.SHIPROCKET_API_KEY;
+    const password = process.env.SHIPROCKET_PASSWORD || process.env.SHIPROCKET_SECRET_KEY;
 
     if (!email || !password) {
       throw new ShiprocketError("Shiprocket credentials are not configured in environment variables.");
     }
 
-    console.log("[Shiprocket] Authenticating with Shiprocket API...");
+    console.log(`[Shiprocket] Authenticating with Shiprocket API (Email/Key: ${email})...`);
     const data = await this.requestRaw("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),

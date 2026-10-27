@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins, Rubik } from "next/font/google";
 import "./globals.css";
+import Script from "next/script";
 
 import Header from "@/components/global/Header";
 import Footer from "@/components/global/Footer";

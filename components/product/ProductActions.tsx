@@ -3,7 +3,6 @@
 import { useState } from "react";
 import * as cartClient from "@/lib/api/cart-client";
 import { useCartStore } from "@/store/cartStore";
-import { getTokenFromCookie } from "@/lib/api/auth-client";
 import NotifyMeModal from "./NotifyMeModal";
 
 export default function ProductActions({ 
@@ -28,17 +27,8 @@ export default function ProductActions({
   const [isNotifyOpen, setIsNotifyOpen] = useState(false);
   const { cartId, setCart, openCart } = useCartStore();
 
-  const requireAuth = () => {
-    if (!getTokenFromCookie()) {
-      window.location.href = "/account/login";
-      return false;
-    }
-    return true;
-  };
-
   const handleAddToCart = async () => {
     if (!availableForSale) return;
-    if (!requireAuth()) return;
     setIsAdding(true);
     
     try {
@@ -56,14 +46,19 @@ export default function ProductActions({
 
   const handleBuyNow = async () => {
     if (!availableForSale) return;
-    if (!requireAuth()) return;
     setIsBuying(true);
     
     try {
       const cart = await cartClient.createCart([{ merchandiseId: variantId, quantity, selectedSize }]);
-      window.location.href = `/checkout?cartId=${cart.id}`;
+      if (cart && cart.id) {
+        setCart(cart);
+        window.location.href = `/checkout?cartId=${cart.id}`;
+      } else {
+        window.location.href = `/checkout`;
+      }
     } catch (e: any) {
-      alert(e.message || "Failed to initiate checkout");
+      console.error("Buy Now error:", e);
+      window.location.href = `/checkout`;
     } finally {
       setIsBuying(false);
     }

@@ -157,6 +157,8 @@ def deploy_vps_root(dotnext_tar, static_tar, public_tar):
         mongodb_db_name = local_env.get("MONGODB_DB_NAME", "boutiique_vastraa")
         shiprocket_email = local_env.get("SHIPROCKET_EMAIL", "")
         shiprocket_password = local_env.get("SHIPROCKET_PASSWORD", "")
+        shiprocket_api_key = local_env.get("SHIPROCKET_API_KEY", "")
+        shiprocket_secret_key = local_env.get("SHIPROCKET_SECRET_KEY", "")
         shiprocket_pickup = local_env.get("SHIPROCKET_PICKUP_LOCATION", "Home")
         shiprocket_auto = local_env.get("SHIPROCKET_AUTO_CREATE_SHIPMENT", "true")
         phonepe_merchant = local_env.get("PHONEPE_MERCHANT_ID", "")
@@ -180,6 +182,8 @@ PORT=3000
 
 SHIPROCKET_EMAIL={shiprocket_email}
 SHIPROCKET_PASSWORD={shiprocket_password}
+SHIPROCKET_API_KEY={shiprocket_api_key}
+SHIPROCKET_SECRET_KEY={shiprocket_secret_key}
 SHIPROCKET_PICKUP_LOCATION={shiprocket_pickup}
 SHIPROCKET_AUTO_CREATE_SHIPMENT={shiprocket_auto}
 

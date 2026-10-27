@@ -151,8 +151,8 @@ export async function generateCheckoutAccessToken(params: GenerateAccessTokenPar
   error?: string;
 }> {
   try {
-    const apiKey = process.env.SHIPROCKET_API_KEY || "De7UR7pXnMXkKvqE";
-    const secretKey = process.env.SHIPROCKET_SECRET_KEY || "6bxaWT9yHfy53oQZs5hF1usiAh1aiwr1";
+    const apiKey = process.env.SHIPROCKET_API_KEY || "9xdjgxaYu0wlOWD0";
+    const secretKey = process.env.SHIPROCKET_SECRET_KEY || "VbpKYibHMB0hjfvMu6zXS9MlKBLHKFuR";
 
     if (!apiKey || !secretKey) {
       throw new Error("Shiprocket Checkout API Key or Secret Key is missing in environment variables.");

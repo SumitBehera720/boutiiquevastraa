@@ -49,7 +49,8 @@ export default function GiftManager() {
 
   // Automatic Trigger: Show modal once when subtotal reaches >= 3000 and user hasn't chosen a gift
   useEffect(() => {
-    if (regularSubtotal >= 3000 && !giftItem && giftsList.length > 0) {
+    const isDismissed = typeof window !== "undefined" && sessionStorage.getItem("gift-modal-dismissed") === "true";
+    if (regularSubtotal >= 3000 && !giftItem && giftsList.length > 0 && !isDismissed) {
       setIsOpen(true);
     }
   }, [regularSubtotal, giftItem, giftsList]);

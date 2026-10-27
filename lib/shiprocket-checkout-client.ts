@@ -109,6 +109,12 @@ export async function launchShiprocketCheckout({
     // Step 2: Open HeadlessCheckout
     const isReady = await ensureShiprocketScript();
     if (isReady && window.HeadlessCheckout && typeof window.HeadlessCheckout.addToCart === "function") {
+      // Remove any stale or previously dismissed container to prevent CHECKOUT_ALREADY_INIT
+      const staleContainer = document.getElementById("fastrr-main-container");
+      if (staleContainer) {
+        staleContainer.remove();
+      }
+
       const fullFallbackUrl = fallbackUrl.startsWith("http")
         ? fallbackUrl
         : `${window.location.origin}${fallbackUrl.startsWith("/") ? fallbackUrl : `/${fallbackUrl}`}`;

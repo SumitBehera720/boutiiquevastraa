@@ -55,7 +55,10 @@ This file contains the production API endpoints and domain details for Postman, 
 
 ## Shipping Integration
 - **Shiprocket Status**: Active custom JSON endpoints matching Shiprocket schema format.
-- **Shiprocket Registered Email**: `prasantabiswas88828@gmail.com`
+- **Shiprocket Registered API Email**: `prasantabiswas88828@gmail.com`
+- **Shiprocket Main Account Email**: `boutiquevastra80@gmail.com`
+- **Shiprocket API Key**: `De7UR7pXnMXkKvqE`
+- **Shiprocket API Password / Secret Key**: `#8%B67jvj9sRHIB*T$6zE8pwo4Mdw*!H`
 - **Pickup Location**: `Home`
 
 ---

@@ -2,13 +2,50 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShoppingBag, ArrowRight, AlertTriangle, Gift, Loader2 } from "lucide-react";
+import { X, ShoppingBag, ArrowRight, AlertTriangle, Gift, Loader2, Zap } from "lucide-react";
 import Link from "next/link";
 import { useCartStore } from "@/store/cartStore";
+import { launchShiprocketCheckout } from "@/lib/shiprocket-checkout-client";
 import CartItem from "./CartItem";
 
 export default function CartDrawer() {
   const { isCartOpen, closeCart, lines, subtotal, checkoutUrl, lastTransactionCancelled, setTransactionCancelled } = useCartStore();
+  const [launchingFastrr, setLaunchingFastrr] = useState(false);
+
+  const handleFastrrCheckout = async (e: React.MouseEvent) => {
+    if (!lines || lines.length === 0) return;
+    setLaunchingFastrr(true);
+
+    try {
+      const items = lines.map((l: any) => ({
+        merchandiseId: l.merchandiseId || l.variantId || l.id,
+        variantId: l.variantId || l.merchandiseId || l.id,
+        quantity: Math.max(1, Number(l.quantity) || 1),
+      }));
+
+      const fallback = checkoutUrl || "/checkout";
+
+      const res = await launchShiprocketCheckout({
+        event: e.nativeEvent || e,
+        items,
+        fallbackUrl: fallback,
+      });
+
+      if (res.success) {
+        closeCart();
+      } else {
+        console.warn("[Fastrr checkout fallback]:", res.error);
+        closeCart();
+        window.location.href = fallback;
+      }
+    } catch (err: any) {
+      console.error("Fastrr checkout error:", err);
+      closeCart();
+      window.location.href = checkoutUrl || "/checkout";
+    } finally {
+      setLaunchingFastrr(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -206,16 +243,29 @@ export default function CartDrawer() {
                       <span className="font-bold text-xl text-primary">₹{regularSubtotal.toFixed(2)}</span>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mb-6 text-center">
+                  <p className="text-xs text-gray-500 mb-4 text-center">
                     Shipping, taxes, and discount codes calculated at checkout.
                   </p>
+                  
+                  {/* Primary 1-Click Fastrr Checkout */}
+                  <button
+                    type="button"
+                    disabled={launchingFastrr}
+                    onClick={handleFastrrCheckout}
+                    className="w-full bg-[#7B1C35] text-white py-3.5 px-4 rounded-xl font-bold uppercase tracking-wider text-xs md:text-sm flex items-center justify-center gap-2 hover:bg-[#6A102A] transition-all shadow-md active:scale-[0.99] disabled:opacity-50"
+                  >
+                    <Zap className="w-4 h-4 fill-amber-300 text-amber-300" />
+                    <span>{launchingFastrr ? "Opening Fastrr..." : "⚡ Fastrr 1-Click Checkout"}</span>
+                  </button>
+
+                  {/* Standard Checkout Link */}
                   <Link
                     href={checkoutUrl || "/checkout"}
                     onClick={closeCart}
-                    className="w-full bg-primary text-white py-4 rounded font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-2 hover:bg-[#6A102A] transition-colors shadow-md text-center"
+                    className="w-full mt-2.5 text-center text-xs font-semibold text-gray-600 hover:text-[#7B1C35] py-2 transition-colors flex items-center justify-center gap-1.5"
                   >
-                    <span>Proceed to Checkout</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Proceed to Standard Checkout</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
               );

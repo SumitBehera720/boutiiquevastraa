@@ -17,12 +17,14 @@ import {
   Phone,
   ShieldCheck,
   CreditCard,
-  ShoppingBag,
   CheckCircle2,
+  Zap,
+  ShoppingBag,
 } from "lucide-react";
 import { getCartForCheckout, submitOrder, createRazorpayOrder, verifyRazorpayPayment } from "@/lib/api/checkout-client";
 import { applyPromoCode } from "@/lib/api/promo-client";
 import { useCartStore } from "@/store/cartStore";
+import { launchShiprocketCheckout } from "@/lib/shiprocket-checkout-client";
 
 interface CheckoutFormProps {
   cartId?: string;
@@ -91,6 +93,36 @@ export default function CheckoutForm({ cartId: initialCartId, initialCustomer }:
     const pct = Math.floor(Math.random() * 4) + 5; // 5, 6, 7, 8
     setPrepaidDiscountPercent(pct);
   }, []);
+
+  const [launchingFastrr, setLaunchingFastrr] = useState(false);
+
+  const handleLaunchFastrr = async (e: React.MouseEvent) => {
+    const rawLines = cart?.lines?.length > 0 ? cart.lines : storeLines;
+    if (!rawLines || rawLines.length === 0) return;
+    setLaunchingFastrr(true);
+
+    try {
+      const items = rawLines.map((l: any) => ({
+        merchandiseId: l.merchandiseId || l.variantId || l.id,
+        variantId: l.variantId || l.merchandiseId || l.id,
+        quantity: Math.max(1, Number(l.quantity) || 1),
+      }));
+
+      const res = await launchShiprocketCheckout({
+        event: e.nativeEvent || e,
+        items,
+        fallbackUrl: `/checkout?fastrr_dismissed=1`,
+      });
+
+      if (!res.success) {
+        console.warn("[Shiprocket Fastrr fallback to manual form]:", res.error);
+      }
+    } catch (err: any) {
+      console.error("[Fastrr checkout launch error]:", err);
+    } finally {
+      setLaunchingFastrr(false);
+    }
+  };
 
   // PIN Lookup States
   const [pinLoading, setPinLoading] = useState(false);
@@ -551,6 +583,42 @@ export default function CheckoutForm({ cartId: initialCartId, initialCustomer }:
                 <span>{error}</span>
               </div>
             )}
+
+            {/* Express Shiprocket Fastrr 1-Click Checkout Banner */}
+            <div className="mb-8 p-5 bg-gradient-to-r from-[#7B1C35]/5 via-amber-50/50 to-[#7B1C35]/5 border border-[#7B1C35]/20 rounded-2xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center bg-[#7B1C35] text-white p-1 rounded-md">
+                      <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                    </span>
+                    <h3 className="text-sm font-bold text-gray-900 tracking-wide">
+                      Shiprocket Fastrr 1-Click Checkout
+                    </h3>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Auto-fill your saved address & checkout in 1-Click via OTP
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={launchingFastrr}
+                  onClick={handleLaunchFastrr}
+                  className="bg-[#7B1C35] text-white hover:bg-[#6A102A] px-5 py-2.5 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-60 whitespace-nowrap"
+                >
+                  <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
+                  <span>{launchingFastrr ? "Opening Fastrr..." : "⚡ Fastrr 1-Click Buy"}</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="relative flex py-2 items-center mb-6">
+              <div className="flex-grow border-t border-gray-200"></div>
+              <span className="flex-shrink mx-4 text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                Or Enter Details Manually
+              </span>
+              <div className="flex-grow border-t border-gray-200"></div>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Customer Contact */}

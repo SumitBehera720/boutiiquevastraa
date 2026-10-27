@@ -92,10 +92,6 @@ export default function ProductCard({ product }: { product: Product }) {
 
   const handleAddToCart = async () => {
     if (!firstVariantId || isAdding || isOutOfStock) return;
-    if (!getTokenFromCookie()) {
-      window.location.href = "/account/login";
-      return;
-    }
     setIsAdding(true);
     try {
       const cart = cartId

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import * as cartClient from "@/lib/api/cart-client";
 import { useCartStore } from "@/store/cartStore";
+import { launchShiprocketCheckout } from "@/lib/shiprocket-checkout-client";
 import NotifyMeModal from "./NotifyMeModal";
 
 export default function ProductActions({ 
@@ -44,17 +45,34 @@ export default function ProductActions({
     }
   };
 
-  const handleBuyNow = async () => {
+  const handleBuyNow = async (e: React.MouseEvent) => {
     if (!availableForSale) return;
     setIsBuying(true);
     
     try {
-      const cart = await cartClient.createCart([{ merchandiseId: variantId, quantity, selectedSize }]);
-      if (cart && cart.id) {
-        setCart(cart);
-        window.location.href = `/checkout?cartId=${cart.id}`;
-      } else {
-        window.location.href = `/checkout`;
+      // Create cart in background so user's cart is preserved
+      let cartObj: any = null;
+      try {
+        cartObj = await cartClient.createCart([{ merchandiseId: variantId, quantity, selectedSize }]);
+        if (cartObj && cartObj.id) {
+          setCart(cartObj);
+        }
+      } catch (cartErr) {
+        console.warn("Background cart creation note:", cartErr);
+      }
+
+      const checkoutFallback = cartObj?.id ? `/checkout?cartId=${cartObj.id}` : "/checkout";
+
+      // Attempt to launch Shiprocket Fastrr 1-Click Checkout
+      const fastrrRes = await launchShiprocketCheckout({
+        event: e.nativeEvent || e,
+        items: [{ variantId, quantity: Math.max(1, quantity) }],
+        fallbackUrl: checkoutFallback,
+      });
+
+      if (!fastrrRes.success) {
+        console.warn("[Shiprocket Fastrr fallback to standard checkout]:", fastrrRes.error);
+        window.location.href = checkoutFallback;
       }
     } catch (e: any) {
       console.error("Buy Now error:", e);
